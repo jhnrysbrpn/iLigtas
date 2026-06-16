@@ -333,14 +333,14 @@ export default function MapsView({
               <span>Tangled Wires</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-4.5 h-4.5 rounded-full bg-gradient-to-tr from-red-500 to-orange-400 border border-white shrink-0 block animate-pulse" />
+              <span className="w-4.5 h-4.5 rounded-full bg-linear-to-tr from-red-500 to-orange-400 border border-white shrink-0 block animate-pulse" />
               <span className="text-orange-700">🔴 Fire Prone Areas</span>
             </div>
           </div>
         </div>
 
         {/* Right column sidebar containing SEARCH and STREET LIST */}
-        <div className="lg:col-span-1 flex flex-col justify-between h-[480px] bg-[#EFF2FE] border border-slate-300 p-4 rounded-2xl relative">
+        <div className="lg:col-span-1 flex flex-col justify-between h-120 bg-[#EFF2FE] border border-slate-300 p-4 rounded-2xl relative">
           <div className="space-y-4 overflow-y-auto flex-1 pr-1">
             
             {/* Search Street capsule */}
@@ -458,7 +458,7 @@ export default function MapsView({
             <select
               value={ticketStatusFilter}
               onChange={(e) => setTicketStatusFilter(e.target.value)}
-              className="bg-white border border-slate-300 rounded-full py-1 px-3 text-xs text-slate-800 focus:outline-none min-w-[120px]"
+              className="bg-white border border-slate-300 rounded-full py-1 px-3 text-xs text-slate-800 focus:outline-none min-w-30"
             >
               <option value="All">All Statuses</option>
               <option value={IncidentStatus.PENDING}>Pending</option>
@@ -470,7 +470,7 @@ export default function MapsView({
         </div>
 
         {/* Tickets Grid list */}
-        <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1">
+        <div className="space-y-3 max-h-120 overflow-y-auto pr-1">
           {reports && reports.filter(r => {
             const matchesSearch = 
               r.title.toLowerCase().includes(ticketSearchQuery.toLowerCase()) ||

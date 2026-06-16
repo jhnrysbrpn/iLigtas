@@ -131,7 +131,7 @@ export default function DashboardView({
       {/* 🚀 SENIOR CITIZENS & EMERGENCY SIMULATION HELP TOGGLE */}
       <div 
         id="simplified-assistance-banner"
-        className="bg-red-600 outline outline3 outline-red-700/60 p-5 rounded-3xl text-white shadow-lg space-y-4 shadow-red-900/10"
+        className="bg-red-600 outline-3 outline-red-700/60 p-5 rounded-3xl text-white shadow-lg space-y-4 shadow-red-900/10"
       >
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -208,14 +208,14 @@ export default function DashboardView({
       <div className="relative w-full h-50 xs:h-[250px] sm:h-85 md:h-107.5 mb-16 select-none">
         {/* Rounded Border Background Container */}
         <section
-          className="w-full h-full rounded-2xl md:rounded-3xl border-2 border-slate-950/60 overflow-hidden bg-[url('/src/assets/images/HeroSectionBG.png')] bg-cover bg-position-[50%_50%] bg-no-repeat shadow-xl"
+          className="w-full h-full rounded-2xl md:rounded-3xl border-2 border-slate-950/60 overflow-hidden bg-[url('/src/assets/images/HeroSectionBG.png')] bg-cover bg-[50%50%] bg-no-repeat shadow-xl"
           aria-label="Report an issue hero section"
         >
           {/* We do not overflow-hidden the outer parent so the button below can hang off of it! */}
         </section>
 
         {/* Custom Hanging Button overlaps the bottom of the section */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex h-22 w-[466.5px] bg-[url(https://c.animaapp.com/NY6mIFxF/img/btn-shadow.svg)] bg-position-[100%_100%] z-10 scale-[0.55] xs:scale-[0.65] sm:scale-[0.85] md:scale-100 origin-bottom">
+        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex h-22 w-[466.5px] bg-[url(https://c.animaapp.com/NY6mIFxF/img/btn-shadow.svg)] bg-position-[100%_100%] z-10 scale-[0.55] xs:scale-[0.65] sm:scale-[0.85] md:scale-100 origin-bottom">
           <button
             type="button"
             onClick={() => setCurrentTab('report')}
@@ -643,7 +643,7 @@ export default function DashboardView({
               </div>
 
               {showReliefTracker && (
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 animate-fade-in text-slate-800 max-h-75 overflow-y-auto">
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 animate-fade-in text-slate-800 max-h-75flow-y-auto">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <p className="font-extrabold font-mono text-xs text-slate-700">🚒 ACTIVE RELIEF SUPPLIES IN PORTAL:</p>

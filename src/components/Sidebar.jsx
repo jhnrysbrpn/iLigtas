@@ -286,7 +286,7 @@ export default function Sidebar({
           })}
         </nav>
 
-        {/* Barangay helpline footer */}
+     {/* Barangay helpline footer */}
         <div className="p-3 mx-4 mb-4 mt-auto rounded-2xl bg-white border border-slate-200 text-left flex flex-col min-h-0">
           <div className="flex items-center gap-1.5 mb-2 select-none border-b pb-1.5 border-slate-100">
             <span className="p-0.5 bg-red-650 text-white font-mono rounded text-[8px] font-black tracking-wide shrink-0 animate-pulse">

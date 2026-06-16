@@ -347,7 +347,7 @@ export default function ReportingView({
                     <div className="flex-1 text-[11px]">
                       {fileSelectedName ? (
                         <div>
-                          <p className="text-emerald-755 font-bold max-w-[180px] truncate">{fileSelectedName}</p>
+                          <p className="text-emerald-755 font-bold max-w-45 truncate">{fileSelectedName}</p>
                           <p className="text-[10px] text-slate-400">Attached successfully</p>
                         </div>
                       ) : (

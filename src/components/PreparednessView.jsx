@@ -273,7 +273,7 @@ export default function PreparednessView({
                   </div>
 
                   {/* Options Option */}
-                  <div className="flex flex-col justify-end items-start md:items-end flex-shrink-0 gap-2">
+                  <div className="flex flex-col justify-end items-start md:items-end shrink-0 gap-2">
                     <span className="text-[11px] font-black text-slate-650 font-mono">
                       {prog.registrantsCount} Residente ang Kasali
                     </span>
