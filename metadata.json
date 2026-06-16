@@ -1,0 +1,10 @@
+{
+  "name": "Remix: Barangay Disaster Preparedness and Emergency Response System",
+  "description": "A responsive, modern web application for Barangay disaster preparedness, early warning alerts, hazard reporting, evacuation centers, and relief tracking.",
+  "requestFramePermissions": [
+    "geolocation"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
