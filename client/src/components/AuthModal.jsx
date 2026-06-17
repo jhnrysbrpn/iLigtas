@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Shield, Lock, UserPlus, KeyRound, CheckCircle } from 'lucide-react';
 import { translations, Language } from '../data/translations';
+import { authAPI } from '../api/client';
 
 export default function AuthModal({
   isOpen,
@@ -52,7 +53,7 @@ export default function AuthModal({
 
   if (!isOpen) return null;
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setLoginError('');
 
@@ -61,26 +62,40 @@ export default function AuthModal({
       return;
     }
 
-    // Lookup user from state
-    const matched = usersList.find(
-      u => u && u.username && u.username.toLowerCase() === loginUsername.trim().toLowerCase() && u.password === loginPassword
-    );
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: loginUsername,
+          password: loginPassword,
+        }),
+      });
 
-    if (matched) {
-      // Elevated roles that are not yet approved only get logged in as a "Resident" session
-      const activeRole = (matched.approved || matched.role === 'Resident') ? matched.role : 'Resident';
-      onAuthSuccess(matched.username, matched.name, activeRole, matched.email, matched.phone);
+      const data = await response.json();
+
+      if (!response.ok || data.status === 'error') {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      const { token, user } = data.data;
+      localStorage.setItem('bdrrmc_token', token);
+      
+      // Call parent success handler
+      onAuthSuccess(user.username, user.name, user.role, user.email, user.phone);
       onClose();
-    } else {
+    } catch (err) {
       setLoginError(
         language === 'ph' 
-          ? 'Maling credentials. Maaari kang mag-register ng bagong account o gamitin ang "admin" o "fire" para mag-login.' 
-          : 'Invalid credentials. You can register a new account on the Create Account tab, or use "admin" (Official) or "fire" (Admin) to log in instantly.'
+          ? `Maling credentials: ${err.message}` 
+          : `Invalid credentials: ${err.message}`
       );
     }
   };
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
     setRegError('');
 
@@ -95,35 +110,6 @@ export default function AuthModal({
       return;
     }
 
-    if (trimmedName.length < 3) {
-      setRegError(language === 'ph' ? 'Ang Buong Pangalan ay dapat may hindi bababa sa 3 karakter.' : 'Full Name must be at least 3 characters long.');
-      return;
-    }
-
-    // Email regex validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(trimmedEmail)) {
-      setRegError(language === 'ph' ? 'Mangyaring maglagay ng valid na email address (hal: juan@gmail.com).' : 'Please enter a valid email address (e.g. name@example.com).');
-      return;
-    }
-
-    // Phone format validation (PH: 09 / +639 / 639 followed by 9 digits)
-    const phoneRegex = /^(09|\+639|639)\d{9}$/;
-    if (!phoneRegex.test(trimmedPhone)) {
-      setRegError(language === 'ph' ? 'Magpasok ng valid na numerong nagsisimula sa 09 (Halimbawa: 09171234567).' : 'Please enter a valid Philippine mobile number starting with 09 (e.g. 09171234567).');
-      return;
-    }
-
-    if (trimmedUsername.length < 3) {
-      setRegError(language === 'ph' ? 'Ang Username ay dapat may hindi bababa sa 3 karakter.' : 'Username must be at least 3 characters long.');
-      return;
-    }
-
-    if (trimmedPassword.length < 6) {
-      setRegError(language === 'ph' ? 'Ang Password ay dapat may hindi bababa sa 6 na karakter.' : 'Password must be at least 6 characters long.');
-      return;
-    }
-
     const isElevated = selectedAccessType !== 'Resident';
 
     if (isElevated) {
@@ -133,48 +119,57 @@ export default function AuthModal({
       }
     }
 
-    // Check if username taken
-    const exists = usersList.some(u => u && u.username && u.username.toLowerCase() === trimmedUsername.toLowerCase());
-    if (exists) {
-      setRegError(language === 'ph' ? 'May gumagamit na ng username na ito.' : 'Username already registered.');
-      return;
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: trimmedName,
+          email: trimmedEmail,
+          phone: trimmedPhone,
+          username: trimmedUsername,
+          password: trimmedPassword,
+          requestedRole: isElevated ? regRole : undefined,
+          department: isElevated ? regDepartment : undefined,
+          departmentId: isElevated ? regDepartmentId.trim() : undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.status === 'error') {
+        if (data.errors && Array.isArray(data.errors)) {
+          // If Zod validation errors exist, format and display them
+          const errorMsgs = data.errors.map(err => err.message).join(', ');
+          throw new Error(errorMsgs);
+        }
+        throw new Error(data.message || 'Registration failed');
+      }
+
+      const { token, user } = data.data;
+      localStorage.setItem('bdrrmc_token', token);
+
+      setRegSuccess(true);
+      
+      // Automatically login user after registration delay
+      setTimeout(() => {
+        onAuthSuccess(user.username, user.name, user.role, user.email, user.phone);
+        setRegSuccess(false);
+        // Reset inputs
+        setRegFullName('');
+        setRegEmail('');
+        setRegPhone('');
+        setRegUsername('');
+        setRegPassword('');
+        setRegDepartment('bfp');
+        setRegDepartmentId('');
+        onClose();
+      }, 1800);
+    } catch (err) {
+      setRegError(err.message);
     }
-
-    // Create user: elevated requests are parked as 'Resident' and approved = false
-    const newUser = {
-      name: trimmedName,
-      username: trimmedUsername.toLowerCase(),
-      email: trimmedEmail.toLowerCase(),
-      phone: trimmedPhone,
-      password: trimmedPassword,
-      role: 'Resident', // without permission the users can only be a resident initially
-      requestedRole: isElevated ? regRole : undefined,
-      department: isElevated ? regDepartment : undefined,
-      departmentId: isElevated ? regDepartmentId.trim() : undefined,
-      approved: !isElevated // Residents auto-approved, staff require approval
-    };
-
-    const updatedList = [...usersList, newUser];
-    setUsersList(updatedList);
-    localStorage.setItem('_users_list', JSON.stringify(updatedList));
-
-    setRegSuccess(true);
-    
-    // Automatically login user after registration delay
-    setTimeout(() => {
-      // They log in as 'Resident' since they are not approved yet!
-      onAuthSuccess(newUser.username, newUser.name, 'Resident', newUser.email, newUser.phone);
-      setRegSuccess(false);
-      // Reset inputs
-      setRegFullName('');
-      setRegEmail('');
-      setRegPhone('');
-      setRegUsername('');
-      setRegPassword('');
-      setRegDepartment('bfp');
-      setRegDepartmentId('');
-      onClose();
-    }, 1800);
   };
 
   return (

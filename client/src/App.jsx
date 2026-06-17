@@ -169,15 +169,8 @@ export default function App() {
   };
 
   // Core synchronized Local States backed by localStorage
-  const [alerts, setAlerts] = useState(() => {
-    const saved = localStorage.getItem('bdrrmc_alerts');
-    return saved ? JSON.parse(saved) : INITIAL_ALERTS;
-  });
-
-  const [reports, setReports] = useState(() => {
-    const saved = localStorage.getItem('bdrrmc_reports');
-    return saved ? JSON.parse(saved) : INITIAL_HAZARD_REPORTS;
-  });
+  const [alerts, setAlerts] = useState([]);
+  const [reports, setReports] = useState([]);
 
   const [evacuationCenters, setEvacuationCenters] = useState(() => {
     const saved = localStorage.getItem('bdrrmc_evacuation_centers');
@@ -206,6 +199,33 @@ export default function App() {
 
   // Hydrants list (Keep cached mapping simple)
   const [hydrants] = useState(HYDRANTS_DATA);
+
+  // Fetch Alerts and Reports from Backend database on mount
+  useEffect(() => {
+    const fetchBackendData = async () => {
+      try {
+        const alertsRes = await fetch('http://localhost:5000/api/alerts');
+        const alertsData = await alertsRes.json();
+        if (alertsData.status === 'success') {
+          setAlerts(alertsData.data);
+        }
+
+        const reportsRes = await fetch('http://localhost:5000/api/reports');
+        const reportsData = await reportsRes.json();
+        if (reportsData.status === 'success') {
+          setReports(reportsData.data);
+        }
+      } catch (err) {
+        console.warn("Backend server offline, falling back to local storage:", err);
+        const savedAlerts = localStorage.getItem('bdrrmc_alerts');
+        setAlerts(savedAlerts ? JSON.parse(savedAlerts) : INITIAL_ALERTS);
+        const savedReports = localStorage.getItem('bdrrmc_reports');
+        setReports(savedReports ? JSON.parse(savedReports) : INITIAL_HAZARD_REPORTS);
+      }
+    };
+
+    fetchBackendData();
+  }, []);
 
   // Synchronize localStorage
   useEffect(() => {
@@ -746,12 +766,10 @@ export default function App() {
       </div>
 
       {/* 3. SIMULATED AUTHENTICATION ENTRY MODAL */}
-      <AuthModal 
+              <AuthModal 
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        onAuthSuccess={handleAuthSuccess}
-        usersList={usersList}
-        setUsersList={setUsersList}
+        onAuthSuccess={handleAuthSuccess}        
         language={language}
         t={t}
       />
