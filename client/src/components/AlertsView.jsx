@@ -19,7 +19,6 @@ export default function AlertsView({
   onAddAlert,
   onDeleteAlert,
   onUpdateAlerts,
-  language,
   t,
   broadcastPublicMode = false,
   onToggleBroadcastPublicMode
@@ -159,8 +158,8 @@ export default function AlertsView({
           </h2>
           <p className="text-xs text-slate-600 mt-1">
             {broadcastPublicMode 
-              ? 'Mga real-time warning, anunsyo, at safety guidelines para sa kaligtasan ng pamilyang mamamayan ng San Sebastian.'
-              : 'BDRRMC early warning broadcast logs. Sa bahaging ito ipinapakita ang lahat ng active extreme danger announcements at simulated SMS logs.'}
+              ? 'Real-time warnings, announcements, and safety guidelines for the safety of the San Sebastian families.'
+              : 'BDRRMC early warning broadcast logs. This section displays all active extreme danger announcements and simulated SMS logs.'}
           </p>
         </div>
       </div>
@@ -210,17 +209,15 @@ export default function AlertsView({
             
             <h3 className="font-extrabold text-slate-900 text-sm tracking-tight uppercase flex items-center gap-1.5 mb-2">
               <Megaphone className="w-4 h-4 text-rose-500 animate-pulse" />
-              {editingAlertId ? 'I-update ang Warning Broadcast' : 'Mag-Broadcast ng Bagong Warning'}
+              {editingAlertId ? 'Update Warning Broadcast' : 'Broadcast New Warning'}
             </h3>
 
             {!isAdmin && (
               <div className="mb-4 p-3 bg-indigo-50 border border-indigo-200 rounded-xl text-slate-805 text-[10.5px] leading-relaxed font-sans font-medium text-left flex items-start gap-1.5 shadow-3xs">
                 <span className="text-rose-600 font-extrabold shrink-0">⚠️</span>
                 <span>
-                  <strong>Hala (Read-Only View):</strong>{' '}
-                  {language === 'ph' 
-                    ? 'Ang mga Barangay Official Admin lamang ang may privilege na mag-modify, mag-delete, o mag-broadcast ng bagong early warning.'
-                    : 'Only verified Barangay Official Admins possess the administrative privilege to broadcast warning alerts, modify fields, and trigger active SMS queues.'}
+                  <strong>Notice (Read-Only View):</strong>{' '}
+                  Only verified Barangay Official Admins possess the administrative privilege to broadcast warning alerts, modify fields, and trigger active SMS queues.
                 </span>
               </div>
             )}
@@ -232,15 +229,14 @@ export default function AlertsView({
                 </div>
                 <h4 className="text-base font-bold text-emerald-600">Warning Broadcast Active!</h4>
                 <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                  Ang warning alert ay live na sa lahat ng Resident dashboard at naipadala na sa SMS priority queues.
+                  The warning alert is now live on all Resident dashboards and has been routed to SMS priority queues.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleBroadcastSubmit} className="space-y-3.5 text-left">
-                
-                <div>
+                            <div>
                   <label className="block text-[10px] uppercase font-bold text-slate-705">
-                    Pamagat ng Warning (Alert Title) *
+                    Warning Title (Alert Title) *
                   </label>
                   <input
                     type="text"
@@ -248,7 +244,7 @@ export default function AlertsView({
                     disabled={!isAdmin}
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Hal: BAGYONG CARINA RED RAINFALL WARNING"
+                    placeholder="Example: BAGYONG CARINA RED RAINFALL WARNING"
                     className="mt-1 w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-900 disabled:opacity-60 disabled:cursor-not-allowed font-medium"
                   />
                 </div>
@@ -256,23 +252,33 @@ export default function AlertsView({
                 <div className="grid grid-cols-1 gap-3">
                   <div>
                     <label className="block text-[10px] uppercase font-bold text-slate-705">
-                      Antas ng Alerto (Severity Group)
+                      Severity Level (Severity Group)
                     </label>
                     <select
                       disabled={!isAdmin}
                       value={severity}
                       onChange={(e) => setSeverity(e.target.value)}
-                      className="mt-1 w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-900 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                      className="mt-1 w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
+                      style={{
+                        width: `calc(${
+                          (severity === 'Extreme Danger' || severity === 'EXTREME'
+                            ? '🔴 Extreme Danger / Critical Evacuation (Immediate Evacuation)'
+                            : severity === 'Warning' || severity === 'WARNING'
+                              ? '🟡 Warning Level / Alert Preparation (Be Prepared)'
+                              : '🔵 Advisory Level / General Monitoring (General Advisory)'
+                          ).length
+                        }ch + 3rem)`
+                      }}
                     >
-                      <option value={AlertSeverity.EXTREME}>🔴 Extreme Danger / Critical Evacuation (Kagyat na Paglikas)</option>
-                      <option value={AlertSeverity.WARNING}>🟡 Warning Level / Alert Preparation (Maging Handa)</option>
+                      <option value={AlertSeverity.EXTREME}>🔴 Extreme Danger / Critical Evacuation (Immediate Evacuation)</option>
+                      <option value={AlertSeverity.WARNING}>🟡 Warning Level / Alert Preparation (Be Prepared)</option>
                       <option value={AlertSeverity.ADVISORY}>🔵 Advisory Level / General Monitoring (General Advisory)</option>
                     </select>
                   </div>
 
                   <div>
                     <label className="block text-[10px] uppercase font-bold text-slate-705">
-                      Sakop na Lugar (Affected Area) *
+                      Affected Area *
                     </label>
                     <input
                       type="text"
@@ -288,7 +294,7 @@ export default function AlertsView({
 
                 <div>
                   <label className="block text-[10px] uppercase font-bold text-slate-705">
-                    Detalyadong Mensahe / Tagubilin *
+                    Detailed Message / Instructions *
                   </label>
                   <textarea
                     required
@@ -296,7 +302,7 @@ export default function AlertsView({
                     disabled={!isAdmin}
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Mangyaring isara ang mga kuryente, mag-lock ng tahanan at patungo sa safe covered court..."
+                    placeholder="Please turn off electricity, lock homes, and proceed to the designated safe zone..."
                     className="mt-1 w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-900 disabled:opacity-60 disabled:cursor-not-allowed"
                   />
                 </div>
@@ -312,7 +318,7 @@ export default function AlertsView({
                     className="rounded border-slate-300 text-rose-600 focus:ring-rose-500 h-4 w-4 disabled:opacity-60"
                   />
                   <label htmlFor="sms-check" className="text-[11px] font-bold text-slate-700 cursor-pointer select-none">
-                    I-broadcast din bilang SMS Text Message sa pamilya
+                    Send broadcast as SMS Text Message to families
                   </label>
                 </div>
 
@@ -322,7 +328,7 @@ export default function AlertsView({
                       type="submit"
                       className="w-full py-2.5 rounded-lg bg-indigo-650 hover:bg-slate-900 text-white font-extrabold text-xs shadow hover:shadow-md transition-all active:scale-95 text-center cursor-pointer uppercase"
                     >
-                      {editingAlertId ? 'I-save ang mga Pagbabago' : 'I-Send Live Broadcast'}
+                      {editingAlertId ? 'Save Changes' : 'Send Live Broadcast'}
                     </button>
                     {editingAlertId && (
                       <button
@@ -397,9 +403,14 @@ export default function AlertsView({
               <select
                 value={selectedSeverity}
                 onChange={(e) => setSelectedSeverity(e.target.value)}
-                className="text-xs p-1.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-705 font-medium"
+                className="text-xs py-1.5 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-705 font-medium w-fit max-w-full cursor-pointer"
+                style={{
+                  width: `calc(${
+                    (selectedSeverity === 'All' ? 'All Warning Levels' : selectedSeverity).length
+                  }ch + 3rem)`
+                }}
               >
-                <option value="All">Lahat ng Warning Levels</option>
+                <option value="All">All Warning Levels</option>
                 <option value="Extreme Danger">Extreme Danger</option>
                 <option value="Warning">Warning</option>
                 <option value="Advisory">Advisory</option>
@@ -490,7 +501,7 @@ export default function AlertsView({
               })}
               {filteredAlerts.length === 0 && (
                 <div className="text-center py-8 text-slate-500 text-xs font-medium">
-                  Walang nakuhang anunsyo para sa piniling warning group.
+                  No announcements found for the selected warning category.
                 </div>
               )}
             </div>

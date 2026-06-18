@@ -24,7 +24,6 @@ export default function PreparednessView({
   onRegisterForProgram,
   onModifyStockpile,
   onUpdatePrograms,
-  language,
   t,
   setCurrentTab
 }) {
@@ -61,7 +60,7 @@ export default function PreparednessView({
     setEditingProgramId(null);
     setFormTitle('');
     setFormType('Drill');
-    setFormDate(new Date().toISOString().split('T')[0]);
+    setFormDate(new Date().toISOString().split("T")[0]);
     setFormTime('9:05 AM - 11:30 AM');
     setFormLocation('Barangay 35 Covered Court');
     setFormDescription('');
@@ -128,7 +127,7 @@ export default function PreparednessView({
 
   const handleDeleteActivity = (programId) => {
     if (!onUpdatePrograms) return;
-    if (window.confirm('Sigurado ka ba na nais mong i-delete ang aktibidad na ito?')) {
+    if (window.confirm('Are you sure you want to delete this activity?')) {
       const updated = programs.filter(p => p.id !== programId);
       onUpdatePrograms(updated);
     }
@@ -186,7 +185,7 @@ export default function PreparednessView({
             Preparedness & Capacity Building Hub
           </h2>
           <p className="text-xs text-slate-600 mt-1">
-            Maging handa bago pa man dumating ang sakuna. Suriin ang Go-Bag, sumali sa mga Barangay drills, at subaybayan ang suplay.
+            Be prepared before disaster strikes. Review your families Go-Bag, participate in active community drill structures, and audit stockpile inventory logs.
           </p>
         </div>
       </div>
@@ -266,8 +265,8 @@ export default function PreparednessView({
                     <p className="text-xs text-slate-705 leading-snug font-medium max-w-xl">{prog.description}</p>
                     
                     <div className="flex flex-wrap gap-3 text-[10px] text-slate-500 font-mono pt-1.5 font-bold">
-                      <span>📅 Petsa: <strong>{prog.date} ({prog.time})</strong></span>
-                      <span>📍 Lugar: <strong>{prog.location}</strong></span>
+                      <span>📅 Date: <strong>{prog.date} ({prog.time})</strong></span>
+                      <span>📍 Location: <strong>{prog.location}</strong></span>
                       <span>👤 Host: <strong>{prog.host}</strong></span>
                     </div>
                   </div>
@@ -275,7 +274,7 @@ export default function PreparednessView({
                   {/* Options Option */}
                   <div className="flex flex-col justify-end items-start md:items-end shrink-0 gap-2">
                     <span className="text-[11px] font-black text-slate-650 font-mono">
-                      {prog.registrantsCount} Residente ang Kasali
+                      {prog.registrantsCount} Residents Registered
                     </span>
 
                     {hasPreparednessAdminPrivilege ? (
@@ -324,7 +323,7 @@ export default function PreparednessView({
             </h3>
 
             <p className="text-[11px] text-slate-550 font-medium leading-relaxed mb-4">
-              Pag-monitor sa mga nakaimbak na relief goods at disaster preparedness supplies sa Barangay center warehouse.
+              Monitor stocked relief goods and disaster preparedness supplies in the Barangay center warehouse.
             </p>
 
             <div className="space-y-4">
@@ -380,8 +379,12 @@ export default function PreparednessView({
                             <input
                               type="number"
                               required
+                              min={0}
                               value={addQtyValue}
-                              onChange={(e) => setAddQtyValue(Number(e.target.value))}
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value);
+                                setAddQtyValue(isNaN(val) ? '' : Math.max(0, val));
+                              }}
                               placeholder="Qty"
                               className="w-1/2 text-[10px] p-1.5 rounded-lg border border-slate-250 bg-white"
                             />
@@ -433,13 +436,13 @@ export default function PreparednessView({
             </h3>
             
             <p className="text-xs text-slate-500 font-medium mb-4">
-              Magrehistro rito upang ma-reserve ang inyong slot at certificate ng pagdalo sa piling pagsasanay.
+              Register here to reserve your slot and receive a certificate of attendance upon completion.
             </p>
 
             {regSuccess ? (
               <div className="text-center py-4">
                 <span className="text-2xl">🎉</span>
-                <h4 className="text-sm font-black text-emerald-600 mt-2 uppercase">NAKA-REHISTRO NA PO KASALI KANA!</h4>
+                <h4 className="text-sm font-black text-emerald-600 mt-2 uppercase">REGISTRATION SUCCESSFUL!</h4>
                 <button
                   onClick={() => setSelectedProgramId(null)}
                   className="mt-4 px-4 py-1.5 text-xs font-bold rounded-lg bg-indigo-600 text-white cursor-pointer"
@@ -495,20 +498,20 @@ export default function PreparednessView({
             </h3>
             
             <p className="text-xs text-slate-500 font-medium mb-4">
-              Maaaring punan ang mga detalye sa ibaba upang magdagdag o mag-edit ng aktibidad para sa kaligtasan ng pamayanan.
+              Please fill out the details below to add or edit an activity for community resilience and safety.
             </p>
 
             <form onSubmit={handleActivityFormSubmit} className="space-y-3.5">
               <div>
                 <label className="block text-[10px] uppercase font-bold text-slate-705">
-                  Pamagat ng Aktibidad (Activity Title) *
+                  Activity Title *
                 </label>
                 <input
                   type="text"
                   required
                   value={formTitle}
                   onChange={(e) => setFormTitle(e.target.value)}
-                  placeholder="Hal: Purok 2 Fire Drill at Suppression Seminar"
+                  placeholder="Example: Purok 2 Fire Drill & Suppression Seminar"
                   className="mt-1 w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-900 font-medium"
                 />
               </div>
@@ -516,12 +519,24 @@ export default function PreparednessView({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[10px] uppercase font-bold text-slate-705">
-                    Uri ng Activity (Type)
+                    Activity Type
                   </label>
                   <select
                     value={formType}
                     onChange={(e) => setFormType(e.target.value)}
-                    className="mt-1 w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-900 font-bold cursor-pointer"
+                    className="mt-1 w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900 font-bold cursor-pointer"
+                    style={{
+                      width: `calc(${
+                        (formType === 'Drill' || formType === 'DRILL'
+                          ? '🚨 Emergency Drill'
+                          : formType === 'Fire Safety' || formType === 'FIRE_SAFETY'
+                            ? '🔥 Fire Safety Seminar'
+                            : formType === 'Seminar' || formType === 'SEMINAR'
+                              ? '📖 Preparedness Seminar'
+                              : '🩹 First Aid Training'
+                        ).length
+                      }ch + 3rem)`
+                    }}
                   >
                     <option value={ProgramType.DRILL}>🚨 Emergency Drill</option>
                     <option value={ProgramType.FIRE_SAFETY}>🔥 Fire Safety Seminar</option>
@@ -532,12 +547,13 @@ export default function PreparednessView({
 
                 <div>
                   <label className="block text-[10px] uppercase font-bold text-slate-705">
-                    Katayuan (Status)
+                    Status
                   </label>
                   <select
                     value={formStatus}
                     onChange={(e) => setFormStatus(e.target.value)}
-                    className="mt-1 w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-900 font-bold cursor-pointer"
+                    className="mt-1 w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900 font-bold cursor-pointer"
+                    style={{ width: `calc(${(formStatus || '').length}ch + 3.5rem)` }}
                   >
                     <option value="Upcoming">Upcoming</option>
                     <option value="Ongoing">Ongoing</option>
@@ -578,42 +594,42 @@ export default function PreparednessView({
 
               <div>
                 <label className="block text-[10px] uppercase font-bold text-slate-705">
-                  Lugar ng Pagsasagawa (Location) *
+                  Activity Location *
                 </label>
                 <input
                   type="text"
                   required
                   value={formLocation}
                   onChange={(e) => setFormLocation(e.target.value)}
-                  placeholder="Hal: Purok 3 Covered Court"
+                  placeholder="Example: Purok 3 Covered Court"
                   className="mt-1 w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
                 />
               </div>
 
               <div>
                 <label className="block text-[10px] uppercase font-bold text-slate-705">
-                  Host / Tagapagsalita (Organizer) *
+                  Host / Organizer *
                 </label>
                 <input
                   type="text"
                   required
                   value={formHost}
                   onChange={(e) => setFormHost(e.target.value)}
-                  placeholder="Hal: BFP Maypajo Personnel"
+                  placeholder="Example: BFP Maypajo Personnel"
                   className="mt-1 w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
                 />
               </div>
 
               <div>
                 <label className="block text-[10px] uppercase font-bold text-slate-705">
-                  Detalyadong Paglalarawan (Description) *
+                  Detailed Description *
                 </label>
                 <textarea
                   required
                   rows={3}
                   value={formDescription}
                   onChange={(e) => setFormDescription(e.target.value)}
-                  placeholder="Ilarawan ang layunin ng pagsasanay, mga dadalo, at iba pang kailangang dalahin..."
+                  placeholder="Describe the objectives of the activity, attendees, checklist items, etc..."
                   className="mt-1 w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-900 leading-relaxed"
                 />
               </div>

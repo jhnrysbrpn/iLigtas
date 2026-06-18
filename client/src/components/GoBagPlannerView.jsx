@@ -399,7 +399,7 @@ export default function GoBagPlannerView({ setCurrentTab, onTriggerSOS }) {
                     setActiveCategory(cat.name);
                     setShowAddForm(false);
                   }}
-                  className={`flex items-center gap-3 py-2.5 px-3.5 rounded-2xl text-left transition-all text-xs font-bold flex-shrink-0 cursor-pointer ${
+                  className={`flex items-center gap-3 py-2.5 px-3.5 rounded-2xl text-left transition-all text-xs font-bold shrink-0 cursor-pointer ${
                     isActive 
                       ? 'bg-white text-indigo-950 shadow-sm border-l-4 border-indigo-650 font-black' 
                       : 'hover:bg-white/50 text-slate-650'
@@ -543,7 +543,7 @@ export default function GoBagPlannerView({ setCurrentTab, onTriggerSOS }) {
                         <div className="flex items-start gap-3 sm:gap-4 flex-1">
                           
                           {/* Checkbox (Formatted like the image: empty rounded box or ticked check) */}
-                          <div className={`mt-0.5 h-5 w-5 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-colors ${
+                          <div className={`mt-0.5 h-5 w-5 rounded-lg border-2 flex items-center justify-center shrink-0 transition-colors ${
                             isChecked 
                               ? 'bg-slate-900 border-slate-900 text-white' 
                               : 'border-slate-400 bg-white group-hover:border-slate-600'

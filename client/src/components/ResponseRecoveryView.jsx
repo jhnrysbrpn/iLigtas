@@ -23,7 +23,6 @@ export default function ResponseRecoveryView({
   reports,
   onAddVictimIntake,
   onAddReliefDistribution,
-  language,
   t
 }) {
   
@@ -119,7 +118,7 @@ export default function ResponseRecoveryView({
             Response, Evacuation, and Recovery Log
           </h2>
           <p className="text-xs text-slate-600 mt-1">
-            Subaybayan ang kalagayan ng evacuation centers, magrehistro para sa relief, at i-audit ang datus ng nakaraang sakuna.
+            Monitor the status of evacuation centers, register for priority relief goods distribution, and audit historical disaster damage statistics.
           </p>
         </div>
       </div>
@@ -212,7 +211,7 @@ export default function ResponseRecoveryView({
                   <CheckSquare className="w-4 h-4 text-indigo-650 animate-pulse" />
                   Disaster Victim & Relief Assistance Registry
                 </h3>
-                <p className="text-xs text-slate-500">Magsumite ng record ng pinsala at hiling na relief goods para sa inyong tahanan</p>
+                <p className="text-xs text-slate-500">Submit family status records, structural damage assessments, and relief requests for your household</p>
               </div>
             </div>
 
@@ -222,44 +221,47 @@ export default function ResponseRecoveryView({
               <div className="md:col-span-1 border-r border-slate-150 pr-0 md:pr-4">
                 {victimSuccess ? (
                   <div className="p-6 text-center text-xs bg-emerald-50 rounded-xl text-emerald-900 font-bold border border-emerald-250">
-                    Salamat po. Matagumpay nating naitala ang kalagayan ng pamilya sa system!
+                    Thank you. Your family status and relief request have been successfully recorded!
                   </div>
                 ) : (
                   <form onSubmit={handleVictimSubmit} className="space-y-3">
                     
                     <div>
-                      <label className="block text-[9px] uppercase font-bold text-slate-500">Apelyido (Family)*</label>
+                      <label className="block text-[9px] uppercase font-bold text-slate-500">Family Last Name*</label>
                       <input
                         type="text"
                         required
                         value={victimFamilyName}
                         onChange={(e) => setVictimFamilyName(e.target.value)}
-                        placeholder="Hal: Capistrano Family"
+                        placeholder="e.g., Capistrano Family"
                         className="mt-1 w-full text-xs p-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-[9px] uppercase font-bold text-slate-500">Pinuno ng tahanan*</label>
+                      <label className="block text-[9px] uppercase font-bold text-slate-500">Head of Household*</label>
                       <input
                         type="text"
                         required
                         value={victimHead}
                         onChange={(e) => setVictimHead(e.target.value)}
-                        placeholder="Hal: Jaime Capistrano"
+                        placeholder="e.g., Jaime Capistrano"
                         className="mt-1 w-full text-xs p-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
                       />
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
                       <div>
-                        <label className="block text-[9px] uppercase font-bold text-slate-500">Mga Kasama</label>
+                        <label className="block text-[9px] uppercase font-bold text-slate-500">No. of Members</label>
                         <input
                           type="number"
                           required
-                          min={1}
+                          min={0}
                           value={familyMembers}
-                          onChange={(e) => setFamilyMembers(Number(e.target.value))}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value);
+                            setFamilyMembers(isNaN(val) ? '' : Math.max(0, val));
+                          }}
                           className="mt-1 w-full text-xs p-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
                         />
                       </div>
@@ -269,7 +271,8 @@ export default function ResponseRecoveryView({
                         <select
                           value={purokArea}
                           onChange={(e) => setPurokArea(e.target.value)}
-                          className="mt-1 w-full text-xs p-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
+                          className="mt-1 w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
+                          style={{ width: `calc(${(purokArea || '').length}ch + 3rem)` }}
                         >
                           <option value="Purok 1">Purok 1</option>
                           <option value="Purok 2">Purok 2</option>
@@ -285,7 +288,15 @@ export default function ResponseRecoveryView({
                       <select
                         value={shelterCenterId}
                         onChange={(e) => setShelterCenterId(e.target.value)}
-                        className="mt-1 w-full text-xs p-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
+                        className="mt-1 w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
+                        style={{
+                          width: `calc(${
+                            (shelterCenterId === 'home' 
+                              ? 'Home quarantine / Relatives' 
+                              : (evacuationCenters.find(ec => ec.id === shelterCenterId)?.name || '')
+                            ).length
+                          }ch + 3rem)`
+                        }}
                       >
                         {evacuationCenters.map(e => (
                           <option key={e.id} value={e.id}>{e.name}</option>
@@ -295,28 +306,38 @@ export default function ResponseRecoveryView({
                     </div>
 
                     <div>
-                      <label className="block text-[9px] uppercase font-bold text-slate-500">Pinsalang Natamo</label>
+                      <label className="block text-[9px] uppercase font-bold text-slate-500">Incurred Damages / Loss</label>
                       <select
                         value={lossCategory}
                         onChange={(e) => setLossCategory(e.target.value)}
-                        className="mt-1 w-full text-xs p-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
+                        className="mt-1 w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
+                        style={{
+                          width: `calc(${
+                            ({
+                              "Complete Fire Destruction": "Totally Destroyed (Fire)",
+                              "Partial Fire kitchen damage": "Partially Damaged (Fire/Kitchen)",
+                              "Complete Flood submergence": "Fully Submerged (Flood)",
+                              "Partial storm damages": "Storm Damage (Roof/Structural)"
+                            }[lossCategory] || lossCategory || '').length
+                          }ch + 3rem)`
+                        }}
                       >
-                        <option value="Complete Fire Destruction">Sira ang Buong Bahay (Sunog)</option>
-                        <option value="Partial Fire kitchen damage">Bahagyang Nasunog ang Kusina</option>
-                        <option value="Complete Flood submergence">Lubog sa Baha buong bahay</option>
-                        <option value="Partial storm damages">Storm Roof Loss / Sira ang bubong</option>
+                        <option value="Complete Fire Destruction">Totally Destroyed (Fire)</option>
+                        <option value="Partial Fire kitchen damage">Partially Damaged (Fire/Kitchen)</option>
+                        <option value="Complete Flood submergence">Fully Submerged (Flood)</option>
+                        <option value="Partial storm damages">Storm Damage (Roof/Structural)</option>
                       </select>
                     </div>
 
                     <div>
-                      <label className="block text-[9px] uppercase font-bold text-slate-500">Hiling na Relief Assistance</label>
+                      <label className="block text-[9px] uppercase font-bold text-slate-500">Requested Relief Assistance</label>
                       <textarea
                         required
                         rows={2}
                         value={reliefRequest}
                         onChange={(e) => setReliefRequest(e.target.value)}
                         className="mt-1 w-full text-xs p-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
-                        placeholder="Nangangailangan ng diaper ng baby, banig at panggatong na kahoy..."
+                        placeholder="Need baby diapers, blankets, mats, water, and first aid..."
                       />
                     </div>
 
@@ -324,7 +345,7 @@ export default function ResponseRecoveryView({
                       type="submit"
                       className="w-full py-2 bg-indigo-600 hover:bg-slate-900 text-white rounded-lg font-black text-xs shadow-sm active:scale-95 transition-all"
                     >
-                      I-REGISTER AKING PAMILYA
+                      REGISTER MY FAMILY
                     </button>
 
                   </form>
@@ -334,7 +355,7 @@ export default function ResponseRecoveryView({
               {/* Right Column: Active Registrants Lists */}
               <div className="md:col-span-2 space-y-3">
                 <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest block">
-                  Kamakailang mga Nagrehistrong Pamilya (Assistance Board)
+                  Recently Registered Families (Assistance Board)
                 </span>
 
                 <div className="space-y-3 max-h-96 overflow-y-auto">
@@ -388,30 +409,30 @@ export default function ResponseRecoveryView({
 
             <div className="grid grid-cols-2 gap-3 text-center mb-4">
               <div className="p-3 bg-rose-50/70 border border-rose-100 rounded-lg">
-                <span className="text-[10px] uppercase font-bold text-slate-500">Total Bumbero / Sunog Calls</span>
+                <span className="text-[10px] uppercase font-bold text-slate-500">Total Emergency / Fire Calls</span>
                 <span className="text-2xl font-black text-rose-600 block mt-1">{fireReports.length}</span>
               </div>
 
               <div className="p-3 bg-amber-50/70 border border-amber-100 rounded-lg">
-                <span className="text-[10px] uppercase font-bold text-slate-500">Apektadong Pamilya</span>
+                <span className="text-[10px] uppercase font-bold text-slate-500">Affected Families</span>
                 <span className="text-2xl font-black text-amber-600 block mt-1">{totalAffectedFamilies} Pax</span>
               </div>
             </div>
 
             {/* Financial cost of damage bar */}
             <div className="bg-[#EFF2FE] p-4 rounded-xl border border-slate-250 text-slate-900">
-              <span className="text-[9px] font-black text-slate-550 uppercase tracking-widest block">Estadong Halaga ng Pinsala:</span>
+              <span className="text-[9px] font-black text-slate-550 uppercase tracking-widest block">Estimated Damage Cost:</span>
               <span className="text-lg font-black text-slate-950 block mt-1">
-                ₱{estimatedFireCost.toLocaleString('en-PH')}.00 PHP
+                ₱{estimatedFireCost.toLocaleString('en')}.05 PHP
               </span>
               <p className="text-[10px] italic text-slate-550 mt-1 font-medium">
-                * Batay sa pagsusuri ng aming Barangay Captain at Bureau of Fire Protection.
+                * Based on the assessment of our Barangay Captain and the Bureau of Fire Protection (BFP).
               </p>
             </div>
 
             {/* Safety Review notes */}
             <div className="mt-4 p-3 rounded-lg bg-slate-50 border border-slate-200 text-[11px] text-slate-700 leading-relaxed font-medium">
-              <strong>Pinakahuling Talumpati ng Response:</strong> Matapos ang matinding structural assessment sa Purok 3 Residential area, idineklara ng pamunuan ang pagbuo ng Purok Fire Brigade upang mapigilan agad ang mabilisang pagkalat habang on-the-way ang BFP station firetrucks.
+              <strong>Latest Response Report:</strong> After rigorous structural assessment at the Purok 3 residential area, local officers declared the establishment of a Purok Volunteer Fire Brigade to proactively mitigate rapid fire propagation while BFP firetrucks are in transit.
             </div>
           </div>
 
@@ -429,7 +450,7 @@ export default function ResponseRecoveryView({
                   onClick={() => setShowDistForm(!showDistForm)}
                   className="p-1 rounded text-rose-600 hover:bg-neutral-100 text-xs font-bold"
                 >
-                  {showDistForm ? 'Suriin' : '+ Bagong Batch'}
+                  {showDistForm ? 'View Logs' : '+ New Batch'}
                 </button>
               )}
             </div>
@@ -438,7 +459,7 @@ export default function ResponseRecoveryView({
               <form onSubmit={handleDistributionSubmit} className="space-y-3 border-b border-dashed border-slate-200 pb-4 mb-4">
                 {distSuccess ? (
                   <p className="text-xs text-emerald-600 font-bold p-2 text-center bg-emerald-50 rounded">
-                    ✓ Matagumpay na schedule ang batch!
+                    ✓ Distribution batch scheduled successfully!
                   </p>
                 ) : (
                   <>
@@ -447,13 +468,18 @@ export default function ResponseRecoveryView({
                       required
                       value={distBatchName}
                       onChange={(e) => setDistBatchName(e.target.value)}
-                      placeholder="Pangalan ng Relief Batch (e.g. Purok 3 Relief Pack)"
+                      placeholder="Relief Batch Name (e.g., Purok 3 Relief Pack)"
                       className="w-full text-xs p-2 rounded-lg border border-slate-300"
                     />
                     <select
                       value={distCenterId}
                       onChange={(e) => setDistCenterId(e.target.value)}
-                      className="w-full text-xs p-2 rounded-lg border border-slate-300"
+                      className="w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-white text-slate-900 cursor-pointer"
+                      style={{
+                        width: `calc(${
+                          (evacuationCenters.find(ec => ec.id === distCenterId)?.name || '').length
+                        }ch + 3rem)`
+                      }}
                     >
                       {evacuationCenters.map(e => (
                         <option key={e.id} value={e.id}>{e.name}</option>
@@ -471,8 +497,12 @@ export default function ResponseRecoveryView({
                       <input
                         type="number"
                         required
+                        min={0}
                         value={distFamilies}
-                        onChange={(e) => setDistFamilies(Number(e.target.value))}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          setDistFamilies(isNaN(val) ? '' : Math.max(0, val));
+                        }}
                         className="w-1/2 text-xs p-2 rounded-lg border border-slate-300"
                         placeholder="Families count"
                       />

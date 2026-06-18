@@ -100,11 +100,6 @@ export default function App() {
     return defaultUsers;
   });
 
-  const [language, setLanguage] = useState(() => {
-    const saved = localStorage.getItem('lang');
-    return saved === 'ph' ? 'ph' : 'en';
-  });
-
   const [broadcastPublicMode, setBroadcastPublicMode] = useState(() => {
     return localStorage.getItem('bdrrmc_broadcast_portal_public_mode') === 'true';
   });
@@ -118,9 +113,9 @@ export default function App() {
 
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // Translation function helper
+  // Translation function helper (English only)
   const t = (key) => {
-    return translations[language][key] || translations['en'][key] || String(key);
+    return translations['en'][key] || String(key);
   };
 
   // Sync role to user selection on reload/state update to make role management updates live
@@ -619,7 +614,6 @@ export default function App() {
         currentUser={currentUser}
         setCurrentUser={setCurrentUser}
         setShowAuthModal={setShowAuthModal}
-        language={language}
         t={t}
         broadcastPublicMode={broadcastPublicMode}
       />
@@ -634,8 +628,6 @@ export default function App() {
           setSidebarOpen={setSidebarOpen}
           onTriggerSOS={handleTriggerSOS}
           activeExtremeAlertsExist={activeExtremeAlertsExist}
-          language={language}
-          setLanguage={setLanguage}
           t={t}
         />
 
@@ -654,7 +646,6 @@ export default function App() {
               onAddComment={handleAddComment}
               onUpdateReportStatus={handleUpdateReportStatus}
               onQuickBroadcast={handleQuickBroadcast}
-              language={language}
               t={t}
               onDeleteReport={handleDeleteReport}
             />
@@ -667,7 +658,6 @@ export default function App() {
               reports={reports}
               vulnerabilityRegistry={vulnerabilityRegistry}
               onAddHouseholdVulnerability={handleAddHouseholdVulnerability}
-              language={language}
               t={t}
               userRole={userRole}
               currentUser={currentUser}
@@ -681,7 +671,6 @@ export default function App() {
               reports={reports}
               onSubmitReport={handleSubmitReport}
               onAddComment={handleAddComment}
-              language={language}
               t={t}
               isLoggedIn={isLoggedIn}
               currentUser={currentUser}
@@ -697,7 +686,6 @@ export default function App() {
               onAddAlert={handleAddAlert}
               onDeleteAlert={handleDeleteAlert}
               onUpdateAlerts={setAlerts}
-              language={language}
               t={t}
               broadcastPublicMode={broadcastPublicMode}
               onToggleBroadcastPublicMode={handleToggleBroadcastPublicMode}
@@ -708,7 +696,6 @@ export default function App() {
             <InterDepartmentView 
               userRole={userRole}
               currentUser={currentUser}
-              language={language}
               t={t}
               usersList={usersList}
               setUsersList={setUsersList}
@@ -724,7 +711,6 @@ export default function App() {
               onRegisterForProgram={handleRegisterForProgram}
               onModifyStockpile={handleModifyStockpile}
               onUpdatePrograms={setPrograms}
-              language={language}
               t={t}
               setCurrentTab={setCurrentTab}
             />
@@ -746,7 +732,6 @@ export default function App() {
               reports={reports}
               onAddVictimIntake={handleAddVictimIntake}
               onAddReliefDistribution={handleAddReliefDistribution}
-              language={language}
               t={t}
             />
           )}
@@ -759,7 +744,7 @@ export default function App() {
               <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></div> {t('systemOnline')}</span>
               <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div> {t('govUplink')}</span>
             </div>
-            <div>Barangay 35 Maypajo Caloocan Fire Preparedness & Emergency Portal © 2026 | Ligtas ang Handa!</div>
+            <div>Barangay 35 Maypajo Caloocan Fire Preparedness & Emergency Portal © 2026 | Preparedness is Safety!</div>
           </div>
         </footer>
 
@@ -769,8 +754,9 @@ export default function App() {
               <AuthModal 
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
-        onAuthSuccess={handleAuthSuccess}        
-        language={language}
+        onAuthSuccess={handleAuthSuccess}
+        usersList={usersList}
+        setUsersList={setUsersList}
         t={t}
       />
 

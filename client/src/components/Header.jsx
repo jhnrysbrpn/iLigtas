@@ -23,8 +23,6 @@ export default function Header({
   setSidebarOpen,
   onTriggerSOS,
   activeExtremeAlertsExist,
-  language,
-  setLanguage,
   t
 }) {
   const [showSosModal, setShowSosModal] = useState(false);
@@ -120,23 +118,8 @@ export default function Header({
           )}
         </div>
 
-        {/* Right Side: Language + Emergency Hotlines Button */}
+        {/* Right Side: Emergency Hotlines Button */}
         <div className="flex items-center gap-2.5 sm:gap-3.5">
-          
-          {/* Language Switcher */}
-          <button
-            id="lang-switcher-btn"
-            onClick={() => {
-              const nextLang = language === 'en' ? 'ph' : 'en';
-              setLanguage(nextLang);
-              localStorage.setItem('lang', nextLang);
-            }}
-            className="flex items-center gap-1.5 p-1.5 sm:p-2 px-2.5 sm:px-3 rounded-lg border border-indigo-150 bg-white hover:bg-indigo-50/50 text-slate-800 text-[11px] font-extrabold transition-all cursor-pointer shadow-3xs"
-            title={language === 'en' ? "Filipino" : "Switch to English"}
-          >
-            <Globe className="w-3.5 h-3.5 text-indigo-600" />
-            <span className="font-mono tracking-wider">{language === 'en' ? 'FILIPINO 🇵🇭' : 'ENGLISH 🇺🇸'}</span>
-          </button>
           
           {/* Emergency Hotlines Cyan block button */}
           <button

@@ -21,7 +21,6 @@ export default function ReportingView({
   reports,
   onSubmitReport,
   onAddComment,
-  language,
   t,
   isLoggedIn = false,
   currentUser = null,
@@ -183,7 +182,7 @@ export default function ReportingView({
             Resident Incident Reporting Center
           </h2>
           <p className="text-xs text-slate-700 mt-1">
-            I-ulat ang anumang panganib, sunog, o baha upang alertuhin ang Barangay Hall at mailatag agad ang mga tagapagsalba.
+            Report any fires, electrical hazards, or structural risk issues immediately to alert dispatchers.
           </p>
         </div>
       </div>
@@ -224,7 +223,18 @@ export default function ReportingView({
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="mt-1 w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-900 focus:outline-none"
+                    className="mt-1 w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900 focus:outline-none cursor-pointer"
+                    style={{
+                      width: `calc(${
+                        ({
+                          [IncidentCategory.FIRE]: "🔥 Structural Fire Escape / Smoke",
+                          [IncidentCategory.ELECTRICAL_HAZARD]: "⚡ Electrical Sparking / Grid Failure",
+                          [IncidentCategory.GAS_LEAK]: "💨 LPG Leakage / Gas Odor",
+                          [IncidentCategory.RUBBISH_BURNING]: "🗑️ Illegal Rubbish Burning",
+                          [IncidentCategory.FIRE_ALARM]: "🚨 Active Fire Sprinkler Alert"
+                        }[category] || category || '').length
+                      }ch + 3rem)`
+                    }}
                   >
                     <option value={IncidentCategory.FIRE}>🔥 Structural Fire Escape / Smoke</option>
                     <option value={IncidentCategory.ELECTRICAL_HAZARD}>⚡ Electrical Sparking / Grid Failure</option>
@@ -320,7 +330,16 @@ export default function ReportingView({
                     <select
                       value={priority}
                       onChange={(e) => setPriority(e.target.value)}
-                      className="mt-1 w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-900 focus:outline-none"
+                      className="mt-1 w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900 focus:outline-none cursor-pointer"
+                      style={{
+                        width: `calc(${
+                          ({
+                            [PriorityLevel.HIGH]: "🔴 High (Threat to life & structures)",
+                            [PriorityLevel.MEDIUM]: "🟡 Medium (Property damage at risk)",
+                            [PriorityLevel.LOW]: "🟢 Low (Minor safety concern / obstacle)"
+                          }[priority] || priority || '').length
+                        }ch + 3rem)`
+                      }}
                     >
                       <option value={PriorityLevel.HIGH}>🔴 High (Threat to life & structures)</option>
                       <option value={PriorityLevel.MEDIUM}>🟡 Medium (Property damage at risk)</option>
@@ -467,7 +486,7 @@ export default function ReportingView({
                   <Clock className="w-4 h-4 text-slate-500" />
                   Active Reports and Status History (Reports History)
                 </h3>
-                <p className="text-xs text-slate-600">Subaybayan ang inyong ulat kasama ang mga opisyal na dispatcher comments</p>
+                <p className="text-xs text-slate-600">Track and monitor reported incidents along with authorized dispatch personnel logging updates</p>
               </div>
 
               {/* Search input and category filter */}
@@ -475,14 +494,26 @@ export default function ReportingView({
                 <select
                   value={filterCategory}
                   onChange={(e) => setFilterCategory(e.target.value)}
-                  className="text-xs p-1.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-900 focus:outline-none font-mono"
+                  className="text-xs py-1.5 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900 focus:outline-none font-mono w-fit max-w-full cursor-pointer"
+                  style={{
+                    width: `calc(${
+                      ({
+                        "All": "All Types",
+                        [IncidentCategory.FIRE]: "Structural Fire",
+                        [IncidentCategory.ELECTRICAL_HAZARD]: "Electrical Hazard",
+                        [IncidentCategory.GAS_LEAK]: "LPG / Gas Leak",
+                        [IncidentCategory.RUBBISH_BURNING]: "Rubbish Burning",
+                        [IncidentCategory.FIRE_ALARM]: "Fire Alarm"
+                      }[filterCategory] || filterCategory || '').length
+                    }ch + 3.5rem)`
+                  }}
                 >
-                  <option value="All">Lahat ng Uri (All Types)</option>
-                  <option value={IncidentCategory.FIRE}>Sunog (Structural Fire)</option>
-                  <option value={IncidentCategory.ELECTRICAL_HAZARD}>Kuryente (Electrical Spark)</option>
-                  <option value={IncidentCategory.GAS_LEAK}>Gas (LPG Leak)</option>
-                  <option value={IncidentCategory.RUBBISH_BURNING}>Basura (Rubbish Burning)</option>
-                  <option value={IncidentCategory.FIRE_ALARM}>Alarma (Fire Alarm)</option>
+                  <option value="All">All Types</option>
+                  <option value={IncidentCategory.FIRE}>Structural Fire</option>
+                  <option value={IncidentCategory.ELECTRICAL_HAZARD}>Electrical Hazard</option>
+                  <option value={IncidentCategory.GAS_LEAK}>LPG / Gas Leak</option>
+                  <option value={IncidentCategory.RUBBISH_BURNING}>Rubbish Burning</option>
+                  <option value={IncidentCategory.FIRE_ALARM}>Fire Alarm</option>
                 </select>
 
                 <div className="relative">
@@ -629,7 +660,7 @@ export default function ReportingView({
                         className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
                       >
                         <MessageSquare className="w-3.5 h-3.5 text-indigo-500" />
-                        <span>{report.comments.length} Dispatch Comments & Logs ({isOpen ? 'Suriin' : 'Palawakin'})</span>
+                        <span>{report.comments.length} Dispatch Comments & Logs ({isOpen ? 'Collapse' : 'Expand'})</span>
                       </button>
 
                       {isOpen && (
@@ -655,7 +686,7 @@ export default function ReportingView({
                                 ...commentTextMap,
                                 [report.id]: e.target.value
                               })}
-                              placeholder="Mag-reply o magtanong ukol sa sitwasyon..."
+                              placeholder="Type a reply or request update on current status details..."
                               className="flex-1 text-xs p-2 rounded-lg border border-slate-300 bg-white text-slate-900 focus:outline-none placeholder-slate-400"
                             />
                             <button
@@ -675,7 +706,7 @@ export default function ReportingView({
 
               {filteredReports.length === 0 && (
                 <div className="text-center py-8 text-slate-500 text-xs font-medium font-mono">
-                  Araw ng kapayapaan! Walang nakitang sakuna sa inyong hinahanap.
+                  No active hazard logs found matches your query. Keep safe!
                 </div>
               )}
             </div>

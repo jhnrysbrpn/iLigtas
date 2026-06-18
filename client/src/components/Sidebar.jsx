@@ -19,7 +19,6 @@ import {
   Check,
   Phone
 } from 'lucide-react';
-import { translations } from '../data/translations';
 
 export default function Sidebar({
   currentTab,
@@ -35,29 +34,27 @@ export default function Sidebar({
   currentUser,
   setCurrentUser,
   setShowAuthModal,
-  language,
-  t,
+  t = (key) => {
+    const localTranslations = {
+      sidebarDashboard: 'Dashboard Hub',
+      sidebarMap: 'Hazard Map',
+      sidebarPreparedness: 'Preparedness Hub',
+      sidebarResponse: 'Evac & Recovery',
+      sidebarReport: 'Report Fire Hazard',
+      sidebarAlerts: 'Broadcaster Portal',
+      logoutBtn: 'Sign Out',
+      roleSwitcherLockInfo: 'To switch roles or update hazard levels, please log in with your authorized Barangay credentials.',
+      loginBtn: 'Acknowledge & Sign In'
+    };
+    return localTranslations[key] || '';
+  },
   broadcastPublicMode = false
 }) {
   const [copiedNumber, setCopiedNumber] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
   const directHotlines = [
-    { group: "BFP Fire/Rescue", name: "Maypajo Substation 1", phone: "0995-637-3278", alt: "0912-358-4359", color: "bg-red-50 text-red-700 border-red-200" },
-    { group: "BFP Fire/Rescue", name: "Caloocan Fire Dept", phone: "(02) 5310-6527", color: "bg-red-50 text-red-700 border-red-200" },
-    { group: "BFP Fire/Rescue", name: "TXT Fire", phone: "0922-561-1111", color: "bg-red-50 text-red-700 border-red-200" },
-    { group: "Barangay 35 Hall", name: "Barangay Hall Direct", phone: "(02) 8260-8842", color: "bg-orange-50 text-orange-700 border-orange-200" },
-    { group: "Barangay Staff", name: "Arnold Arenas (Ex-O)", phone: "0909-028-0292", color: "bg-amber-50 text-amber-800 border-amber-200" },
-    { group: "Barangay Staff", name: "Dan Doyon (Inspector)", phone: "0928-433-2658", color: "bg-amber-50 text-amber-800 border-amber-200" },
-    { group: "Barangay Staff", name: "Jacqueline Mendoza", phone: "0967-061-7738", color: "bg-amber-50 text-amber-800 border-amber-200" },
-    { group: "Barangay Staff", name: "Rene Llaban (Monitor)", phone: "0956-164-9706", color: "bg-amber-50 text-amber-800 border-amber-200" },
-    { group: "Medical / Rescue", name: "CCMC South Hospital", phone: "(02) 8288-7077", color: "bg-blue-50 text-blue-700 border-blue-200" },
-    { group: "Medical / Rescue", name: "CDRRMO Alert Line 1", phone: "(02) 5310-6972", alt: "0947-796-4372", color: "bg-blue-50 text-blue-700 border-blue-200" },
-    { group: "Medical / Rescue", name: "CDRRMO Alert Line 2", phone: "(02) 310-6527", alt: "0916-797-6365", color: "bg-blue-50 text-blue-700 border-blue-200" },
-    { group: "Law Enforcement", name: "NPD Caloocan Police", phone: "0905-454-2547", alt: "0998-598-7862", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
-    { group: "Law Enforcement", name: "Traffic South Caloocan", phone: "0915-112-4731", color: "bg-indigo-50 text-indigo-700 border-indigo-200" },
-    { group: "Welfare & Utilities", name: "Meralco Power Cutoff", phone: "16211", alt: "1622", color: "bg-yellow-50 text-yellow-800 border-yellow-200" },
-    { group: "Welfare & Utilities", name: "City Social Welfare", phone: "5336-5705", color: "bg-purple-50 text-purple-700 border-purple-200" }
+    { group: "Barangay 35 Hall", name: "Barangay Hall Direct", phone: "(02) 8260-8842", color: "bg-orange-50 text-orange-700 border-orange-200" }
   ];
 
   const handleCopy = (num) => {
@@ -86,9 +83,9 @@ export default function Sidebar({
     if (!role) return '';
     switch (role) {
       case 'Resident':
-        return language === 'ph' ? 'Mamamayan (Resident)' : 'Resident';
+        return 'Resident';
       case 'Responder':
-        return language === 'ph' ? 'Tagatugon (Responder)' : 'Responder';
+        return 'Responder';
       case 'SuperAdmin':
         if (currentUser && currentUser.department) {
           return `SuperAdmin [${getDeptLabel(currentUser.department)} - ID: ${currentUser.departmentId}]`;
@@ -98,7 +95,7 @@ export default function Sidebar({
         if (currentUser && currentUser.department && currentUser.departmentId) {
           return `Admin [${getDeptLabel(currentUser.department)} - ID: ${currentUser.departmentId}]`;
         }
-        return language === 'ph' ? 'Admin / Tagapamahala' : 'Admin';
+        return 'Admin';
       default:
         return role;
     }
@@ -287,109 +284,48 @@ export default function Sidebar({
         </nav>
 
      {/* Barangay helpline footer */}
-        <div className="p-3 mx-4 mb-4 mt-auto rounded-2xl bg-white border border-slate-200 text-left flex flex-col min-h-0">
+        <div className="p-3 mx-4 mb-4 mt-auto rounded-2xl bg-white border border-slate-200 text-left flex flex-col min-h-0 shrink-0">
           <div className="flex items-center gap-1.5 mb-2 select-none border-b pb-1.5 border-slate-100">
             <span className="p-0.5 bg-red-650 text-white font-mono rounded text-[8px] font-black tracking-wide shrink-0 animate-pulse">
-              HOTLINES
+              HOTLINE
             </span>
             <p className="text-[10px] font-black text-slate-900 uppercase tracking-tight font-sans">
-              Direct Dispatch Lines
+              Direct Dispatch Line
             </p>
           </div>
 
-          {/* Quick Search */}
-          <div className="relative mb-2 shrink-0">
-            <Search className="w-3 h-3 text-slate-400 absolute left-2.5 top-2" />
-            <input
-              type="text"
-              placeholder="Search direct dept, staff or #..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-7 pr-7 py-1.5 text-[10px] border border-slate-200 rounded-lg focus:outline-none focus:border-slate-900 bg-slate-50 font-medium text-slate-900"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-2 top-1.5 text-[9px] font-black text-slate-400 hover:text-slate-950 font-mono"
+          <div className="pt-1 select-none">
+            <div className="flex items-center justify-between gap-1 mb-1.5">
+              <span className="text-[10px] font-black text-slate-950 uppercase font-sans">
+                Barangay 35 Hall
+              </span>
+              <span className="text-[8px] font-mono font-extrabold uppercase px-1 rounded leading-none py-0.5 inline-block bg-orange-50 text-orange-700 border border-orange-200">
+                Direct Line
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between gap-1.5">
+              <a
+                href="tel:0282608842"
+                className="text-xs font-mono font-black text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200/50 inline-flex items-center gap-1 cursor-pointer transition-colors"
+                title="Tap to call"
               >
-                ✕
+                <Phone className="w-3 h-3 text-emerald-650" />
+                <span>(02) 8260-8842</span>
+              </a>
+
+              <button
+                onClick={() => handleCopy("(02) 8260-8842")}
+                className="p-1 border border-slate-200 text-slate-400 rounded bg-slate-50 hover:bg-slate-100 hover:text-slate-900 cursor-pointer transition-colors"
+                title="Copy number"
+              >
+                {copiedNumber === "(02) 8260-8842" ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-600 font-extrabold" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5" />
+                )}
               </button>
-            )}
-          </div>
-
-          {/* Scrollable list of exact hotlines */}
-          <div className="overflow-y-auto space-y-1.5 pr-0.5 divide-y divide-slate-100 max-h-42.5 flex-1 scrollbar-thin">
-            {directHotlines.filter(h => {
-              const query = searchQuery.toLowerCase();
-              return h.name.toLowerCase().includes(query) || h.phone.includes(query) || (h.alt && h.alt.includes(query)) || h.group.toLowerCase().includes(query);
-            }).map((hotline, idx) => (
-              <div key={idx} className="pt-1.5 first:pt-0 flex flex-col gap-0.5">
-                <div className="flex items-center justify-between gap-1">
-                  <span className="text-[10px] font-extrabold text-slate-900 leading-tight">
-                    {hotline.name}
-                  </span>
-                  <span className={`text-[7px] font-mono font-bold uppercase px-1 rounded hover:opacity-90 leading-none py-0.5 inline-block shrink-0 ${hotline.color}`}>
-                    {hotline.group}
-                  </span>
-                </div>
-                
-                <div className="flex items-center justify-between gap-1.5">
-                  <div className="flex flex-wrap items-center gap-1">
-                    <a
-                      href={`tel:${hotline.phone.replace(/[^0-9+]/g, '')}`}
-                      className="text-[10px] font-mono font-black text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-1.5 py-0.5 rounded border border-emerald-200/50 inline-flex items-center gap-0.5 cursor-pointer"
-                      title="Tap to call"
-                    >
-                      <Phone className="w-2.5 h-2.5 text-emerald-650" />
-                      <span>{hotline.phone}</span>
-                    </a>
-                    {hotline.alt && (
-                      <a
-                        href={`tel:${hotline.alt.replace(/[^0-9+]/g, '')}`}
-                        className="text-[10px] font-mono font-black text-teal-700 bg-teal-50 hover:bg-teal-100 px-1.5 py-0.5 rounded border border-teal-200/50 inline-flex items-center gap-0.5 cursor-pointer"
-                        title="Tap to call alt"
-                      >
-                        <Phone className="w-2.5 h-2.5 text-teal-600" />
-                        <span>{hotline.alt}</span>
-                      </a>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => handleCopy(hotline.phone)}
-                      className="p-1 border border-slate-200 text-slate-405 rounded bg-slate-50 hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
-                      title="Copy main number"
-                    >
-                      {copiedNumber === hotline.phone ? (
-                        <Check className="w-2.5 h-2.5 text-emerald-600 font-extrabold" />
-                      ) : (
-                        <Copy className="w-2.5 h-2.5 text-slate-400" />
-                      )}
-                    </button>
-                    {hotline.alt && (
-                      <button
-                        onClick={() => handleCopy(hotline.alt)}
-                        className="p-1 border border-slate-200 text-slate-405 rounded bg-slate-50 hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
-                        title="Copy alternative number"
-                      >
-                        {copiedNumber === hotline.alt ? (
-                          <Check className="w-2.5 h-2.5 text-emerald-600 font-extrabold" />
-                        ) : (
-                          <Copy className="w-2.5 h-2.5 text-slate-400" />
-                        )}
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-            {directHotlines.filter(h => {
-              const query = searchQuery.toLowerCase();
-              return h.name.toLowerCase().includes(query) || h.phone.includes(query) || (h.alt && h.alt.includes(query)) || h.group.toLowerCase().includes(query);
-            }).length === 0 && (
-              <p className="text-[9px] text-slate-400 text-center py-4 font-medium uppercase font-mono">No matching direct lines</p>
-            )}
+            </div>
           </div>
           
           <p className="text-[8px] text-slate-400 font-extrabold uppercase leading-none mt-2 text-center select-none">

@@ -12,7 +12,6 @@ import {
   Users
 } from 'lucide-react';
 import { IncidentStatus } from '../types';
-import { Language, translations } from '../data/translations';
 
 export default function MapsView({
   evacuationCenters,
@@ -20,7 +19,6 @@ export default function MapsView({
   reports,
   vulnerabilityRegistry,
   onAddHouseholdVulnerability,
-  language,
   t,
   userRole,
   onUpdateReportStatus
@@ -458,7 +456,18 @@ export default function MapsView({
             <select
               value={ticketStatusFilter}
               onChange={(e) => setTicketStatusFilter(e.target.value)}
-              className="bg-white border border-slate-300 rounded-full py-1 px-3 text-xs text-slate-800 focus:outline-none min-w-30"
+              className="bg-white border border-slate-300 rounded-full py-1.5 px-3 pr-10 h-auto whitespace-normal wrap-break-word text-xs text-slate-800 focus:outline-none w-fit max-w-full cursor-pointer"
+              style={{
+                width: `calc(${
+                  ({
+                    "All": "All Statuses",
+                    [IncidentStatus.PENDING]: "Pending",
+                    [IncidentStatus.VERIFIED]: "Verified",
+                    [IncidentStatus.DISPATCHED]: "Dispatched",
+                    [IncidentStatus.RESOLVED]: "Resolved"
+                  }[ticketStatusFilter] || ticketStatusFilter || '').length
+                }ch + 3.5rem)`
+              }}
             >
               <option value="All">All Statuses</option>
               <option value={IncidentStatus.PENDING}>Pending</option>
@@ -577,7 +586,17 @@ export default function MapsView({
                         <select
                           value={report.status}
                           onChange={(e) => onUpdateReportStatus(report.id, e.target.value)}
-                          className="w-full text-xs p-1.5 rounded border border-rose-400 bg-amber-50 font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer"
+                          className="w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded border border-rose-400 bg-amber-50 font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer"
+                          style={{
+                            width: `calc(${
+                              ({
+                                [IncidentStatus.PENDING]: "Pending Report (Awaiting action)",
+                                [IncidentStatus.VERIFIED]: "Verified Hazard (Confirmed)",
+                                [IncidentStatus.DISPATCHED]: "Responder Dispatched (On route)",
+                                [IncidentStatus.RESOLVED]: "Resolved (Declared Clean / Safe)"
+                              }[report.status] || report.status || '').length
+                            }ch + 3.5rem)`
+                          }}
                         >
                           <option value={IncidentStatus.PENDING}>Pending Report (Awaiting action)</option>
                           <option value={IncidentStatus.VERIFIED}>Verified Hazard (Confirmed)</option>

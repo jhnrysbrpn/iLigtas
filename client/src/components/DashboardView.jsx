@@ -20,7 +20,6 @@ import {
   FileSpreadsheet,
   AlertOctagon
 } from 'lucide-react';
-import { translations, Language } from '../data/translations';
 import { IncidentStatus, IncidentCategory } from '../types';
 
 export default function DashboardView({
@@ -35,7 +34,6 @@ export default function DashboardView({
   onAddComment,
   onUpdateReportStatus,
   onQuickBroadcast,
-  language,
   t,
   onDeleteReport
 }) {
@@ -139,10 +137,10 @@ export default function DashboardView({
               <PhoneCall className="w-8 h-8 text-white animate-bounce" />
             </div>
             <div>
-              <span className="text-[10px] uppercase tracking-widest font-black bg-white/20 px-2.5 py-0.5 rounded-full">{t('gadgetFreeLabel') || 'GADGET-FREE ASSISTANCE'}</span>
-              <h3 className="text-xl font-bold tracking-tight mt-1">{t('gadgetFreeHelp')}</h3>
+              <span className="text-[10px] uppercase tracking-widest font-black bg-white/20 px-2.5 py-0.5 rounded-full">{"HELP FOR NON-TECH USERS"}</span>
+              <h3 className="text-xl font-bold tracking-tight mt-1">{"Struggling with gadgets or internet?"}</h3>
               <p className="text-xs text-red-100 max-w-xl">
-                {t('gadgetFreeDesc')}
+                {"We have prepared our emergency support protocol for senior residents and non-tech users. Click easy mode or use our direct emergency help hotlines!"}
               </p>
             </div>
           </div>
@@ -152,7 +150,7 @@ export default function DashboardView({
             onClick={() => setIsSimpleMode(!isSimpleMode)}
             className="w-full md:w-auto bg-slate-900 text-white hover:bg-slate-950 font-black text-xs uppercase px-5 py-3 rounded-full border-2 border-white/20 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer select-none"
           >
-            {isSimpleMode ? (t('turnOffEasyMode') || '✨ Back') : (t('turnOnEasyMode') || '🚨 Easy Mode')}
+            {isSimpleMode ? ("✨ Back to Standard Map Portal") : ("🚨 Turn on Big Text / Easy Mode")}
           </button>
         </div>
 
@@ -160,27 +158,27 @@ export default function DashboardView({
         {(isSimpleMode) && (
           <div id="simple-guidance-grid" className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-3 border-t border-white/10 animate-fade-in text-white">
             <div className="bg-black/15 p-4 rounded-2xl space-y-2">
-              <h4 className="text-sm font-extrabold uppercase tracking-wider text-amber-300">{t('hotlinesCallNow')}</h4>
-              <p className="text-xs">{t('noInternetRequired')}</p>
+              <h4 className="text-sm font-extrabold uppercase tracking-wider text-amber-300">{"📞 Hotlines (Call Now)"}</h4>
+              <p className="text-xs">{"No internet required! Save these on any old analog mobile phone:"}</p>
               <div className="space-y-1 mt-2">
-                <p className="text-sm font-bold">{t('hotlineMaypajo') || 'Maypajo Fire Station'}: <span className="p-1 px-1.5 bg-red-700 rounded text-[13px] font-mono tracking-wider ml-1">0917-BFP-LINE</span></p>
-                <p className="text-sm font-bold">{t('hotlineBrgy35') || 'Barangay Office'}: <span className="p-1 px-1.5 bg-red-700 rounded text-[13px] font-mono tracking-wider ml-1">(02) 8281-9111</span></p>
-                <p className="text-sm font-bold">{t('clinic') || 'Community Clinic'}: <span className="p-1 px-1.5 bg-red-700 rounded text-[13px] font-mono tracking-wider ml-1">0918-HEALTH-35</span></p>
+                <p className="text-sm font-bold">{"Maypajo Fire Station"}: <span className="p-1 px-1.5 bg-red-700 rounded text-[13px] font-mono tracking-wider ml-1">0917-BFP-LINE</span></p>
+                <p className="text-sm font-bold">{"Barangay 35 Office"}: <span className="p-1 px-1.5 bg-red-700 rounded text-[13px] font-mono tracking-wider ml-1">(02) 8281-9111</span></p>
+                <p className="text-sm font-bold">{"Barangay Health Clinic"}: <span className="p-1 px-1.5 bg-red-700 rounded text-[13px] font-mono tracking-wider ml-1">0918-HEALTH-35</span></p>
               </div>
             </div>
 
             <div className="bg-black/15 p-4 rounded-2xl space-y-2">
-              <h4 className="text-sm font-extrabold uppercase tracking-wider text-amber-300">{t('whistleSignalsTitle')}</h4>
-              <p className="text-xs">{t('whistleSignalsDesc')}</p>
+              <h4 className="text-sm font-extrabold uppercase tracking-wider text-amber-300">{"📢 Traditional Fire Whistle Signals"}</h4>
+              <p className="text-xs">{"If smoke is sighted and phones are unavailable, blow your emergency WHISTLE repeatedly:"}</p>
               <ul className="text-xs list-disc pl-4 space-y-1 mt-1 text-red-50 font-mono">
-                <li>{t('whistle3Blasts')}</li>
-                <li>{t('whistleContinuous')}</li>
+                <li>{"3 Short Blasts: Spark or gas/LPG leak detected."}</li>
+                <li>{"Continuous Long Blasts: FIRE SIGHTED! EVACUATE immediately!"}</li>
               </ul>
             </div>
 
             <div className="bg-black/15 p-4 rounded-2xl space-y-2">
-              <h4 className="text-sm font-extrabold uppercase tracking-wider text-amber-300">{t('oneClickSosTitle')}</h4>
-              <p className="text-xs">{t('oneClickSosDesc')}</p>
+              <h4 className="text-sm font-extrabold uppercase tracking-wider text-amber-300">{"🚒 One-Click Automatic Fire SOS"}</h4>
+              <p className="text-xs">{"If you cannot write or search, press this giant red button right away to call fire responders."}</p>
               {easySosSent ? (
                 <div className="bg-[#052e16]/80 border-2 border-emerald-500 rounded-xl p-3 text-center space-y-1 animate-pulse">
                   <p className="font-extrabold text-[#10B981] uppercase text-[11px] tracking-wider leading-tight">🚒 DISPATCH TRIGGERED!</p>
@@ -196,7 +194,7 @@ export default function DashboardView({
                   className="w-full bg-yellow-400 text-slate-950 font-black py-2.5 rounded-xl hover:bg-yellow-300 active:scale-95 transition-all text-xs tracking-wider uppercase shadow-md mt-2 flex items-center justify-center gap-2 border-2 border-slate-950 cursor-pointer"
                 >
                   <Flame className="w-5 h-5 text-red-600 animate-pulse fill-red-600" />
-                  {t('oneClickSosBtn') || 'PRESS TO CALL FIRE TRUCK'}
+                  {"PRESS TO CALL FIRE TRUCK"}
                 </button>
               )}
             </div>
@@ -243,7 +241,7 @@ export default function DashboardView({
       {/* 2. FIRE PREPAREDNESS PROGRAMS */}
       <section id="preparedness-programs-section" className="space-y-4 pt-4">
         <h2 className="font-extrabold italic uppercase text-slate-950 text-2xl tracking-tight text-left">
-          {t('preparednessProgramsTitle')}
+          {"Fire Preparedness Programs"}
         </h2>
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -300,10 +298,10 @@ export default function DashboardView({
                     </p>
 
                     <div className="pt-2 border-t border-slate-200 text-[10px] text-slate-600 font-mono space-y-0.5">
-                      <p><b>{t('hostLabel') || 'Host'}:</b> {prog.host}</p>
-                      <p><b>{t('dateLabel') || 'Date'}:</b> {prog.date}</p>
-                      <p><b>{t('timeLabel') || 'Time'}:</b> {prog.time}</p>
-                      <p><b>{t('locationLabel') || 'Location'}:</b> {prog.location}</p>
+                      <p><b>{"Hosted by"}:</b> {prog.host}</p>
+                      <p><b>{"Date"}:</b> {prog.date}</p>
+                      <p><b>{"Time"}:</b> {prog.time}</p>
+                      <p><b>{"Location"}:</b> {prog.location}</p>
                     </div>
                   </div>
 
@@ -321,7 +319,7 @@ export default function DashboardView({
                         onClick={() => triggerRegisterForProgramLocal(prog.id)}
                         className="p-1 px-3 bg-[#E5E9FA] hover:bg-slate-950 hover:text-white text-slate-900 border border-slate-400 hover:border-slate-950 rounded-lg font-bold font-mono text-[10px] uppercase transition-colors cursor-pointer"
                       >
-                        {t('registerNow') || 'Join'}
+                        {"Register / Support Now"}
                       </button>
                     )}
                   </div>
@@ -339,7 +337,7 @@ export default function DashboardView({
         <div className="lg:col-span-2 bg-[#E5E9FA] border-2 border-slate-900/15 p-5 sm:p-6 rounded-3xl space-y-4 shadow-sm text-left">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-2 border-b border-slate-900/10">
             <h2 className="font-extrabold italic uppercase text-slate-950 text-xl tracking-tight">
-              {t('recentReportsTitle') || 'Recent Reports'}
+              {"Recent Reports"}
             </h2>
             
             {/* Search Box & Filters */}
@@ -348,7 +346,7 @@ export default function DashboardView({
                 <Search className="absolute left-2.5 top-2.5 w-4 h-4 text-slate-700" />
                 <input
                   type="text"
-                  placeholder={t('searchPlaceholder') || 'Search location/title...'}
+                  placeholder={"Search reports..."}
                   value={reportSearch}
                   onChange={(e) => setReportSearch(e.target.value)}
                   className="w-full sm:w-48 bg-[#F0F2FC] border border-slate-300 text-xs py-2 pl-8 pr-3 rounded-full text-slate-800 placeholder-slate-500 focus:outline-[#0ADBD2]"
@@ -359,13 +357,18 @@ export default function DashboardView({
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="bg-[#F0F2FC] border border-slate-300 text-xs py-2 px-3 rounded-full font-bold text-slate-800 focus:outline-[#0ADBD2]"
+                className="bg-[#F0F2FC] border border-slate-300 text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-full font-bold text-slate-800 focus:outline-[#0ADBD2] w-fit max-w-full cursor-pointer"
+                style={{
+                  width: `calc(${
+                    (filterStatus === 'All' ? 'All Status' : filterStatus).length
+                  }ch + 3.5rem)`
+                }}
               >
-                <option value="All">{t('filterAllStatus') || 'All Status'}</option>
-                <option value="Pending">{t('filterPending') || 'Pending'}</option>
-                <option value="Verified">{t('filterVerified') || 'Verified'}</option>
-                <option value="Dispatched">{t('filterDispatched') || 'Dispatched'}</option>
-                <option value="Resolved">{t('filterResolved') || 'Resolved'}</option>
+                <option value="All">{"All Status"}</option>
+                <option value="Pending">{"Pending"}</option>
+                <option value="Verified">{"Verified"}</option>
+                <option value="Dispatched">{"Dispatched"}</option>
+                <option value="Resolved">{"Resolved"}</option>
               </select>
             </div>
           </div>
@@ -375,9 +378,9 @@ export default function DashboardView({
             <table className="w-full text-left text-xs text-slate-800">
               <thead>
                 <tr className="border-b border-slate-900/10 text-[10px] font-mono tracking-wider uppercase text-slate-700 font-bold">
-                  <th className="py-2.5 w-1/2 font-mono">{t('tableTicket') || 'REPORT TICKET'}</th>
-                  <th className="py-2.5 font-mono">{t('tableLocation') || 'LOCATION'}</th>
-                  <th className="py-2.5 text-right font-mono">{t('tableStatus') || 'STATUS'}</th>
+                  <th className="py-2.5 w-1/2 font-mono">{"REPORT TICKET"}</th>
+                  <th className="py-2.5 font-mono">{"LOCATION"}</th>
+                  <th className="py-2.5 text-right font-mono">{"STATUS"}</th>
                   {userRole === 'Admin' && <th className="py-2.5 text-right font-mono w-20">ACTIONS</th>}
                 </tr>
               </thead>
@@ -433,7 +436,7 @@ export default function DashboardView({
                 {filteredReports.length === 0 && (
                   <tr>
                     <td colSpan={userRole === 'Admin' ? 4 : 3} className="text-center py-8 text-slate-700 font-bold italic font-sans">
-                      {t('noReportsFound') || 'No fire hazard reports found match filters.'}
+                      {"No fire hazard reports match your filters."}
                     </td>
                   </tr>
                 )}
@@ -447,10 +450,10 @@ export default function DashboardView({
           <div className="space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-slate-900/10">
               <h2 className="font-extrabold italic uppercase text-slate-950 text-xl tracking-tight">
-                {t('earlyWarningsTitle') || 'Early Fire Warnings'}
+                {"Early Fire Warnings"}
               </h2>
               <span className="p-1 px-2.5 bg-red-100 text-red-700 font-extrabold text-[10px] rounded uppercase font-mono tracking-widest block">
-                {t('activeWarnings') || 'ACTIVE'}
+                {"Active Alerts"}
               </span>
             </div>
 
@@ -484,7 +487,7 @@ export default function DashboardView({
 
               {alerts.filter(a => a.isActive).length === 0 && (
                 <div className="text-center py-10 text-slate-500 italic text-xs font-bold font-mono">
-                  {t('noActiveWarnings') || 'No active warnings in Maypajo.'}
+                  {"No active fire warning alerts at the moment."}
                 </div>
               )}
             </div>
@@ -497,7 +500,7 @@ export default function DashboardView({
             className="w-full bg-[#EAEDFC] hover:bg-slate-950 hover:text-white text-slate-900 font-extrabold py-3.5 px-4 rounded-xl border border-slate-400 hover:border-slate-950 transition-colors text-xs tracking-wider uppercase shadow-sm flex items-center justify-center gap-2 cursor-pointer"
           >
             <Shield className="w-4 h-4 text-red-500 shrink-0 animate-pulse" />
-            {t('goBagPlannerBtn') || 'Go BAG Planner'}
+            {"Go BAG Planner"}
           </button>
         </div>
       </div>
@@ -740,8 +743,12 @@ export default function DashboardView({
                         <input
                           type="number"
                           required
+                          min={0}
                           value={damageAmount}
-                          onChange={(e) => setDamageAmount(e.target.value)}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value);
+                            setDamageAmount(isNaN(val) ? '' : Math.max(0, val));
+                          }}
                           placeholder="e.g., 45000"
                           className="w-full bg-white border rounded p-2 text-xs text-slate-900 border-slate-300"
                         />
@@ -968,10 +975,10 @@ export default function DashboardView({
               }`}>
                 <p className="font-extrabold flex items-center gap-1">
                   <span>🔑 ASSIGNED DEPT:</span>
-                  <span className="underline text-red-650">{handlingDept.name.toUpperCase()}</span>
+                  <span className="underline text-red-600">{handlingDept.name.toUpperCase()}</span>
                 </p>
                 {!hasStatusPermission && (
-                  <p className="text-[10px] text-red-650 mt-1 font-extrabold">
+                  <p className="text-[10px] text-red-600 mt-1 font-extrabold">
                     ❌ ACCESS DENIED: Your department ({currentUser?.departmentId?.toUpperCase()}) does not have administrative rights to update {handlingDept.id.toUpperCase()} incidents.
                   </p>
                 )}

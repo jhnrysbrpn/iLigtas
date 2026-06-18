@@ -16,7 +16,7 @@ import {
   RotateCcw
 } from 'lucide-react';
 
-export default function InterDepartmentView({ userRole, currentUser, language, t, usersList = [], setUsersList }) {
+export default function InterDepartmentView({ userRole, currentUser, t, usersList = [], setUsersList }) {
   
   // 1. Core State with LocalStorage persistence for realistic usage
   const [disasterStatus, setDisasterStatus] = useState(() => {
@@ -420,7 +420,7 @@ export default function InterDepartmentView({ userRole, currentUser, language, t
       </div>
 
       {/* Main Fire Disaster Overall Status Card */}
-      <div className="relative p-6 rounded-2xl bg-gradient-to-r from-red-650 to-orange-700 text-white shadow-lg overflow-hidden border border-red-800">
+      <div className="relative p-6 rounded-2xl bg-linear-to-r from-red-600 to-orange-700 text-white shadow-lg overflow-hidden border border-red-800">
         <div className="absolute top-0 right-0 p-8 opacity-10 select-none pointer-events-none">
           <Flame className="w-40 h-40 fill-white" />
         </div>
@@ -439,7 +439,7 @@ export default function InterDepartmentView({ userRole, currentUser, language, t
               {disasterStatus.summary}
             </p>
           </div>
-          <div className="bg-black/25 backdrop-blur-xs p-4 rounded-xl border border-white/20 min-w-[200px] text-left">
+          <div className="bg-black/25 backdrop-blur-xs p-4 rounded-xl border border-white/20 min-w-50 text-left">
             <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-1.5 mb-1.5">
               <span className="text-[9px] font-bold uppercase tracking-widest text-red-200 font-mono">Incident Level</span>
               <span className="text-xs font-black text-yellow-300">CODE RED</span>
@@ -496,10 +496,10 @@ export default function InterDepartmentView({ userRole, currentUser, language, t
                   <div className="p-6 rounded-xl bg-slate-50 border border-slate-200 text-slate-500 text-center flex flex-col items-center justify-center space-y-2">
                     <HeartHandshake className="w-8 h-8 text-slate-400" />
                     <p className="text-xs font-bold leading-relaxed">No pending authorization requests.</p>
-                    <p className="text-[9.5px] text-slate-400 font-mono max-w-[240px]">All department applicant records are currently synchronized & verified.</p>
+                    <p className="text-[9.5px] text-slate-400 font-mono max-w-60">All department applicant records are currently synchronized & verified.</p>
                   </div>
                 ) : (
-                  <div className="space-y-3 max-h-[360px] overflow-y-auto pr-1">
+                  <div className="space-y-3 max-h-90 overflow-y-auto pr-1">
                     {deptPending.map((p) => (
                       <div key={p.username} className="p-4 rounded-xl bg-amber-50/70 border border-amber-250 shadow-2xs space-y-2.5 text-left transition-all hover:shadow-xs">
                         <div className="flex justify-between items-start">
@@ -564,7 +564,7 @@ export default function InterDepartmentView({ userRole, currentUser, language, t
                       <tr className="bg-emerald-50/40 font-bold">
                         <td className="py-3 px-3">
                           <p className="text-slate-900 font-extrabold">{currentUser.name} (YOU)</p>
-                          <p className="text-[9.5px] text-slate-500 font-mono font-bold mt-0.5 leading-none bg-emerald-100 border border-emerald-300 text-emerald-900 inline-block px-1 rounded">@{currentUser.username}</p>
+                          <p className="text-[9.5px] text-slate-500 font-mono font-bold mt-0.5 leading-none bg-emerald-100 border border-emerald-300 inline-block px-1 rounded">@{currentUser.username}</p>
                         </td>
                         <td className="py-3 px-3">
                           <span className="text-[10px] bg-emerald-250 text-emerald-950 border border-emerald-400 font-black px-2 py-0.5 rounded font-mono uppercase">
@@ -593,7 +593,17 @@ export default function InterDepartmentView({ userRole, currentUser, language, t
                               <select
                                 value={m.role}
                                 onChange={(e) => handleUpdateMemberRole(m.username, e.target.value)}
-                                className="text-[10px] font-bold p-1 rounded border border-slate-300 bg-white text-slate-950 font-mono cursor-pointer uppercase shadow-3xs focus:outline-none focus:border-indigo-500 w-full"
+                                className="text-[10px] font-bold py-1.5 px-2 pr-8 h-auto whitespace-normal wrap-break-word rounded border border-slate-300 bg-white text-slate-950 font-mono cursor-pointer uppercase shadow-3xs focus:outline-none focus:border-indigo-500 w-fit max-w-full"
+                                style={{
+                                  width: `calc(${
+                                    ({
+                                      "SuperAdmin": "👮 SuperAdmin",
+                                      "Admin": "🛠️ Admin",
+                                      "Responder": "🚒 Responder",
+                                      "Resident": "🏠 Resident"
+                                    }[m.role] || m.role || '').length
+                                  }ch + 3rem)`
+                                }}
                               >
                                 <option value="SuperAdmin">👮 SuperAdmin</option>
                                 <option value="Admin">🛠️ Admin</option>
@@ -672,7 +682,7 @@ export default function InterDepartmentView({ userRole, currentUser, language, t
                         No active location deployments logged for this squad at this moment.
                       </div>
                     ) : (
-                      <div className={`space-y-2 ${dept.deployments.length > 2 ? 'max-h-[195px] overflow-y-auto pr-1.5' : ''}`}>
+                      <div className={`space-y-2 ${dept.deployments.length > 2 ? 'max-h-48.75 overflow-y-auto pr-1.5' : ''}`}>
                         {dept.deployments.map((dep) => (
                           <div 
                             key={dep.id} 
@@ -744,7 +754,7 @@ export default function InterDepartmentView({ userRole, currentUser, language, t
         {/* Real-time Dispatch Event Timeline (Logs of details) */}
         <div className="lg:col-span-7 space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b border-slate-300">
-            <Clock className="w-5 h-5 text-red-650" />
+            <Clock className="w-5 h-5 text-red-600" />
             <h3 className="text-lg font-extrabold uppercase italic text-slate-900 tracking-tight">
               Disaster Operational Chronology & Details Log
             </h3>
@@ -754,7 +764,7 @@ export default function InterDepartmentView({ userRole, currentUser, language, t
             Chronological log of event updates, line operations, power cut-offs, and volunteer action milestones.
           </p>
 
-          <div className="relative border-l-2 border-neutral-300 pl-4 ml-3 pt-2 space-y-4 max-h-[580px] overflow-y-auto no-scrollbar">
+          <div className="relative border-l-2 border-neutral-300 pl-4 ml-3 pt-2 space-y-4 max-h-145rflow-y-auto no-scrollbar">
             {logs.length === 0 ? (
               <p className="text-xs text-slate-400 italic py-6 text-center">No timeline updates logged yet.</p>
             ) : (
@@ -797,7 +807,7 @@ export default function InterDepartmentView({ userRole, currentUser, language, t
                 return (
                   <div key={lg.id} className="relative text-left group">
                     {/* Ring dot handle */}
-                    <span className={`absolute -left-[23px] top-1.5 w-2 h-2 rounded-full ${dotColor} ring-4 ring-white`} />
+                    <span className={`absolute -left-5.75 top-1.5 w-2 h-2 rounded-full ${dotColor} ring-4 ring-white`} />
                     
                     <div className={`p-3.5 rounded-xl border shadow-2xs transition-all hover:shadow-xs ${alertClass}`}>
                       <div className="flex items-center justify-between text-[10px] font-mono font-black mb-1.5">
@@ -823,7 +833,7 @@ export default function InterDepartmentView({ userRole, currentUser, language, t
         {/* Command Control Console: Admin and Officers Input Side */}
         <div className="lg:col-span-5 space-y-4">
           <div className="flex items-center gap-2 pb-2 border-b border-slate-300">
-            <ShieldAlert className="w-5 h-5 text-red-650 animate-pulse" />
+            <ShieldAlert className="w-5 h-5 text-red-600 animate-pulse" />
             <h3 className="text-lg font-extrabold uppercase italic text-slate-900 tracking-tight">
               Command Control Center
             </h3>
@@ -844,9 +854,15 @@ export default function InterDepartmentView({ userRole, currentUser, language, t
               
               <div className="p-3 bg-white rounded-xl border border-slate-200 text-left">
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest font-mono">Demo Mock Accounts</p>
-                <div className="space-y-1 text-xs mt-1 font-mono">
-                  <p>👤 <strong>Admin:</strong> user `admin` | pass `admin`</p>
-                  <p>🚒 <strong>Responder:</strong> user `fire` | pass `fire`</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5 text-xs mt-1.5 font-mono">
+                  <p>👤 <strong>Central Admin:</strong> `admin` | `admin`</p>
+                  <p>🚒 <strong>Field Responder:</strong> `fire` | `fire`</p>
+                  <p>🔥 <strong>BFP Admin:</strong> `bfpadmin` | `bfpadmin`</p>
+                  <p>👮 <strong>PNP Admin:</strong> `pnpadmin` | `pnpadmin`</p>
+                  <p>🏥 <strong>Health Admin:</strong> `healthadmin` | `healthadmin`</p>
+                  <p>🤝 <strong>Volunteer Leader:</strong> `volunteer` | `volunteer`</p>
+                  <p>⚡ <strong>Rescue Specialist:</strong> `rescue` | `rescue`</p>
+                  <p>🏛️ <strong>Brgy Official:</strong> `official` | `official`</p>
                 </div>
               </div>
             </div>
@@ -881,7 +897,7 @@ export default function InterDepartmentView({ userRole, currentUser, language, t
                 }
                 return (
                   <div className="p-4 rounded-xl bg-white border border-slate-300 text-left space-y-3 shadow-xs">
-                    <h4 className="text-[10px] uppercase tracking-widest font-black text-red-650 font-mono flex items-center gap-1.5 border-b border-slate-100 pb-1.5">
+                    <h4 className="text-[10px] uppercase tracking-widest font-black text-red-600 font-mono flex items-center gap-1.5 border-b border-slate-100 pb-1.5">
                       <Flame className="w-3.5 h-3.5 fill-red-200 text-red-500" />
                       Overall Fire disaster status (Barangay Central)
                     </h4>
@@ -944,15 +960,26 @@ export default function InterDepartmentView({ userRole, currentUser, language, t
                         value={selectedDeptId} 
                         disabled={isDeptLocked}
                         onChange={(e) => setSelectedDeptId(e.target.value)}
-                        className={`w-full text-xs p-1.5 rounded border border-slate-300 bg-slate-50 text-slate-900 font-bold ${
+                        className={`w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded border border-slate-300 bg-slate-50 text-slate-900 font-bold ${
                           isDeptLocked ? 'opacity-85 cursor-not-allowed bg-slate-100 border-amber-400 text-amber-800' : 'cursor-pointer'
                         }`}
+                        style={{
+                          width: `calc(${
+                            ({
+                              "bfp": "BFP Station",
+                              "pnp": "PNP Maypajo",
+                              "volunteers": "Barangay Volunteers",
+                              "medics": "Medic Team",
+                              "rescue": "Rescue Evacuation"
+                            }[selectedDeptId] || selectedDeptId || '').length
+                          }ch + 3.5rem)`
+                        }}
                       >
-                        {isSelectableDept('bfp') && <option value="bfp">BFP Station</option>}
-                        {isSelectableDept('pnp') && <option value="pnp">PNP Maypajo</option>}
-                        {isSelectableDept('volunteers') && <option value="volunteers">Barangay Volunteers</option>}
-                        {isSelectableDept('medics') && <option value="medics">Medic Team</option>}
-                        {isSelectableDept('rescue') && <option value="rescue">Rescue Evacuation</option>}
+                        {isSelectableDept("bfp") && <option value="bfp">BFP Station</option>}
+                        {isSelectableDept("pnp") && <option value="pnp">PNP Maypajo</option>}
+                        {isSelectableDept("volunteers") && <option value="volunteers">Barangay Volunteers</option>}
+                        {isSelectableDept("medics") && <option value="medics">Medic Team</option>}
+                        {isSelectableDept("rescue") && <option value="rescue">Rescue Evacuation</option>}
                       </select>
                     </div>
                     <div>
@@ -960,8 +987,12 @@ export default function InterDepartmentView({ userRole, currentUser, language, t
                       <input 
                         type="number" 
                         required
+                        min={0}
                         value={deptPersonnel} 
-                        onChange={(e) => setDeptPersonnel(e.target.value)}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          setDeptPersonnel(isNaN(val) ? '' : Math.max(0, val));
+                        }}
                         className="w-full text-xs p-1.5 rounded border border-slate-300 bg-slate-50 text-slate-900 font-mono"
                       />
                     </div>
@@ -1024,15 +1055,26 @@ export default function InterDepartmentView({ userRole, currentUser, language, t
                         value={selectedDeptId} 
                         disabled={isDeptLocked}
                         onChange={(e) => setSelectedDeptId(e.target.value)}
-                        className={`w-full text-xs p-1.5 rounded border border-slate-300 bg-slate-50 text-slate-900 font-bold ${
+                        className={`w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded border border-slate-300 bg-slate-50 text-slate-900 font-bold ${
                           isDeptLocked ? 'opacity-85 cursor-not-allowed bg-slate-100 border-amber-400 text-amber-800' : 'cursor-pointer'
                         }`}
+                        style={{
+                          width: `calc(${
+                            ({
+                              "bfp": "BFP Station",
+                              "pnp": "PNP Maypajo",
+                              "volunteers": "Barangay Volunteers",
+                              "medics": "Medic Team",
+                              "rescue": "Rescue Evacuation"
+                            }[selectedDeptId] || selectedDeptId || '').length
+                          }ch + 3.5rem)`
+                        }}
                       >
-                        {isSelectableDept('bfp') && <option value="bfp">BFP Station</option>}
-                        {isSelectableDept('pnp') && <option value="pnp">PNP Maypajo</option>}
-                        {isSelectableDept('volunteers') && <option value="volunteers">Barangay Volunteers</option>}
-                        {isSelectableDept('medics') && <option value="medics">Medic Team</option>}
-                        {isSelectableDept('rescue') && <option value="rescue">Rescue Evacuation</option>}
+                        {isSelectableDept("bfp") && <option value="bfp">BFP Station</option>}
+                        {isSelectableDept("pnp") && <option value="pnp">PNP Maypajo</option>}
+                        {isSelectableDept("volunteers") && <option value="volunteers">Barangay Volunteers</option>}
+                        {isSelectableDept("medics") && <option value="medics">Medic Team</option>}
+                        {isSelectableDept("rescue") && <option value="rescue">Rescue Evacuation</option>}
                       </select>
                     </div>
                     <div>
@@ -1105,15 +1147,26 @@ export default function InterDepartmentView({ userRole, currentUser, language, t
                       value={selectedDeptId} 
                       disabled={isDeptLocked}
                       onChange={(e) => setSelectedDeptId(e.target.value)}
-                      className={`w-full text-xs p-1.5 rounded border border-slate-300 bg-slate-50 text-slate-900 font-bold ${
+                      className={`w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded border border-slate-300 bg-slate-50 text-slate-900 font-bold ${
                         isDeptLocked ? 'opacity-85 cursor-not-allowed bg-slate-100 border-amber-400 text-amber-800' : 'cursor-pointer'
                       }`}
+                      style={{
+                        width: `calc(${
+                          ({
+                            "bfp": "BFP Maypajo Substation",
+                            "pnp": "PNP Maypajo Police Precinct",
+                            "volunteers": "Barangay Fire Volunteers",
+                            "medics": "Red Cross Medical Hub",
+                            "rescue": "Evac & Rescue Dispatch"
+                          }[selectedDeptId] || selectedDeptId || '').length
+                        }ch + 3.5rem)`
+                      }}
                     >
-                      {isSelectableDept('bfp') && <option value="bfp">BFP Maypajo Substation</option>}
-                      {isSelectableDept('pnp') && <option value="pnp">PNP Maypajo Police Precinct</option>}
-                      {isSelectableDept('volunteers') && <option value="volunteers">Barangay Fire Volunteers</option>}
-                      {isSelectableDept('medics') && <option value="medics">Red Cross Medical Hub</option>}
-                      {isSelectableDept('rescue') && <option value="rescue">Evac & Rescue Dispatch</option>}
+                      {isSelectableDept("bfp") && <option value="bfp">BFP Maypajo Substation</option>}
+                      {isSelectableDept("pnp") && <option value="pnp">PNP Maypajo Police Precinct</option>}
+                      {isSelectableDept("volunteers") && <option value="volunteers">Barangay Fire Volunteers</option>}
+                      {isSelectableDept("medics") && <option value="medics">Red Cross Medical Hub</option>}
+                      {isSelectableDept("rescue") && <option value="rescue">Evac & Rescue Dispatch</option>}
                     </select>
                   </div>
                   <div>
@@ -1121,7 +1174,17 @@ export default function InterDepartmentView({ userRole, currentUser, language, t
                     <select 
                       value={logType} 
                       onChange={(e) => setLogType(e.target.value)}
-                      className="w-full text-xs p-1.5 rounded border border-slate-300 bg-slate-50 text-slate-900 font-bold"
+                      className="w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded border border-slate-300 bg-slate-50 text-slate-900 font-bold cursor-pointer"
+                      style={{
+                        width: `calc(${
+                          ({
+                            "info": "💡 General Info Update",
+                            "dispatch": "🚚 Deployment / Squad Move",
+                            "warning": "🚨 Major Hazard / Incident warning",
+                            "success": "✅ Goal Achieved / Hazard cleared"
+                          }[logType] || logType || '').length
+                        }ch + 3.5rem)`
+                      }}
                     >
                       <option value="info">💡 General Info Update</option>
                       <option value="dispatch">🚚 Deployment / Squad Move</option>
