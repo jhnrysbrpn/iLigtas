@@ -126,22 +126,22 @@ export default function DashboardView({
   });
 
   return (
-    <div id="main-dashboard-wrapper" className="space-y-10 selection:bg-red-500 selection:text-white pb-16">
+    <div id="main-dashboard-wrapper" className="w-full max-w-7xl mx-auto space-y-6 sm:space-y-8 lg:space-y-10 selection:bg-red-500 selection:text-white pb-12 sm:pb-16 px-3 sm:px-4 lg:px-6">
       
       {/* 🚀 SENIOR CITIZENS & EMERGENCY SIMULATION HELP TOGGLE */}
       <div 
         id="simplified-assistance-banner"
-        className="bg-red-600 outline-3 outline-red-700/60 p-5 rounded-3xl text-white shadow-lg space-y-4 shadow-red-900/10"
+        className="bg-red-600 outline-3 outline-red-700/60 p-4 sm:p-5 lg:p-6 rounded-3xl text-white shadow-lg space-y-4 shadow-red-900/10"
       >
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-white/10 rounded-2xl">
+            <div className="p-3 bg-white/10 rounded-2xl ring-1 ring-white/10">
               <PhoneCall className="w-8 h-8 text-white animate-bounce" />
             </div>
             <div>
               <span className="text-[10px] uppercase tracking-widest font-black bg-white/20 px-2.5 py-0.5 rounded-full">{t('gadgetFreeLabel') || 'GADGET-FREE ASSISTANCE'}</span>
               <h3 className="text-xl font-bold tracking-tight mt-1">{t('gadgetFreeHelp')}</h3>
-              <p className="text-xs text-red-100 max-w-xl">
+              <p className="text-xs text-red-50/95 max-w-xl leading-relaxed">
                 {t('gadgetFreeDesc')}
               </p>
             </div>
@@ -150,7 +150,7 @@ export default function DashboardView({
           <button
             id="toggle-simple-layout-btn"
             onClick={() => setIsSimpleMode(!isSimpleMode)}
-            className="w-full md:w-auto bg-slate-900 text-white hover:bg-slate-950 font-black text-xs uppercase px-5 py-3 rounded-full border-2 border-white/20 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer select-none"
+            className="w-full md:w-auto min-w-[180px] bg-slate-900 text-white hover:bg-slate-950 hover:-translate-y-0.5 font-black text-xs uppercase px-5 py-3 rounded-full border-2 border-white/20 transition-all duration-200 shadow-md flex items-center justify-center gap-2 cursor-pointer select-none"
           >
             {isSimpleMode ? (t('turnOffEasyMode') || '✨ Back') : (t('turnOnEasyMode') || '🚨 Easy Mode')}
           </button>
@@ -205,55 +205,52 @@ export default function DashboardView({
       </div>
 
       {/* 1. BRANDING HERO BANNER: CUSTOM FIRE SAFETY HERO BANNER POSTER */}
-      <div className="relative w-full h-50 xs:h-[250px] sm:h-85 md:h-107.5 mb-16 select-none">
+      <div className="relative w-full h-50 xs:h-[250px] sm:h-85 md:h-107.5 mb-18 sm:mb-16 select-none overflow-visible">
         {/* Rounded Border Background Container */}
         <section
-          className="w-full h-full rounded-2xl md:rounded-3xl border-2 border-slate-950/60 overflow-hidden bg-[url('/src/assets/images/HeroSectionBG.png')] bg-cover bg-[50%50%] bg-no-repeat shadow-xl"
+          className="relative w-full h-full rounded-2xl md:rounded-3xl border-2 border-slate-950/60 overflow-hidden bg-[url('/src/assets/images/HeroSectionBG.png')] bg-cover bg-center bg-no-repeat shadow-xl"
           aria-label="Report an issue hero section"
         >
-          {/* We do not overflow-hidden the outer parent so the button below can hang off of it! */}
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/35 via-slate-950/10 to-slate-950/25" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/20 via-transparent to-transparent" />
         </section>
 
-        {/* Custom Hanging Button overlaps the bottom of the section */}
-        <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 flex h-22 w-[466.5px] bg-[url(https://c.animaapp.com/NY6mIFxF/img/btn-shadow.svg)] bg-position-[100%_100%] z-10 scale-[0.55] xs:scale-[0.65] sm:scale-[0.85] md:scale-100 origin-bottom">
+        {/* Responsive CTA overlay that avoids cutting off on mobile */}
+        <div className="absolute inset-x-0 bottom-0 z-10 flex justify-center px-3 pb-2 sm:pb-0 sm:-bottom-10">
           <button
             type="button"
             onClick={() => setCurrentTab('report')}
-            className="ml-5.75 mt-0.5 flex h-18 w-105 items-center justify-center bg-[url(https://c.animaapp.com/NY6mIFxF/img/btn-holder.svg)] bg-position-[100%_100%] cursor-pointer active:scale-95 transition-all text-white"
+            className="relative flex h-14 w-full max-w-[420px] items-center justify-center gap-2 rounded-2xl bg-[url(https://c.animaapp.com/NY6mIFxF/img/btn-holder.svg)] bg-cover bg-center px-4 text-white shadow-lg transition-all duration-200 hover:-translate-y-0.5 active:scale-95 sm:h-18 sm:max-w-[460px] sm:gap-3 sm:rounded-3xl"
             aria-label="Report an issue"
           >
-            <span className="relative ml-7 h-12 w-73">
-              <span className="absolute left-0 top-[calc(50.00%-24px)] inline-flex h-11.5 w-11.5 items-center justify-center">
-                <img
-                  className="aspect-[1] h-11.5 w-11.5"
-                  alt=""
-                  aria-hidden="true"
-                  src="https://c.animaapp.com/NY6mIFxF/img/ant-design-alert-twotone.svg"
-                  referrerPolicy="no-referrer"
-                />
-              </span>
-              <span className="absolute left-[calc(50.00%-100px)] top-[calc(50.00%-14px)] w-61 whitespace-nowrap text-center font-['Jersey_25',Helvetica] text-[35px] font-normal leading-[normal] tracking-normal text-white">
-                REPORT AN ISSUE
-              </span>
+            <img
+              className="h-7 w-7 shrink-0 sm:h-11.5 sm:w-11.5"
+              alt=""
+              aria-hidden="true"
+              src="https://c.animaapp.com/NY6mIFxF/img/ant-design-alert-twotone.svg"
+              referrerPolicy="no-referrer"
+            />
+            <span className="font-['Jersey_25',Helvetica] text-[17px] leading-none whitespace-nowrap text-white sm:text-[28px] md:text-[35px]">
+              REPORT AN ISSUE
             </span>
           </button>
         </div>
       </div>
 
       {/* 2. FIRE PREPAREDNESS PROGRAMS */}
-      <section id="preparedness-programs-section" className="space-y-4 pt-4">
+      <section id="preparedness-programs-section" className="w-full space-y-4 pt-2 sm:pt-4">
         <h2 className="font-extrabold italic uppercase text-slate-950 text-2xl tracking-tight text-left">
           {t('preparednessProgramsTitle')}
         </h2>
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {programs.slice(0, 4).map((prog, index) => {
             const hasRegistered = registeredProgramsState[prog.id];
 
             return (
               <div 
                 key={prog.id} 
-                className="bg-[#EFF2FE]/65 border-2 border-slate-900/15 rounded-3xl overflow-hidden flex flex-col justify-between hover:scale-[1.01] hover:shadow-md transition-all"
+                className="min-w-0 bg-[#EFF2FE]/65 border-2 border-slate-900/15 rounded-3xl overflow-hidden flex flex-col justify-between hover:-translate-y-0.5 hover:shadow-lg transition-all duration-200"
               >
                 {/* Poster Graphic Header */}
                 <div className="relative aspect-4/3 bg-linear-to-br from-[#EA580C] via-[#FF6302] to-[#B83D00] overflow-hidden flex flex-col justify-between p-3 border-b-2 border-slate-900/10">
@@ -333,10 +330,10 @@ export default function DashboardView({
       </section>
 
       {/* 3. RECENT REPORTS (LEFT) & EARLY FIRE WARNINGS (RIGHT) */}
-      <div id="split-layout-reports-warnings" className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div id="split-layout-reports-warnings" className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 items-start">
         
         {/* RECENT REPORTS CARD (2 COLS) */}
-        <div className="lg:col-span-2 bg-[#E5E9FA] border-2 border-slate-900/15 p-5 sm:p-6 rounded-3xl space-y-4 shadow-sm text-left">
+        <div className="lg:col-span-2 min-w-0 bg-[#E5E9FA] border-2 border-slate-900/15 p-4 sm:p-5 lg:p-6 rounded-3xl space-y-4 shadow-sm shadow-slate-900/5 text-left">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-2 border-b border-slate-900/10">
             <h2 className="font-extrabold italic uppercase text-slate-950 text-xl tracking-tight">
               {t('recentReportsTitle') || 'Recent Reports'}
@@ -443,7 +440,7 @@ export default function DashboardView({
         </div>
 
         {/* EARLY FIRE WARNINGS CARD (1 COL) */}
-        <div className="bg-[#E5E9FA] border-2 border-slate-900/15 p-5 sm:p-6 rounded-3xl flex flex-col justify-between space-y-4 shadow-sm text-left">
+        <div className="min-w-0 bg-[#E5E9FA] border-2 border-slate-900/15 p-4 sm:p-5 lg:p-6 rounded-3xl flex flex-col justify-between space-y-4 shadow-sm shadow-slate-900/5 text-left">
           <div className="space-y-4">
             <div className="flex items-center justify-between pb-2 border-b border-slate-900/10">
               <h2 className="font-extrabold italic uppercase text-slate-950 text-xl tracking-tight">
@@ -455,7 +452,7 @@ export default function DashboardView({
             </div>
 
             {/* List of Warnings */}
-            <div className="space-y-3 max-h-72.5 overflow-y-auto pr-1">
+            <div className="space-y-3 max-h-[18rem] overflow-y-auto pr-1">
               {alerts.filter(a => a.isActive).map((alert) => (
                 <div 
                   key={alert.id}
@@ -494,7 +491,7 @@ export default function DashboardView({
           <button
             id="open-gobag-planner-btn"
             onClick={() => setCurrentTab('gobag')}
-            className="w-full bg-[#EAEDFC] hover:bg-slate-950 hover:text-white text-slate-900 font-extrabold py-3.5 px-4 rounded-xl border border-slate-400 hover:border-slate-950 transition-colors text-xs tracking-wider uppercase shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full bg-[#EAEDFC] hover:bg-slate-950 hover:text-white text-slate-900 font-extrabold py-3.5 px-4 rounded-xl border border-slate-400 hover:border-slate-950 transition-all duration-200 text-xs tracking-wider uppercase shadow-sm flex items-center justify-center gap-2 cursor-pointer"
           >
             <Shield className="w-4 h-4 text-red-500 shrink-0 animate-pulse" />
             {t('goBagPlannerBtn') || 'Go BAG Planner'}
@@ -503,12 +500,12 @@ export default function DashboardView({
       </div>
 
       {/* 5. COMMUNITY DASHBOARD WITH ASSISTANCE CONTROLS */}
-      <section id="community-dashboard-card" className="space-y-4">
+      <section id="community-dashboard-card" className="w-full space-y-4">
         <h2 className="font-extrabold italic uppercase text-slate-950 text-2xl tracking-tight">
           Community Dashboard
         </h2>
         
-        <div className="bg-[#E5E9FA] border-2 border-slate-900/15 p-5 sm:p-6 rounded-3xl space-y-6 shadow-sm">
+        <div className="min-w-0 bg-[#E5E9FA] border-2 border-slate-900/15 p-4 sm:p-5 lg:p-6 rounded-3xl space-y-6 shadow-sm shadow-slate-900/5">
           <div>
             <span className="text-[10px] font-bold text-slate-600 tracking-wider font-mono">INCIDENT LOGS & ASSISTANCE</span>
             <hr className="mt-1.5 border-slate-900/10" />
@@ -517,7 +514,7 @@ export default function DashboardView({
           <div className="flex flex-col gap-4">
             
             {/* ITEM 1: MY REPORTS TRACKER */}
-            <div className="p-4 bg-white border border-slate-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="p-4 bg-white border border-slate-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 min-w-0 shadow-sm shadow-slate-900/5">
               <div>
                 <h3 className="text-md font-extrabold text-slate-900 italic uppercase">
                   My Reports Tracker
@@ -546,7 +543,7 @@ export default function DashboardView({
             </div>
 
             {/* ITEM 2: LIVE COMMUNITY FIRE TRACKER */}
-            <div className="p-4 bg-white border border-slate-300 rounded-2xl space-y-3">
+            <div className="p-4 bg-white border border-slate-300 rounded-2xl space-y-3 min-w-0 shadow-sm shadow-slate-900/5">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-md font-extrabold text-slate-900 italic uppercase">
@@ -623,7 +620,7 @@ export default function DashboardView({
             </div>
 
             {/* ITEM 3: RELIEF GOODS TRACKER (MUTATION) */}
-            <div className="p-4 bg-white border border-slate-300 rounded-2xl space-y-3">
+            <div className="p-4 bg-white border border-slate-300 rounded-2xl space-y-3 min-w-0 shadow-sm shadow-slate-900/5">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-md font-extrabold text-[#0d1222] italic uppercase">
@@ -643,7 +640,7 @@ export default function DashboardView({
               </div>
 
               {showReliefTracker && (
-                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 animate-fade-in text-slate-800 max-h-75flow-y-auto">
+                <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 animate-fade-in text-slate-800 max-h-[24rem] overflow-y-auto">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <p className="font-extrabold font-mono text-xs text-slate-700">🚒 ACTIVE RELIEF SUPPLIES IN PORTAL:</p>
@@ -680,7 +677,7 @@ export default function DashboardView({
             </div>
 
             {/* ITEM 4: PROPERTY DAMAGE ASSISTANCE FORM (MUTATION) */}
-            <div className="p-4 bg-white border border-slate-300 rounded-2xl space-y-3">
+            <div className="p-4 bg-white border border-slate-300 rounded-2xl space-y-3 min-w-0 shadow-sm shadow-slate-900/5">
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                   <h3 className="text-md font-extrabold text-[#0d1222] italic uppercase">
