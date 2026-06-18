@@ -3,8 +3,8 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "build": "cd iLigtas-main/client && npm install && npm run build && rm -rf ../../dist && cp -r dist ../../dist",
-    "dev": "cd iLigtas-main/client && npm install && npm run dev",
-    "lint": "cd iLigtas-main/client && npm run lint"
+    "build": "cd client && npm install && npm run build && rm -rf ../dist && cp -r dist ../dist",
+    "dev": "cd client && npm install && npm run dev",
+    "lint": "cd client && npm run lint"
   }
 }
