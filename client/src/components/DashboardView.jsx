@@ -743,10 +743,11 @@ export default function DashboardView({
                           type="number"
                           required
                           min={0}
+                          max={5000000000}
                           value={damageAmount}
                           onChange={(e) => {
                             const val = parseInt(e.target.value);
-                            setDamageAmount(isNaN(val) ? '' : Math.max(0, val));
+                            setDamageAmount(isNaN(val) ? '' : Math.min(5000000000, Math.max(0, val)));
                           }}
                           placeholder="e.g., 45000"
                           className="w-full bg-white border rounded p-2 text-xs text-slate-900 border-slate-300"

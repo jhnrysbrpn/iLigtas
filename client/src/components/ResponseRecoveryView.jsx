@@ -256,10 +256,11 @@ export default function ResponseRecoveryView({
                           type="number"
                           required
                           min={0}
+                          max={50}
                           value={familyMembers}
                           onChange={(e) => {
                             const val = parseInt(e.target.value);
-                            setFamilyMembers(isNaN(val) ? '' : Math.max(0, val));
+                            setFamilyMembers(isNaN(val) ? '' : Math.min(50, Math.max(0, val)));
                           }}
                           className="mt-1 w-full text-xs p-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
                         />
