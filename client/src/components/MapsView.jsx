@@ -25,7 +25,6 @@ export default function MapsView({
   
   // Search state for Purok/hazard Lists
   const [searchQuery, setSearchQuery] = useState('');
-  const [mapSearchQuery, setMapSearchQuery] = useState('');
   const [ticketSearchQuery, setTicketSearchQuery] = useState('');
   const [ticketStatusFilter, setTicketStatusFilter] = useState('All');
 
@@ -173,7 +172,7 @@ export default function MapsView({
           id: hyd.name,
           name: `${hyd.name} - Fire Hydrant Point`,
           type: 'hydrant',
-          description: `Crucial municipal firefighting installation located on the street path. Standby pressure: ${hyd.status === 'Operational' ? 'Optimal 60 PSI' : 'Decreased 15 PSI'}. Checked and verified by Bureau of Fire Protection volunteers.`,
+          description: `Crucial municipal firefighting installation located on the street path. Standby pressure: ${hyd.status === 'Operational' ? 'Optimal 60 PSI' : 'Decreased 15 PSI'}. Checked and verified by Bureau of Fire Protection.`,
           lat: hyd.lat,
           lng: hyd.lng,
           status: hyd.status
@@ -283,20 +282,8 @@ export default function MapsView({
       {/* 1. CONTAINER COMPONENT STYLED EXACTLY TO MATCH SCREENSHOT 1 */}
       <div className="bg-[#E5E9FA] border-2 border-slate-900/15 p-5 md:p-6 rounded-3xl grid grid-cols-1 lg:grid-cols-4 gap-6 shadow-sm">
         
-        {/* Left column is Search box, Map, and Centered Label "MAP", with Legend underneath */}
+        {/* Left column is Map, and Centered Label "MAP", with Legend underneath */}
         <div className="lg:col-span-3 space-y-4">
-          
-          {/* SEARCH BAR CAPSULATION IN WEST BLOCK */}
-          <div className="relative w-full">
-            <Search className="absolute left-3.5 top-3 w-4 h-4 text-slate-500" />
-            <input
-              type="text"
-              placeholder="search bar"
-              value={mapSearchQuery}
-              onChange={(e) => setMapSearchQuery(e.target.value)}
-              className="w-full bg-[#EAEDFC] border border-slate-300 focus:border-slate-500 rounded-full py-2.5 pl-10 pr-4 text-xs text-slate-800 placeholder-slate-500 font-medium focus:outline-none flex items-center transition-all shadow-xs"
-            />
-          </div>
 
           {/* Map Frame wrapper with border-2 rounded */}
           <div className="rounded-2xl border-2 border-slate-400 bg-white overflow-hidden relative">
@@ -304,7 +291,7 @@ export default function MapsView({
               id="leaflet-interactive-map-frame" 
               ref={mapContainerRef} 
               className="w-full z-10"
-              style={{ height: '350px' }}
+              style={{ height: '550px' }}
             />
           </div>
 
@@ -330,14 +317,18 @@ export default function MapsView({
               <span>Tangled Wires</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="w-4.5 h-4.5 rounded-full bg-linear-to-tr from-red-500 to-orange-400 border border-white shrink-0 block animate-pulse" />
-              <span className="text-orange-700">🔴 Fire Prone Areas</span>
+              <span className="w-4.5 h-4.5 rounded-full bg-[#f97316] border border-white shrink-0 block animate-pulse" />
+              <span>Extreme Fire Risk Spot</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-8 h-4 rounded border-2 border-dashed border-[#f97316] bg-[#ef4444]/25 shrink-0 block" />
+              <span className="text-orange-700">🟠 Fire Prone Zone (Orange Range)</span>
             </div>
           </div>
         </div>
 
         {/* Right column sidebar containing SEARCH and STREET LIST */}
-        <div className="lg:col-span-1 flex flex-col justify-between h-120 bg-[#EFF2FE] border border-slate-300 p-4 rounded-2xl relative">
+        <div className="lg:col-span-1 flex flex-col justify-between bg-[#EFF2FE] border border-slate-300 p-4 rounded-2xl relative" style={{ height: '640px' }}>
           <div className="space-y-4 overflow-y-auto flex-1 pr-1">
             
             {/* Search Street capsule */}
@@ -455,18 +446,7 @@ export default function MapsView({
             <select
               value={ticketStatusFilter}
               onChange={(e) => setTicketStatusFilter(e.target.value)}
-              className="bg-white border border-slate-300 rounded-full py-1.5 px-3 pr-10 h-auto whitespace-normal wrap-break-word text-xs text-slate-800 focus:outline-none w-fit max-w-full cursor-pointer"
-              style={{
-                width: `calc(${
-                  ({
-                    "All": "All Statuses",
-                    [IncidentStatus.PENDING]: "Pending",
-                    [IncidentStatus.VERIFIED]: "Verified",
-                    [IncidentStatus.DISPATCHED]: "Dispatched",
-                    [IncidentStatus.RESOLVED]: "Resolved"
-                  }[ticketStatusFilter] || ticketStatusFilter || '').length
-                }ch + 3.5rem)`
-              }}
+              className="bg-white border border-slate-300 rounded-full py-1.5 px-3 h-auto whitespace-normal break-words text-xs text-slate-800 focus:outline-none w-full sm:w-auto min-w-[130px] max-w-full cursor-pointer hover:bg-slate-50"
             >
               <option value="All">All Statuses</option>
               <option value={IncidentStatus.PENDING}>Pending</option>
@@ -585,17 +565,7 @@ export default function MapsView({
                         <select
                           value={report.status}
                           onChange={(e) => onUpdateReportStatus(report.id, e.target.value)}
-                          className="w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded border border-rose-400 bg-amber-50 font-bold text-slate-900 focus:outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer"
-                          style={{
-                            width: `calc(${
-                              ({
-                                [IncidentStatus.PENDING]: "Pending Report (Awaiting action)",
-                                [IncidentStatus.VERIFIED]: "Verified Hazard (Confirmed)",
-                                [IncidentStatus.DISPATCHED]: "Responder Dispatched (On route)",
-                                [IncidentStatus.RESOLVED]: "Resolved (Declared Clean / Safe)"
-                              }[report.status] || report.status || '').length
-                            }ch + 3.5rem)`
-                          }}
+                          className="w-full text-xs py-2 px-3 h-auto whitespace-normal break-words rounded border border-rose-400 bg-amber-50 font-bold text-slate-950 focus:outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer hover:bg-amber-100/50"
                         >
                           <option value={IncidentStatus.PENDING}>Pending Report (Awaiting action)</option>
                           <option value={IncidentStatus.VERIFIED}>Verified Hazard (Confirmed)</option>

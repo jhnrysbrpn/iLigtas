@@ -401,11 +401,11 @@ export default function GoBagPlannerView({ setCurrentTab, onTriggerSOS }) {
                   }}
                   className={`flex items-center gap-3 py-2.5 px-3.5 rounded-2xl text-left transition-all text-xs font-bold shrink-0 cursor-pointer ${
                     isActive 
-                      ? 'bg-white text-indigo-950 shadow-sm border-l-4 border-indigo-650 font-black' 
-                      : 'hover:bg-white/50 text-slate-650'
+                      ? 'bg-white text-indigo-950 shadow-sm border-l-4 border-indigo-600 font-black' 
+                      : 'hover:bg-white/50 text-slate-600'
                   }`}
                 >
-                  <IconComp className={`w-4 h-4 ${isActive ? 'text-indigo-650' : 'text-slate-400'}`} />
+                  <IconComp className={`w-4 h-4 ${isActive ? 'text-indigo-600' : 'text-slate-400'}`} />
                   <span className="truncate flex-1">{cat.name}</span>
                   {catTotal > 0 && (
                     <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${
@@ -491,7 +491,7 @@ export default function GoBagPlannerView({ setCurrentTab, onTriggerSOS }) {
                               ? prio === 'Urgent' ? 'bg-red-500 border-red-600 text-white font-black'
                                 : prio === 'Important' ? 'bg-amber-400 border-amber-500 text-slate-950 font-black'
                                 : 'bg-slate-500 border-slate-600 text-white font-black'
-                              : 'bg-white text-slate-650 hover:bg-slate-100 border-slate-205'
+                              : 'bg-white text-slate-600 hover:bg-slate-100 border-slate-205'
                           }`}
                         >
                           {prio}

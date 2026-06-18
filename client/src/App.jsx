@@ -243,12 +243,14 @@ export default function App() {
   }, [distributions]);
 
   // MUTATION WORKFLOW 1: Direct SOS Panic Trigger Action
-  const handleTriggerSOS = (category, locationName, notes) => {
+  const handleTriggerSOS = (category, locationName, notes, waterLevel = 'Adequate', taskUrgency = 'High', fireAlarmLevel = 'First Alarm') => {
+    const finalDescription = notes && notes.trim() !== '' ? notes : 'cause: Under Investigation';
+
     const newReport = {
       id: `rep-sos-${Date.now()}`,
       category,
       title: `⚡ SOS DISTRESS: ${category} reported at ${locationName}`,
-      description: notes,
+      description: finalDescription,
       reporterName: 'Resident SOS Emergency Trigger',
       reporterPhone: '0911-SOS-911',
       locationName,
@@ -257,12 +259,15 @@ export default function App() {
       status: IncidentStatus.DISPATCHED, // Instantly dispatched in simulated command
       priority: PriorityLevel.HIGH,
       timestamp: new Date().toISOString(),
+      waterLevel,
+      taskUrgency,
+      fireAlarmLevel,
       comments: [
         {
           id: `comm-sos-${Date.now()}`,
           author: 'BDRRMC Autonomous Command',
           role: 'Admin',
-          text: '⚡ EMERGENCY SOS DETECTED! Responders and paramedic sirens dispatched to location immediately.',
+          text: `⚡ EMERGENCY SOS DETECTED! Water Level Supply: ${waterLevel}. Urgency: ${taskUrgency}. Alarm Level: ${fireAlarmLevel}. Responders and paramedic sirens dispatched. Detail cause: ${finalDescription}`,
           timestamp: new Date().toISOString()
         }
       ],
@@ -293,7 +298,7 @@ export default function App() {
         id: `sos-warn-${Date.now()}`,
         time: timeNow,
         departmentId: 'rescue',
-        message: `🚨 EMERGENCY RESIDENT SOS ALARM: [${category}] threat reported at [Locator: ${locationName}]. Coordinates Broadcasted!`,
+        message: `🚨 RESIDENT SOS: [${category}] at [${locationName}]. [Water: ${waterLevel}] [Urgency: ${taskUrgency}] [Alarm: ${fireAlarmLevel}] - Details: ${finalDescription}`,
         type: 'warning'
       };
 
@@ -301,7 +306,7 @@ export default function App() {
         id: `sos-disp-${Date.now()}`,
         time: timeNow,
         departmentId: 'bfp',
-        message: `🚚 DIPLOMATIC FAST ACTION: Joint forces of BFP Engines and Barangay Volunteer Brigades dispatched to [${locationName}] instantly.`,
+        message: `🚚 BFP RESPONSE: Engaged with [Fire Alarm: ${fireAlarmLevel}] at [${locationName}]. Water supply: ${waterLevel}.`,
         type: 'dispatch'
       };
 
@@ -309,7 +314,7 @@ export default function App() {
         id: `sos-rescue-${Date.now()}`,
         time: timeNow,
         departmentId: 'rescue',
-        message: `🚑 FIRST-AID SUPPORT: Barangay Rescue Squad & Medics mobilized to [${locationName}] for perimeter triaging and resident shelter evac.`,
+        message: `🚑 MEDICAL DEPLOYMENT: Urgency [${taskUrgency}] triggered. Ambulance and evacuation squads heading to [${locationName}] instantly.`,
         type: 'success'
       };
 
@@ -340,63 +345,71 @@ export default function App() {
             status: 'Conducting House Sweep Search',
             color: 'border-indigo-500 bg-indigo-50/50 hover:bg-indigo-50',
             deployments: []
-          },
-          {
-            id: 'volunteers',
-            name: 'Barangay 35 Fire Volunteer Brigade',
-            leader: 'Captain Noel Aguilar',
-            personnelActive: 15,
-            status: 'Operating Aux Dry Standpipes',
-            color: 'border-orange-500 bg-orange-50/50 hover:bg-orange-50',
-            deployments: []
           }
         ];
       }
 
       const updatedDepts = currentDepts.map((dept) => {
         if (dept.id === 'bfp') {
+          const bfpAssetPool = [
+            'BFP SOS Fast-Response Engine 4',
+            'BFP Support Tanker 1',
+            'BFP Specialized Pumper Truck 8',
+            'BFP Escalation Ladder 12',
+            'BFP Water Tanker 3'
+          ];
+          const bfpCount = (dept.deployments || []).length;
+          const assignedName = bfpAssetPool[bfpCount % bfpAssetPool.length];
+
           return {
             ...dept,
             status: `Suppressing active SOS report at ${locationName}`,
             deployments: [
               {
                 id: `dep-sos-bfp-${Date.now()}`,
-                teamName: 'BFP SOS Fast-Response Engine 4',
+                teamName: assignedName,
                 location: locationName,
                 task: `Immediate containment and extinguishing of reported ${category.toLowerCase()} crisis.`,
-                timeSent: timeNow
+                timeSent: timeNow,
+                fireAlarmLevel: fireAlarmLevel,
+                taskUrgency: taskUrgency,
+                waterLevel: waterLevel,
+                timelineHistory: [
+                  `${timeNow} - Dispatched ➡️ En route`,
+                  `${timeNow} - Active Suppression Initiated`
+                ]
               },
               ...(dept.deployments || [])
             ]
           };
         }
         if (dept.id === 'rescue') {
+          const rescueAssetPool = [
+            'Barangay Rescue Quick-Alpha Squad',
+            'Maypajo Medical Ambulance 2',
+            'Barangay House Sweep Team Bravo',
+            'BDRRMC Rescue Action Squad 1'
+          ];
+          const rescueCount = (dept.deployments || []).length;
+          const assignedName = rescueAssetPool[rescueCount % rescueAssetPool.length];
+
           return {
             ...dept,
             status: `Evacuation and shelter transport at ${locationName}`,
             deployments: [
               {
                 id: `dep-sos-rescue-${Date.now()}`,
-                teamName: 'Barangay Rescue Quick-Alpha Squad',
+                teamName: assignedName,
                 location: locationName,
                 task: `Sweeping sector, guiding families to primary evac centers, and administering emergency aid.`,
-                timeSent: timeNow
-              },
-              ...(dept.deployments || [])
-            ]
-          };
-        }
-        if (dept.id === 'volunteers') {
-          return {
-            ...dept,
-            status: `Auxiliary water connection at ${locationName}`,
-            deployments: [
-              {
-                id: `dep-sos-vol-${Date.now()}`,
-                teamName: 'Volunteer Standby Hose Crew C',
-                location: locationName,
-                task: `Connecting backup water tanker lines, securing local dry standpipes, and perimeter guidance.`,
-                timeSent: timeNow
+                timeSent: timeNow,
+                fireAlarmLevel: fireAlarmLevel,
+                taskUrgency: taskUrgency,
+                waterLevel: waterLevel,
+                timelineHistory: [
+                  `${timeNow} - Dispatched ➡️ Mobilizing Medics`,
+                  `${timeNow} - Active Evacuation Launch`
+                ]
               },
               ...(dept.deployments || [])
             ]
@@ -576,11 +589,55 @@ export default function App() {
     setDistributions([newDist, ...distributions]);
   };
 
+  const archiveDeletedItem = (category, item) => {
+    try {
+      const saved = localStorage.getItem('bdrrmc_archives_v1');
+      let archivesObj = { users: [], reports: [], alerts: [], programs: [] };
+      if (saved) {
+        try {
+          archivesObj = JSON.parse(saved);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+      
+      const newArchiveRecord = {
+        id: item.id || `rec-${Date.now()}`,
+        type: category.slice(0, -1).toUpperCase(), // strip plural 's'
+        name: item.title || item.locationName || item.message || `Deleted ${category}`,
+        details: item,
+        history: [
+          {
+            action: `${category.slice(0, -1).toUpperCase()} Deleted & Archived`,
+            timestamp: new Date().toISOString(),
+            details: `Entity [ID: ${item.id}] deleted and committed to coldbase under Category: ${category}.`
+          }
+        ],
+        archivedAt: new Date().toISOString(),
+        deletedBy: currentUser?.name || 'Administrator'
+      };
+
+      archivesObj[category] = [newArchiveRecord, ...(archivesObj[category] || [])];
+      localStorage.setItem('bdrrmc_archives_v1', JSON.stringify(archivesObj));
+      window.dispatchEvent(new CustomEvent('bdrrmc-archives-updated'));
+    } catch (e) {
+      console.error('Archival insertion failed:', e);
+    }
+  };
+
   const handleDeleteReport = (id) => {
+    const reportToArchive = reports.find(r => r.id === id);
+    if (reportToArchive) {
+      archiveDeletedItem('reports', reportToArchive);
+    }
     setReports(prev => prev.filter(r => r.id !== id));
   };
 
   const handleDeleteAlert = (id) => {
+    const alertToArchive = alerts.find(a => a.id === id);
+    if (alertToArchive) {
+      archiveDeletedItem('alerts', alertToArchive);
+    }
     setAlerts(prev => prev.filter(a => a.id !== id));
   };
 
@@ -619,7 +676,7 @@ export default function App() {
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
           onTriggerSOS={handleTriggerSOS}
-          activeExtremeAlertsExist={activeExtremeAlertsExist}
+          alerts={alerts}
         />
 
         {/* COMPONENT TAB DETECTOR RENDER VIEWS */}

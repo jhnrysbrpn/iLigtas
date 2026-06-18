@@ -39,21 +39,18 @@ export default function AlertsView({
     'BDRRMC SMS: [3:15 PM] Purok 3 Fire safety seminar reminder sent successfully to 120 registered students and parents.'
   ]);
 
-  const isVolunteer = currentUser?.department?.toLowerCase() === 'volunteers';
   const isResident = userRole === 'Resident';
-  const isPublicViewer = isResident || isVolunteer;
+  const isPublicViewer = isResident;
   const isAdmin = userRole === 'Admin' || userRole === 'SuperAdmin';
 
-  const canConfigurePublicBroadcast = isAdmin && currentUser?.department?.toLowerCase() !== 'volunteers';
+  const canConfigurePublicBroadcast = isAdmin;
 
   const getDeptNameFromKey = (deptKey) => {
     if (!deptKey) return 'Municipal Emergency Command Unit';
     switch (deptKey.toLowerCase()) {
       case 'bfp': return 'Bureau of Fire Protection (BFP) Maypajo';
-      case 'pnp': return 'Philippine National Police (PNP) Maypajo';
       case 'medics': return 'Maypajo Health & Red Cross Medic Unit';
       case 'rescue': return 'Barangay Rescue & Evacuation Squad';
-      case 'volunteers': return 'Barangay 35 Fire Volunteer Brigade';
       default: return deptKey.toUpperCase();
     }
   };
@@ -61,8 +58,8 @@ export default function AlertsView({
   const canModifyAlert = (alert) => {
     if (isPublicViewer) return false;
     if (!isAdmin) return false;
-    if (!currentUser?.department || currentUser.department.toLowerCase() === 'rescue') return true; 
-    return alert.department === currentUser.department;
+    if (!currentUser?.department || currentUser?.department?.toLowerCase() === 'system') return true; 
+    return alert.department?.toLowerCase() === currentUser.department.toLowerCase();
   };
 
   const handleStartEditAlert = (alert) => {
@@ -180,7 +177,7 @@ export default function AlertsView({
               Modify Broadcaster Portal Access
             </h3>
             <p className="text-[11px] text-slate-300 leading-relaxed font-sans max-w-xl">
-              Toggling public access changes the portal tab name to <strong className="text-yellow-400">"Broadcast"</strong>, making it fully visible to Residents and Volunteers. Controls and sensitive SMS log gateways are automatically hidden for their read-only safety view.
+              Toggling public access changes the portal tab name to <strong className="text-yellow-400">"Broadcast"</strong>, making it fully visible to Residents. Controls and sensitive SMS log gateways are automatically hidden for their read-only safety view.
             </p>
           </div>
           <button
@@ -257,17 +254,7 @@ export default function AlertsView({
                       disabled={!isAdmin}
                       value={severity}
                       onChange={(e) => setSeverity(e.target.value)}
-                      className="mt-1 w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer"
-                      style={{
-                        width: `calc(${
-                          (severity === 'Extreme Danger' || severity === 'EXTREME'
-                            ? '🔴 Extreme Danger / Critical Evacuation (Immediate Evacuation)'
-                            : severity === 'Warning' || severity === 'WARNING'
-                              ? '🟡 Warning Level / Alert Preparation (Be Prepared)'
-                              : '🔵 Advisory Level / General Monitoring (General Advisory)'
-                          ).length
-                        }ch + 3rem)`
-                      }}
+                      className="mt-1 w-full text-xs py-2 px-3 h-auto whitespace-normal break-words rounded-lg border border-slate-300 bg-slate-50 text-slate-900 disabled:opacity-60 disabled:cursor-not-allowed cursor-pointer hover:bg-slate-100/50"
                     >
                       <option value={AlertSeverity.EXTREME}>🔴 Extreme Danger / Critical Evacuation (Immediate Evacuation)</option>
                       <option value={AlertSeverity.WARNING}>🟡 Warning Level / Alert Preparation (Be Prepared)</option>
@@ -325,7 +312,7 @@ export default function AlertsView({
                   <div className="space-y-2 pt-1.5 flex flex-col">
                     <button
                       type="submit"
-                      className="w-full py-2.5 rounded-lg bg-indigo-650 hover:bg-slate-900 text-white font-extrabold text-xs shadow hover:shadow-md transition-all active:scale-95 text-center cursor-pointer uppercase"
+                      className="w-full py-2.5 rounded-lg bg-indigo-600 hover:bg-slate-900 text-white font-extrabold text-xs shadow hover:shadow-md transition-all active:scale-95 text-center cursor-pointer uppercase"
                     >
                       {editingAlertId ? 'Save Changes' : 'Send Live Broadcast'}
                     </button>
@@ -357,11 +344,11 @@ export default function AlertsView({
             <div className="space-y-2 text-[10px] font-mono text-slate-600 pt-1.5 border-t border-slate-200">
               <div className="flex items-start gap-1.5">
                 <span className="text-rose-600 font-black">● ONE LONG BLAST (30s):</span>
-                <span className="font-medium">Flood / Fire Advisory - Gather Go-Bags and prepare for fast evacuation.</span>
+                <span className="font-medium">Active Smoke / Fire Advisory - Gather Go-Bags and prepare for fast evacuation.</span>
               </div>
               <div className="flex items-start gap-1.5">
                 <span className="text-red-600 font-black">● CONTINUOUS BLASTS:</span>
-                <span className="font-medium">EVACUATION NOW! Fire or flood hazards threatening your immediate sector.</span>
+                <span className="font-medium">EVACUATION NOW! Fire or electrical sparking hazards threatening your immediate sector.</span>
               </div>
               <div className="flex items-start gap-1.5">
                 <span className="text-emerald-600 font-black">● TWO SHORT BLASTS:</span>
@@ -402,12 +389,7 @@ export default function AlertsView({
               <select
                 value={selectedSeverity}
                 onChange={(e) => setSelectedSeverity(e.target.value)}
-                className="text-xs py-1.5 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-705 font-medium w-fit max-w-full cursor-pointer"
-                style={{
-                  width: `calc(${
-                    (selectedSeverity === 'All' ? 'All Warning Levels' : selectedSeverity).length
-                  }ch + 3rem)`
-                }}
+                className="text-xs py-1.5 px-3 h-auto whitespace-normal break-words rounded-lg border border-slate-300 bg-slate-50 text-slate-950 font-medium w-full sm:w-auto min-w-[150px] max-w-full cursor-pointer hover:bg-slate-100/50"
               >
                 <option value="All">All Warning Levels</option>
                 <option value="Extreme Danger">Extreme Danger</option>
@@ -435,9 +417,9 @@ export default function AlertsView({
                   stripeClass = 'bg-amber-500';
                   badgeClass = 'bg-amber-100 text-amber-950 border border-amber-300';
                 } else if (isAdvisory) {
-                  cardBgClass = 'bg-blue-50/20 border-blue-200 text-slate-850';
-                  stripeClass = 'bg-blue-500';
-                  badgeClass = 'bg-blue-50 text-blue-900 border border-blue-200';
+                  cardBgClass = 'bg-indigo-50/40 border-indigo-200 text-slate-900';
+                  stripeClass = 'bg-indigo-500';
+                  badgeClass = 'bg-indigo-50 text-indigo-900 border border-indigo-200';
                 }
 
                 return (
