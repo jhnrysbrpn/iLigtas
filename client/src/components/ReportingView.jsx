@@ -124,6 +124,10 @@ export default function ReportingView({
   const handleSmsSubmit = (e) => {
     e.preventDefault();
     if (!smsPhone || !smsName) return;
+
+    const normalizedPhone = smsPhone.replace(/\D/g, '');
+    if (!/^09\d{9}$/.test(normalizedPhone)) return;
+
     setSmsRegistered(true);
     setTimeout(() => {
       setSmsRegistered(false);
@@ -424,11 +428,22 @@ export default function ReportingView({
                 </div>
                 <div>
                   <input
-                    type="tel"
+                    type="text"
+                    inputMode="numeric"
                     required
+                    maxLength={11}
+                    pattern="09[0-9]{9}"
                     value={smsPhone}
-                    onChange={(e) => setSmsPhone(e.target.value)}
-                    placeholder="Mobile Contact Numbers (0917-XXX-XXXX)"
+                    onChange={(e) => {
+                      const digits = e.target.value.replace(/\D/g, '').slice(0, 11);
+                      const nextValue = digits.startsWith('09') || digits.length === 0
+                        ? digits
+                        : digits.startsWith('9')
+                          ? `0${digits}`
+                          : `09${digits}`;
+                      setSmsPhone(nextValue.slice(0, 11));
+                    }}
+                    placeholder="09XXXXXXXXX"
                     className="w-full text-xs p-2.5 rounded bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-indigo-400 font-mono"
                   />
                 </div>

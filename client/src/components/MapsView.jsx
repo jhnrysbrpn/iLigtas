@@ -418,18 +418,18 @@ export default function MapsView({
               BDRRMC FIRE HAZARD RECORD LOGS & DISPATCH STATUS
             </h3>
             <p className="text-xs text-slate-700 leading-normal mt-0.5">
-              Active incident registry of Barangay 35. Only the <strong className="text-orange-700 uppercase font-mono">System Admin</strong> is authorized to edit ticket dispatch status.
+              Active incident registry of Barangay 35. Only the <strong className="text-orange-700 uppercase font-mono">System Admin</strong> or <strong className="text-orange-700 uppercase font-mono">Barangay SuperAdmin</strong> is authorized to edit ticket dispatch status.
             </p>
           </div>
           
           {/* Active Status privilege Badge */}
           <div className="shrink-0">
             <span className={`px-3 py-1 text-[10px] font-mono font-bold rounded-full border ${
-              userRole === 'Admin' 
+              userRole === 'Admin' || userRole === 'SuperAdmin'
                 ? 'bg-amber-100 text-amber-800 border-amber-300' 
                 : 'bg-slate-100 text-slate-600 border-slate-300'
             }`}>
-              👤 Privilege Level: <span className="uppercase">{userRole}</span> {userRole === 'Admin' ? '• AUTHORIZED' : '• READ-ONLY'}
+              👤 Privilege Level: <span className="uppercase">{userRole}</span> {(userRole === 'Admin' || userRole === 'SuperAdmin') ? '• AUTHORIZED' : '• READ-ONLY'}
             </span>
           </div>
         </div>
@@ -577,7 +577,7 @@ export default function MapsView({
 
                   {/* interactive Dropdown Selector for Admin ONLY */}
                   <div className="w-full">
-                    {userRole === 'Admin' ? (
+                    {(userRole === 'Admin' || userRole === 'SuperAdmin') ? (
                       <div className="space-y-1">
                         <label className="block text-[10px] uppercase font-black text-rose-700 tracking-tight">
                           ⚙️ ADMIN ADVANCED DISPATCH STATUS:
@@ -605,7 +605,7 @@ export default function MapsView({
                       </div>
                     ) : (
                       <div className="p-2 border border-slate-300 bg-slate-100 rounded-xl text-[10px] text-slate-500 text-center font-bold">
-                        🔒 Dropdown Locked. Only Admin privilege level is authorized to edit dispatch status codes.
+                        🔒 Dropdown Locked. Only System Admin or Barangay SuperAdmin privilege levels are authorized to edit dispatch status codes.
                       </div>
                     )}
                   </div>

@@ -394,9 +394,10 @@ export default function AuthModal({
                   <div className="bg-blue-50/95 p-3 rounded-xl border border-blue-200">
                     <p className="text-[10px] leading-relaxed text-blue-900">
                       💡 <strong>Quick simulation demo access:</strong><br />
-                      • Barangay Admin: <code className="text-indigo-850 font-black">admin</code> | Pass: <code className="text-indigo-800 font-black">admin</code><br />
-                      • BFP Admin: <code className="text-indigo-850 font-black">bfpadmin</code> | Pass: <code className="text-indigo-800 font-black">bfpadmin</code> (Bureau of Fire Protection)<br />
-                      • Health Admin: <code className="text-indigo-850 font-black">healthadmin</code> | Pass: <code className="text-indigo-800 font-black">healthadmin</code> (Medics / Red Cross)
+                      • Barangay Admin (admin): <code className="text-indigo-850 font-black">admin</code> | Pass: <code className="text-indigo-800 font-black">admin</code><br />
+                      • BFP Admin (admin): <code className="text-indigo-850 font-black">bfpadmin</code> | Pass: <code className="text-indigo-800 font-black">bfpadmin</code> (Bureau of Fire Protection)<br />
+                      • Health Admin (admin): <code className="text-indigo-850 font-black">healthadmin</code> | Pass: <code className="text-indigo-800 font-black">healthadmin</code> (Medics / Red Cross)<br />
+                      • Super Admin (developer): <code className="text-indigo-850 font-black">supadmin</code> | Pass: <code className="text-indigo-800 font-black">supadmin</code>
                     </p>
                   </div>
 
