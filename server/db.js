@@ -20,6 +20,9 @@ const adapter = new PrismaMariaDb({
   password: decodeURIComponent(dbUrl.password),
   database: dbUrl.pathname.replace(/^\//, ''),
   connectionLimit: 5,
+  ssl:  {
+    rejectUnauthorized: false,
+  },
 });
 
 // Instantiate PrismaClient with the adapter
