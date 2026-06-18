@@ -68,9 +68,10 @@ export default function App() {
 
   const [usersList, setUsersList] = useState(() => {
     const defaultUsers = [
-      { name: 'Kagawad Jaime Ortiz', username: 'admin', email: 'jaime.ortiz@maypajo.gov.ph', phone: '0917-828-9111', password: 'admin', role: 'SuperAdmin', department: 'rescue', departmentId: 'RES-101', approved: true },
-      { name: 'SFO4 Juan Dela Cruz', username: 'bfpadmin', email: 'juan.delacruz@bfp.gov.ph', phone: '0917-001-9111', password: 'bfpadmin', role: 'SuperAdmin', department: 'bfp', departmentId: 'BFP-911', approved: true },
-      { name: 'Dr. Jane Doe V', username: 'healthadmin', email: 'jane.doe@redcross.org.ph', phone: '0917-003-9111', password: 'healthadmin', role: 'SuperAdmin', department: 'medics', departmentId: 'MDC-911', approved: true }
+      { name: 'Kagawad Jaime Ortiz', username: 'admin', email: 'jaime.ortiz@maypajo.gov.ph', phone: '0917-828-9111', password: 'admin', role: 'Admin', department: 'rescue', departmentId: 'RES-101', approved: true },
+      { name: 'SFO4 Juan Dela Cruz', username: 'bfpadmin', email: 'juan.delacruz@bfp.gov.ph', phone: '0917-001-9111', password: 'bfpadmin', role: 'Admin', department: 'bfp', departmentId: 'BFP-911', approved: true },
+      { name: 'Dr. Jane Doe V', username: 'healthadmin', email: 'jane.doe@redcross.org.ph', phone: '0917-003-9111', password: 'healthadmin', role: 'Admin', department: 'medics', departmentId: 'MDC-911', approved: true },
+      { name: 'Developer Super Admin', username: 'supadmin', email: 'developer@maypajo.gov.ph', phone: '0917-999-0000', password: 'supadmin', role: 'SuperAdmin', department: 'system', departmentId: 'SYS-001', approved: true }
     ];
     const saved = localStorage.getItem('_users_list');
     if (saved) {
@@ -82,7 +83,7 @@ export default function App() {
           if (index === -1) {
             merged.push(du);
           } else {
-            // Overwrite with fresh default values to make sure SuperAdmins exist
+            // Overwrite with fresh default values to make sure admin and superadmin accounts exist
             merged[index] = { ...du, ...merged[index], role: du.role, approved: true };
           }
         });
@@ -454,10 +455,12 @@ export default function App() {
 
   // MUTATION WORKFLOW 4: Modify Incident Status Code (Official enforcers only)
   const handleUpdateReportStatus = (reportId, status) => {
+    if (userRole !== 'Admin' && userRole !== 'SuperAdmin') return;
+
     const updatedReports = reports.map(r => {
       if (r.id === reportId) {
-        const commentAuthor = 'BDRRMC Center Dispatcher';
-        const statusNotes = `Status updated to [${status}] by BDRRMC officials.`;
+        const commentAuthor = currentUser?.name || 'BDRRMC Center Dispatcher';
+        const statusNotes = `Status updated to [${status}] by ${userRole === 'SuperAdmin' ? 'Barangay SuperAdmin' : 'BDRRMC officials'}.`;
         
         return {
           ...r,
@@ -467,7 +470,7 @@ export default function App() {
             {
               id: `comm-stat-${Date.now()}`,
               author: commentAuthor,
-              role: 'Admin',
+              role: userRole,
               text: statusNotes,
               timestamp: new Date().toISOString()
             }
