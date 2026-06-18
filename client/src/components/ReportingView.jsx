@@ -57,7 +57,7 @@ export default function ReportingView({
   // SMS subscription state
   const [smsPhone, setSmsPhone] = useState('');
   const [smsName, setSmsName] = useState('');
-  const [smsTopics, setSmsTopics] = useState(['fire', 'typhoon']);
+  const [smsTopics, setSmsTopics] = useState(['fire', 'electric_lpg']);
   const [smsRegistered, setSmsRegistered] = useState(false);
 
   const handleMockPhotoUpload = (e) => {
@@ -226,18 +226,7 @@ export default function ReportingView({
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="mt-1 w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900 focus:outline-none cursor-pointer"
-                    style={{
-                      width: `calc(${
-                        ({
-                          [IncidentCategory.FIRE]: "🔥 Structural Fire Escape / Smoke",
-                          [IncidentCategory.ELECTRICAL_HAZARD]: "⚡ Electrical Sparking / Grid Failure",
-                          [IncidentCategory.GAS_LEAK]: "💨 LPG Leakage / Gas Odor",
-                          [IncidentCategory.RUBBISH_BURNING]: "🗑️ Illegal Rubbish Burning",
-                          [IncidentCategory.FIRE_ALARM]: "🚨 Active Fire Sprinkler Alert"
-                        }[category] || category || '').length
-                      }ch + 3rem)`
-                    }}
+                    className="mt-1 w-full text-xs py-2 px-3 h-auto whitespace-normal break-words rounded-lg border border-slate-300 bg-slate-50 text-slate-905 focus:outline-none cursor-pointer hover:bg-slate-100/50"
                   >
                     <option value={IncidentCategory.FIRE}>🔥 Structural Fire Escape / Smoke</option>
                     <option value={IncidentCategory.ELECTRICAL_HAZARD}>⚡ Electrical Sparking / Grid Failure</option>
@@ -333,16 +322,7 @@ export default function ReportingView({
                     <select
                       value={priority}
                       onChange={(e) => setPriority(e.target.value)}
-                      className="mt-1 w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900 focus:outline-none cursor-pointer"
-                      style={{
-                        width: `calc(${
-                          ({
-                            [PriorityLevel.HIGH]: "🔴 High (Threat to life & structures)",
-                            [PriorityLevel.MEDIUM]: "🟡 Medium (Property damage at risk)",
-                            [PriorityLevel.LOW]: "🟢 Low (Minor safety concern / obstacle)"
-                          }[priority] || priority || '').length
-                        }ch + 3rem)`
-                      }}
+                      className="mt-1 w-full text-xs py-2 px-3 h-auto whitespace-normal break-words rounded-lg border border-slate-300 bg-slate-50 text-slate-905 focus:outline-none cursor-pointer hover:bg-slate-100/50"
                     >
                       <option value={PriorityLevel.HIGH}>🔴 High (Threat to life & structures)</option>
                       <option value={PriorityLevel.MEDIUM}>🟡 Medium (Property damage at risk)</option>
@@ -403,11 +383,11 @@ export default function ReportingView({
           <div className="bg-[#E5E9FA] p-5 rounded-2xl border-2 border-slate-900/15 text-slate-900 shadow-sm relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full blur-xl -mr-6 -mt-6" />
             <h4 className="font-extrabold text-xs uppercase tracking-wider text-indigo-900 flex items-center gap-2 font-mono">
-              <Smartphone className="w-4 h-4 text-indigo-650 animate-bounce" />
+              <Smartphone className="w-4 h-4 text-indigo-600 animate-bounce" />
               Barangay SMS Warning Registry
             </h4>
             <p className="text-[11px] text-slate-800 leading-relaxed mt-1">
-              Join our emergency text dispatch warnings broad list. Receive free real-time text warnings in case of active fires or flash flooding in your specific street.
+              Join our emergency text dispatch warnings broad list. Receive free real-time text warnings in case of active fires or electrical/LPG hazards in your specific street.
             </p>
 
             {smsRegistered ? (
@@ -455,7 +435,7 @@ export default function ReportingView({
                     className={`flex-1 py-1.5 px-2 text-[10px] font-black rounded-lg border text-center transition-colors font-mono uppercase tracking-tight ${
                       smsTopics.includes('fire') 
                         ? 'bg-rose-100 border-rose-400 text-rose-800' 
-                        : 'border-slate-300 bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+                        : 'border-slate-300 bg-slate-100 text-slate-600 hover:bg-slate-205 hover:text-slate-900'
                     }`}
                   >
                     🔥 Fire Sirens
@@ -465,8 +445,8 @@ export default function ReportingView({
                     onClick={() => handleToggleSmsTopic('electric_lpg')}
                     className={`flex-1 py-1.5 px-2 text-[10px] font-black rounded-lg border text-center transition-colors font-mono uppercase tracking-tight ${
                       smsTopics.includes('electric_lpg') 
-                        ? 'bg-teal-100 border-teal-400 text-teal-800' 
-                        : 'border-slate-300 bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-900'
+                        ? 'bg-indigo-50 border-indigo-300 text-indigo-900' 
+                        : 'border-slate-300 bg-slate-100 text-slate-600 hover:bg-slate-205 hover:text-slate-900'
                     }`}
                   >
                     ⚡ LPG Sparks
@@ -475,7 +455,7 @@ export default function ReportingView({
 
                 <button
                   type="submit"
-                  className="w-full py-2 bg-indigo-650 hover:bg-indigo-700 text-white text-xs font-black rounded-lg tracking-wider text-center uppercase font-mono shadow-xs cursor-pointer border border-indigo-500"
+                  className="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black rounded-lg tracking-wider text-center uppercase font-mono shadow-xs cursor-pointer border border-indigo-700"
                 >
                   SUBSCRIBE PHONE FOR ALERT ALERTS
                 </button>
@@ -508,19 +488,7 @@ export default function ReportingView({
                 <select
                   value={filterCategory}
                   onChange={(e) => setFilterCategory(e.target.value)}
-                  className="text-xs py-1.5 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900 focus:outline-none font-mono w-fit max-w-full cursor-pointer"
-                  style={{
-                    width: `calc(${
-                      ({
-                        "All": "All Types",
-                        [IncidentCategory.FIRE]: "Structural Fire",
-                        [IncidentCategory.ELECTRICAL_HAZARD]: "Electrical Hazard",
-                        [IncidentCategory.GAS_LEAK]: "LPG / Gas Leak",
-                        [IncidentCategory.RUBBISH_BURNING]: "Rubbish Burning",
-                        [IncidentCategory.FIRE_ALARM]: "Fire Alarm"
-                      }[filterCategory] || filterCategory || '').length
-                    }ch + 3.5rem)`
-                  }}
+                  className="text-xs py-1.5 px-3 h-auto whitespace-normal break-words rounded-lg border border-slate-300 bg-slate-50 text-slate-950 focus:outline-none font-mono w-full sm:w-auto min-w-[150px] max-w-full cursor-pointer hover:bg-slate-100/50"
                 >
                   <option value="All">All Types</option>
                   <option value={IncidentCategory.FIRE}>Structural Fire</option>
@@ -587,6 +555,23 @@ export default function ReportingView({
                       {report.description}
                     </p>
 
+                    {report.fireAlarmLevel && (
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2 mb-3.5 p-2.5 bg-indigo-50/40 border border-slate-200 rounded-xl font-mono text-[10px] text-slate-900 shadow-3xs">
+                        <div>
+                          <span className="font-black uppercase text-rose-600 block">🚨 Fire Alarm Level</span>
+                          <span className="font-bold text-slate-900">{report.fireAlarmLevel}</span>
+                        </div>
+                        <div>
+                          <span className="font-black uppercase text-blue-600 block">💧 Water level supply</span>
+                          <span className="font-bold text-slate-900">{report.waterLevel}</span>
+                        </div>
+                        <div>
+                          <span className="font-black uppercase text-amber-600 block">⚠️ Task Urgency</span>
+                          <span className="font-bold text-slate-900">{report.taskUrgency}</span>
+                        </div>
+                      </div>
+                    )}
+
                     {/* PHOTO ATTACHMENT DISPLAY DIRECT IN WORKSPACE */}
                     {report.image && (
                       <div className="mb-3.5 rounded-xl overflow-hidden border border-slate-200 max-h-48 w-full bg-slate-50">
@@ -634,7 +619,7 @@ export default function ReportingView({
                         <div className="flex flex-col items-center">
                           <div className={`h-5 w-5 rounded-full flex items-center justify-center font-bold mb-1 ${
                             report.status === IncidentStatus.DISPATCHED || report.status === IncidentStatus.RESOLVED
-                              ? 'bg-purple-600 text-white font-black animate-pulse' 
+                              ? 'bg-rose-600 text-white font-black animate-pulse' 
                               : 'bg-slate-200 text-slate-500'
                           }`}>
                             3

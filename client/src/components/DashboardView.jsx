@@ -258,7 +258,7 @@ export default function DashboardView({
                   <div className="flex items-center justify-between">
                     <div className="flex gap-1 scale-90 origin-left">
                       <span className="w-4 h-4 rounded-full bg-yellow-400 border border-slate-950 flex items-center justify-center text-[8px]">🚒</span>
-                      <span className="w-4 h-4 rounded-full bg-red-650 border border-slate-950 flex items-center justify-center text-[8px]">🔥</span>
+                      <span className="w-4 h-4 rounded-full bg-red-600 border border-slate-950 flex items-center justify-center text-[8px]">🔥</span>
                     </div>
                     <span className="text-[7.5px] font-mono font-black text-slate-950 bg-white/95 px-1 py-0.2 rounded border border-slate-950 scale-90 origin-right uppercase">
                       BFP COMMAND • BRGY 35
@@ -348,7 +348,7 @@ export default function DashboardView({
                   placeholder={"Search reports..."}
                   value={reportSearch}
                   onChange={(e) => setReportSearch(e.target.value)}
-                  className="w-full sm:w-48 bg-[#F0F2FC] border border-slate-300 text-xs py-2 pl-8 pr-3 rounded-full text-slate-800 placeholder-slate-500 focus:outline-[#0ADBD2]"
+                  className="w-full sm:w-48 bg-[#F0F2FC] border border-slate-300 text-xs py-2 pl-8 pr-3 rounded-full text-slate-800 placeholder-slate-500 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none"
                 />
               </div>
 
@@ -356,12 +356,7 @@ export default function DashboardView({
               <select
                 value={filterStatus}
                 onChange={(e) => setFilterStatus(e.target.value)}
-                className="bg-[#F0F2FC] border border-slate-300 text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-full font-bold text-slate-800 focus:outline-[#0ADBD2] w-fit max-w-full cursor-pointer"
-                style={{
-                  width: `calc(${
-                    (filterStatus === 'All' ? 'All Status' : filterStatus).length
-                  }ch + 3.5rem)`
-                }}
+                className="bg-[#F0F2FC] border border-slate-300 text-xs py-2 px-3 h-auto whitespace-normal break-words rounded-full font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 focus:outline-none w-full sm:w-auto min-w-[120px] max-w-full cursor-pointer hover:bg-[#e4e7f8]"
               >
                 <option value="All">{"All Status"}</option>
                 <option value="Pending">{"Pending"}</option>
@@ -422,7 +417,7 @@ export default function DashboardView({
                         <td className="py-3 text-right" onClick={(e) => e.stopPropagation()}>
                           <button
                             onClick={() => onDeleteReport && onDeleteReport(rep.id)}
-                            className="p-1 px-2.5 bg-red-50 hover:bg-red-100 text-red-650 hover:text-red-700 font-black rounded border border-red-205 transition-colors text-[10px] uppercase font-mono"
+                            className="p-1 px-2.5 bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 font-black rounded border border-red-205 transition-colors text-[10px] uppercase font-mono"
                           >
                             Delete
                           </button>
@@ -493,14 +488,16 @@ export default function DashboardView({
           </div>
 
           {/* Go Bag Planner Activation Box */}
-          <button
-            id="open-gobag-planner-btn"
-            onClick={() => setCurrentTab('gobag')}
-            className="w-full bg-[#EAEDFC] hover:bg-slate-950 hover:text-white text-slate-900 font-extrabold py-3.5 px-4 rounded-xl border border-slate-400 hover:border-slate-950 transition-colors text-xs tracking-wider uppercase shadow-sm flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <Shield className="w-4 h-4 text-red-500 shrink-0 animate-pulse" />
-            {"Go BAG Planner"}
-          </button>
+          {userRole === 'Resident' && (
+            <button
+              id="open-gobag-planner-btn"
+              onClick={() => setCurrentTab('gobag')}
+              className="w-full bg-[#EAEDFC] hover:bg-slate-950 hover:text-white text-slate-900 font-extrabold py-3.5 px-4 rounded-xl border border-slate-400 hover:border-slate-950 transition-colors text-xs tracking-wider uppercase shadow-sm flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <Shield className="w-4 h-4 text-red-500 shrink-0 animate-pulse" />
+              {"Go BAG Planner"}
+            </button>
+          )}
         </div>
       </div>
 
@@ -519,33 +516,35 @@ export default function DashboardView({
           <div className="flex flex-col gap-4">
             
             {/* ITEM 1: MY REPORTS TRACKER */}
-            <div className="p-4 bg-white border border-slate-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <div>
-                <h3 className="text-md font-extrabold text-slate-900 italic uppercase">
-                  My Reports Tracker
-                </h3>
-                <p className="text-xs text-slate-700 max-w-xl leading-relaxed mt-1">
-                  Follow and check real-time action status of fire hazards or electric wire dangers you logged to your local Purok officer.
-                </p>
-                {/* Visual log helper */}
-                <div className="flex gap-2.5 mt-2.5 text-[10px] font-mono text-slate-600 flex-wrap">
-                  <span className="flex items-center gap-1">🔴 Report Filed</span>
-                  <span>➜</span>
-                  <span className="flex items-center gap-1 font-bold">🟡 Verified by Brgy</span>
-                  <span>➜</span>
-                  <span className="flex items-center gap-1">🟢 Solved</span>
+            {userRole === 'Resident' && (
+              <div className="p-4 bg-white border border-slate-300 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <h3 className="text-md font-extrabold text-slate-900 italic uppercase">
+                    My Reports Tracker
+                  </h3>
+                  <p className="text-xs text-slate-700 max-w-xl leading-relaxed mt-1">
+                    Follow and check real-time action status of fire hazards or electric wire dangers you logged to your local Purok officer.
+                  </p>
+                  {/* Visual log helper */}
+                  <div className="flex gap-2.5 mt-2.5 text-[10px] font-mono text-slate-600 flex-wrap">
+                    <span className="flex items-center gap-1">🔴 Report Filed</span>
+                    <span>➜</span>
+                    <span className="flex items-center gap-1 font-bold">🟡 Verified by Brgy</span>
+                    <span>➜</span>
+                    <span className="flex items-center gap-1">🟢 Solved</span>
+                  </div>
                 </div>
+                <button
+                  id="track-my-record-btn"
+                  onClick={() => {
+                    setCurrentTab('report');
+                  }}
+                  className="text-xs px-4 py-2 font-mono font-bold border border-slate-400 bg-[#EFF2FE] hover:bg-slate-950 hover:text-white rounded-lg transition-colors shrink-0"
+                >
+                  Track My Record
+                </button>
               </div>
-              <button
-                id="track-my-record-btn"
-                onClick={() => {
-                  setCurrentTab('report');
-                }}
-                className="text-xs px-4 py-2 font-mono font-bold border border-slate-400 bg-[#EFF2FE] hover:bg-slate-950 hover:text-white rounded-lg transition-colors shrink-0"
-              >
-                Track My Record
-              </button>
-            </div>
+            )}
 
             {/* ITEM 2: LIVE COMMUNITY FIRE TRACKER */}
             <div className="p-4 bg-white border border-slate-300 rounded-2xl space-y-3">
@@ -584,6 +583,23 @@ export default function DashboardView({
                       </div>
                       <p><b>Reporter:</b> {report.reporterName} ({report.reporterPhone})</p>
                       <p><b>Detailed notes:</b> {report.description}</p>
+
+                      {report.fireAlarmLevel && (
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2 p-2.5 bg-indigo-50/40 border border-slate-200 rounded-xl font-mono text-[10px] text-slate-900 shadow-3xs">
+                          <div>
+                            <span className="font-black uppercase text-rose-600 block">🚨 Fire Alarm Level</span>
+                            <span className="font-bold text-slate-900">{report.fireAlarmLevel}</span>
+                          </div>
+                          <div>
+                            <span className="font-black uppercase text-blue-600 block">💧 Water level supply</span>
+                            <span className="font-bold text-slate-900">{report.waterLevel}</span>
+                          </div>
+                          <div>
+                            <span className="font-black uppercase text-amber-600 block">⚠️ Task Urgency</span>
+                            <span className="font-bold text-slate-900">{report.taskUrgency}</span>
+                          </div>
+                        </div>
+                      )}
                       
                       <div className="space-y-2 mt-3 pt-2 border-t">
                         <p className="font-bold font-mono uppercase tracking-wide text-slate-700">Dispatch Update Stream:</p>
@@ -682,91 +698,93 @@ export default function DashboardView({
             </div>
 
             {/* ITEM 4: PROPERTY DAMAGE ASSISTANCE FORM (MUTATION) */}
-            <div className="p-4 bg-white border border-slate-300 rounded-2xl space-y-3">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                  <h3 className="text-md font-extrabold text-[#0d1222] italic uppercase">
-                    Property Damage Assistance Form
-                  </h3>
-                  <p className="text-xs text-slate-750 max-w-xl leading-relaxed mt-1">
-                    Affected residents can submit estimated property damage values directly to fire marshals to expedite social welfare relief coordination.
-                  </p>
-                </div>
-                
-                <button
-                  onClick={() => setShowDamageForm(!showDamageForm)}
-                  className="text-xs px-4 py-2 font-mono font-bold border border-slate-400 bg-[#EFF2FE] hover:bg-slate-950 hover:text-white rounded-lg transition-colors shrink-0"
-                >
-                  {showDamageForm ? 'Cancel Form' : 'Submit Assistance Claims'}
-                </button>
-              </div>
-
-              {showDamageForm && (
-                <form onSubmit={handleDamageSubmit} className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 animate-fade-in text-slate-800">
-                  <p className="text-xs font-extrabold font-mono text-red-600 uppercase tracking-widest">
-                    ⚠️ OFFICIAL BDRRMC POST-FIRE DAMAGE SUBMISSION
-                  </p>
+            {userRole === 'Resident' && (
+              <div className="p-4 bg-white border border-slate-300 rounded-2xl space-y-3">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-md font-extrabold text-[#0d1222] italic uppercase">
+                      Property Damage Assistance Form
+                    </h3>
+                    <p className="text-xs text-slate-750 max-w-xl leading-relaxed mt-1">
+                      Affected residents can submit estimated property damage values directly to fire marshals to expedite social welfare relief coordination.
+                    </p>
+                  </div>
                   
-                  {damageFormSuccess ? (
-                    <div className="p-4 bg-emerald-100 text-emerald-800 rounded-xl text-xs font-mono font-bold border border-emerald-400/20 text-center animate-pulse">
-                      ✅ Damage report filed successfully! Maypajo fire relief officers will contact you at your household phone number for verification visits.
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-mono font-bold text-slate-600">Head of Household Full Name</label>
-                        <input
-                          type="text"
-                          required
-                          value={damageName}
-                          onChange={(e) => setDamageName(e.target.value)}
-                          placeholder="e.g., Carlos Santos Mendiola"
-                          className="w-full bg-white border rounded p-2 text-xs text-slate-900 border-slate-300"
-                        />
-                      </div>
+                  <button
+                    onClick={() => setShowDamageForm(!showDamageForm)}
+                    className="text-xs px-4 py-2 font-mono font-bold border border-slate-400 bg-[#EFF2FE] hover:bg-slate-950 hover:text-white rounded-lg transition-colors shrink-0"
+                  >
+                    {showDamageForm ? 'Cancel Form' : 'Submit Assistance Claims'}
+                  </button>
+                </div>
 
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-mono font-bold text-slate-600">Street / Area in Barangay 35</label>
-                        <input
-                          type="text"
-                          required
-                          value={damageAddress}
-                          onChange={(e) => setDamageAddress(e.target.value)}
-                          placeholder="e.g., Purok 4 Sawata Alleyway"
-                          className="w-full bg-white border rounded p-2 text-xs text-slate-900 border-slate-300"
-                        />
+                {showDamageForm && (
+                  <form onSubmit={handleDamageSubmit} className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 animate-fade-in text-slate-800">
+                    <p className="text-xs font-extrabold font-mono text-red-600 uppercase tracking-widest">
+                      ⚠️ OFFICIAL BDRRMC POST-FIRE DAMAGE SUBMISSION
+                    </p>
+                    
+                    {damageFormSuccess ? (
+                      <div className="p-4 bg-emerald-100 text-emerald-800 rounded-xl text-xs font-mono font-bold border border-emerald-400/20 text-center animate-pulse">
+                        ✅ Damage report filed successfully! Maypajo fire relief officers will contact you at your household phone number for verification visits.
                       </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-mono font-bold text-slate-600">Head of Household Full Name</label>
+                          <input
+                            type="text"
+                            required
+                            value={damageName}
+                            onChange={(e) => setDamageName(e.target.value)}
+                            placeholder="e.g., Carlos Santos Mendiola"
+                            className="w-full bg-white border rounded p-2 text-xs text-slate-900 border-slate-300"
+                          />
+                        </div>
 
-                      <div className="space-y-1">
-                        <label className="text-[10px] font-mono font-bold text-slate-600">Estimated Damages (PHP value)</label>
-                        <input
-                          type="number"
-                          required
-                          min={0}
-                          max={5000000000}
-                          value={damageAmount}
-                          onChange={(e) => {
-                            const val = parseInt(e.target.value);
-                            setDamageAmount(isNaN(val) ? '' : Math.min(5000000000, Math.max(0, val)));
-                          }}
-                          placeholder="e.g., 45000"
-                          className="w-full bg-white border rounded p-2 text-xs text-slate-900 border-slate-300"
-                        />
-                      </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-mono font-bold text-slate-600">Street / Area in Barangay 35</label>
+                          <input
+                            type="text"
+                            required
+                            value={damageAddress}
+                            onChange={(e) => setDamageAddress(e.target.value)}
+                            placeholder="e.g., Purok 4 Sawata Alleyway"
+                            className="w-full bg-white border rounded p-2 text-xs text-slate-900 border-slate-300"
+                          />
+                        </div>
 
-                      <div className="md:col-span-3 text-right">
-                        <button
-                          type="submit"
-                          className="w-full md:w-auto bg-slate-950 text-white hover:bg-slate-900 font-bold font-mono text-xs px-5 py-2.5 rounded-lg border border-slate-800 transition-colors"
-                        >
-                          Send Damage Report
-                        </button>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-mono font-bold text-slate-600">Estimated Damages (PHP value)</label>
+                          <input
+                            type="number"
+                            required
+                            min={0}
+                            max={5000000000}
+                            value={damageAmount}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value);
+                              setDamageAmount(isNaN(val) ? '' : Math.min(5000000000, Math.max(0, val)));
+                            }}
+                            placeholder="e.g., 45000"
+                            className="w-full bg-white border rounded p-2 text-xs text-slate-900 border-slate-300"
+                          />
+                        </div>
+
+                        <div className="md:col-span-3 text-right">
+                          <button
+                            type="submit"
+                            className="w-full md:w-auto bg-slate-950 text-white hover:bg-slate-900 font-bold font-mono text-xs px-5 py-2.5 rounded-lg border border-slate-800 transition-colors"
+                          >
+                            Send Damage Report
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </form>
-              )}
-            </div>
+                    )}
+                  </form>
+                )}
+              </div>
+            )}
 
           </div>
         </div>
@@ -937,7 +955,7 @@ export default function DashboardView({
       {showStatusModal && (() => {
         const currentReport = reports.find(r => r.id === showStatusModal);
         
-        let handlingDept = { id: 'volunteers', name: 'Barangay 35 Volunteers / Rescue' };
+        let handlingDept = { id: 'rescue', name: 'Barangay Rescue & Evacuation Squad' };
         if (currentReport) {
           if (
             currentReport.category === IncidentCategory.FIRE ||
@@ -950,9 +968,9 @@ export default function DashboardView({
 
         const hasStatusPermission = 
           !currentUser || 
-          !currentUser.departmentId || 
-          currentUser.departmentId === 'rescue' || 
-          currentUser.departmentId === handlingDept.id;
+          !currentUser?.department || 
+          currentUser.department.toLowerCase() === 'system' || 
+          currentUser.department.toLowerCase() === handlingDept.id;
 
         return (
           <div id="status-modal-backdrop" className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
@@ -960,11 +978,11 @@ export default function DashboardView({
               id="status-modal-box"
               className="bg-white border-2 border-slate-950 max-w-sm w-full rounded-2xl p-5 text-slate-900 space-y-4 animate-fade-in text-left"
             >
-              <h3 className="font-sans font-black uppercase text-sm border-b pb-1.5 text-orange-655">
+              <h3 className="font-sans font-black uppercase text-sm border-b pb-1.5 text-orange-600">
                 🛠️ REPORT LIFE CYCLE CONTROL
               </h3>
               
-              <p className="text-xs text-slate-650 leading-relaxed">
+              <p className="text-xs text-slate-600 leading-relaxed">
                 Verify or resolve reports on behalf of local response units. Current report: <b className="text-slate-950">{currentReport?.title}</b>
               </p>
 
@@ -979,7 +997,7 @@ export default function DashboardView({
                 </p>
                 {!hasStatusPermission && (
                   <p className="text-[10px] text-red-600 mt-1 font-extrabold">
-                    ❌ ACCESS DENIED: Your department ({currentUser?.departmentId?.toUpperCase()}) does not have administrative rights to update {handlingDept.id.toUpperCase()} incidents.
+                    ❌ ACCESS DENIED: Your department ({currentUser?.department?.toUpperCase()}) does not have administrative rights to update {handlingDept.id.toUpperCase()} incidents.
                   </p>
                 )}
               </div>

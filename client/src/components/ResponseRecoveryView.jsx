@@ -202,200 +202,183 @@ export default function ResponseRecoveryView({
                 );
               })}
             </div>
-          </div>
-          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
-            <div className="border-b border-slate-150 pb-3 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-              <div>
-                <h3 className="font-extrabold text-slate-900 text-sm tracking-tight uppercase flex items-center gap-2">
-                  <CheckSquare className="w-4 h-4 text-indigo-650 animate-pulse" />
-                  Disaster Victim & Relief Assistance Registry
-                </h3>
-                <p className="text-xs text-slate-500">Submit family status records, structural damage assessments, and relief requests for your household</p>
+               {userRole === 'Resident' && (
+            <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
+              <div className="border-b border-slate-150 pb-3 mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                <div>
+                  <h3 className="font-extrabold text-slate-900 text-sm tracking-tight uppercase flex items-center gap-2">
+                    <CheckSquare className="w-4 h-4 text-indigo-600 animate-pulse" />
+                    Disaster Victim & Relief Assistance Registry
+                  </h3>
+                  <p className="text-xs text-slate-500">Submit family status records, structural damage assessments, and relief requests for your household</p>
+                </div>
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              
-              {/* Left Column: Form */}
-              <div className="md:col-span-1 border-r border-slate-150 pr-0 md:pr-4">
-                {victimSuccess ? (
-                  <div className="p-6 text-center text-xs bg-emerald-50 rounded-xl text-emerald-900 font-bold border border-emerald-250">
-                    Thank you. Your family status and relief request have been successfully recorded!
-                  </div>
-                ) : (
-                  <form onSubmit={handleVictimSubmit} className="space-y-3">
-                    
-                    <div>
-                      <label className="block text-[9px] uppercase font-bold text-slate-500">Family Last Name*</label>
-                      <input
-                        type="text"
-                        required
-                        value={victimFamilyName}
-                        onChange={(e) => setVictimFamilyName(e.target.value)}
-                        placeholder="e.g., Capistrano Family"
-                        className="mt-1 w-full text-xs p-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
-                      />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                {/* Left Column: Form */}
+                <div className="md:col-span-1 border-r border-slate-150 pr-0 md:pr-4">
+                  {victimSuccess ? (
+                    <div className="p-6 text-center text-xs bg-emerald-50 rounded-xl text-emerald-900 font-bold border border-emerald-250">
+                      Thank you. Your family status and relief request have been successfully recorded!
                     </div>
-
-                    <div>
-                      <label className="block text-[9px] uppercase font-bold text-slate-500">Head of Household*</label>
-                      <input
-                        type="text"
-                        required
-                        value={victimHead}
-                        onChange={(e) => setVictimHead(e.target.value)}
-                        placeholder="e.g., Jaime Capistrano"
-                        className="mt-1 w-full text-xs p-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
+                  ) : (
+                    <form onSubmit={handleVictimSubmit} className="space-y-3">
+                      
                       <div>
-                        <label className="block text-[9px] uppercase font-bold text-slate-500">No. of Members</label>
+                        <label className="block text-[9px] uppercase font-bold text-slate-500">Family Last Name*</label>
                         <input
-                          type="number"
+                          type="text"
                           required
-                          min={0}
-                          max={50}
-                          value={familyMembers}
-                          onChange={(e) => {
-                            const val = parseInt(e.target.value);
-                            setFamilyMembers(isNaN(val) ? '' : Math.min(50, Math.max(0, val)));
-                          }}
+                          value={victimFamilyName}
+                          onChange={(e) => setVictimFamilyName(e.target.value)}
+                          placeholder="e.g., Capistrano Family"
                           className="mt-1 w-full text-xs p-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
                         />
                       </div>
 
                       <div>
-                        <label className="block text-[9px] uppercase font-bold text-slate-500">Purok Area</label>
+                        <label className="block text-[9px] uppercase font-bold text-slate-500">Head of Household*</label>
+                        <input
+                          type="text"
+                          required
+                          value={victimHead}
+                          onChange={(e) => setVictimHead(e.target.value)}
+                          placeholder="e.g., Jaime Capistrano"
+                          className="mt-1 w-full text-xs p-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2">
+                        <div>
+                          <label className="block text-[9px] uppercase font-bold text-slate-500">No. of Members</label>
+                          <input
+                            type="number"
+                            required
+                            min={0}
+                            max={50}
+                            value={familyMembers}
+                            onChange={(e) => {
+                              const val = parseInt(e.target.value);
+                              setFamilyMembers(isNaN(val) ? '' : Math.min(50, Math.max(0, val)));
+                            }}
+                            className="mt-1 w-full text-xs p-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[9px] uppercase font-bold text-slate-500">Purok Area</label>
+                          <select
+                            value={purokArea}
+                            onChange={(e) => setPurokArea(e.target.value)}
+                            className="mt-1 w-full text-xs py-2 px-3 h-auto whitespace-normal break-words rounded-lg border border-slate-300 bg-slate-50 text-slate-905 cursor-pointer hover:bg-slate-100/50"
+                          >
+                            <option value="Purok 1">Purok 1</option>
+                            <option value="Purok 2">Purok 2</option>
+                            <option value="Purok 3">Purok 3</option>
+                            <option value="Purok 4">Purok 4 (Sawata)</option>
+                            <option value="Purok 5">Purok 5</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[9px] uppercase font-bold text-slate-500">Evacuation Station</label>
                         <select
-                          value={purokArea}
-                          onChange={(e) => setPurokArea(e.target.value)}
-                          className="mt-1 w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
-                          style={{ width: `calc(${(purokArea || '').length}ch + 3rem)` }}
+                          value={shelterCenterId}
+                          onChange={(e) => setShelterCenterId(e.target.value)}
+                          className="mt-1 w-full text-xs py-2 px-3 h-auto whitespace-normal break-words rounded-lg border border-slate-300 bg-slate-50 text-slate-905 cursor-pointer hover:bg-slate-100/50"
                         >
-                          <option value="Purok 1">Purok 1</option>
-                          <option value="Purok 2">Purok 2</option>
-                          <option value="Purok 3">Purok 3</option>
-                          <option value="Purok 4">Purok 4 (Flood)</option>
-                          <option value="Purok 5">Purok 5</option>
+                          {evacuationCenters.map(e => (
+                            <option key={e.id} value={e.id}>{e.name}</option>
+                          ))}
+                          <option value="home">Home quarantine / Relatives</option>
                         </select>
                       </div>
-                    </div>
 
-                    <div>
-                      <label className="block text-[9px] uppercase font-bold text-slate-500">Evacuation Station</label>
-                      <select
-                        value={shelterCenterId}
-                        onChange={(e) => setShelterCenterId(e.target.value)}
-                        className="mt-1 w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
-                        style={{
-                          width: `calc(${
-                            (shelterCenterId === 'home' 
-                              ? 'Home quarantine / Relatives' 
-                              : (evacuationCenters.find(ec => ec.id === shelterCenterId)?.name || '')
-                            ).length
-                          }ch + 3rem)`
-                        }}
-                      >
-                        {evacuationCenters.map(e => (
-                          <option key={e.id} value={e.id}>{e.name}</option>
-                        ))}
-                        <option value="home">Home quarantine / Relatives</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[9px] uppercase font-bold text-slate-500">Incurred Damages / Loss</label>
-                      <select
-                        value={lossCategory}
-                        onChange={(e) => setLossCategory(e.target.value)}
-                        className="mt-1 w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
-                        style={{
-                          width: `calc(${
-                            ({
-                              "Complete Fire Destruction": "Totally Destroyed (Fire)",
-                              "Partial Fire kitchen damage": "Partially Damaged (Fire/Kitchen)",
-                              "Complete Flood submergence": "Fully Submerged (Flood)",
-                              "Partial storm damages": "Storm Damage (Roof/Structural)"
-                            }[lossCategory] || lossCategory || '').length
-                          }ch + 3rem)`
-                        }}
-                      >
-                        <option value="Complete Fire Destruction">Totally Destroyed (Fire)</option>
-                        <option value="Partial Fire kitchen damage">Partially Damaged (Fire/Kitchen)</option>
-                        <option value="Complete Flood submergence">Fully Submerged (Flood)</option>
-                        <option value="Partial storm damages">Storm Damage (Roof/Structural)</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-[9px] uppercase font-bold text-slate-500">Requested Relief Assistance</label>
-                      <textarea
-                        required
-                        rows={2}
-                        value={reliefRequest}
-                        onChange={(e) => setReliefRequest(e.target.value)}
-                        className="mt-1 w-full text-xs p-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
-                        placeholder="Need baby diapers, blankets, mats, water, and first aid..."
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="w-full py-2 bg-indigo-600 hover:bg-slate-900 text-white rounded-lg font-black text-xs shadow-sm active:scale-95 transition-all"
-                    >
-                      REGISTER MY FAMILY
-                    </button>
-
-                  </form>
-                )}
-              </div>
-
-              {/* Right Column: Active Registrants Lists */}
-              <div className="md:col-span-2 space-y-3">
-                <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest block">
-                  Recently Registered Families (Assistance Board)
-                </span>
-
-                <div className="space-y-3 max-h-96 overflow-y-auto">
-                  {victimRegisteredList.map((vic, idx) => (
-                    <div 
-                      key={vic.id || idx}
-                      className="p-3.5 rounded-xl bg-slate-50 border border-slate-250"
-                    >
-                      <div className="flex justify-between items-start gap-1">
-                        <div>
-                          <h4 className="font-extrabold text-xs text-slate-900">
-                            {vic.name} ({vic.head})
-                          </h4>
-                          <p className="text-[10px] text-slate-500 font-medium">📍 Sentral shelter: {vic.center}</p>
-                        </div>
-                        <span className={`px-2 py-0.5 text-[9px] font-bold rounded ${
-                          vic.status === 'Assisted' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-80 * 2 font-bold'
-                        }`}>
-                          {vic.status}
-                        </span>
+                      <div>
+                        <label className="block text-[9px] uppercase font-bold text-slate-500">Incurred Damages / Loss</label>
+                        <select
+                          value={lossCategory}
+                          onChange={(e) => setLossCategory(e.target.value)}
+                          className="mt-1 w-full text-xs py-2 px-3 h-auto whitespace-normal break-words rounded-lg border border-slate-300 bg-slate-50 text-slate-950 cursor-pointer hover:bg-slate-100/50"
+                        >
+                          <option value="Complete Fire Destruction">Totally Destroyed (Fire)</option>
+                          <option value="Partial Fire kitchen damage">Partially Damaged (Fire/Kitchen)</option>
+                          <option value="Smoke and electrical wire damage">Partially Damaged (Smoke/Wiring)</option>
+                          <option value="Water and debris damage">Water & Hose Cleanup Damage</option>
+                        </select>
                       </div>
 
-                      <div className="mt-2 text-xs">
-                        <p className="text-slate-800">
-                          <strong>Damages:</strong> <span className="text-rose-600 font-semibold">{vic.loss}</span>
-                        </p>
-                        <p className="text-slate-500 text-[11px] italic mt-0.5">
-                          <strong>Request:</strong> {vic.request}
-                        </p>
+                      <div>
+                        <label className="block text-[9px] uppercase font-bold text-slate-500">Requested Relief Assistance</label>
+                        <textarea
+                          required
+                          rows={2}
+                          value={reliefRequest}
+                          onChange={(e) => setReliefRequest(e.target.value)}
+                          className="mt-1 w-full text-xs p-2 rounded-lg border border-slate-300 bg-slate-50 text-slate-900"
+                          placeholder="Need baby diapers, blankets, mats, water, and first aid..."
+                        />
                       </div>
 
-                    </div>
-                  ))}
+                      <button
+                        type="submit"
+                        className="w-full py-2 bg-indigo-600 hover:bg-slate-900 text-white rounded-lg font-black text-xs shadow-sm active:scale-95 transition-all"
+                      >
+                        REGISTER MY FAMILY
+                      </button>
+
+                    </form>
+                  )}
                 </div>
+
+                {/* Right Column: Active Registrants Lists */}
+                <div className="md:col-span-2 space-y-3">
+                  <span className="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest block">
+                    Recently Registered Families (Assistance Board)
+                  </span>
+
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {victimRegisteredList.map((vic, idx) => (
+                      <div 
+                        key={vic.id || idx}
+                        className="p-3.5 rounded-xl bg-slate-50 border border-slate-250"
+                      >
+                        <div className="flex justify-between items-start gap-1">
+                          <div>
+                            <h4 className="font-extrabold text-xs text-slate-900">
+                              {vic.name} ({vic.head})
+                            </h4>
+                            <p className="text-[10px] text-slate-500 font-medium">📍 Sentral shelter: {vic.center}</p>
+                          </div>
+                          <span className={`px-2 py-0.5 text-[9px] font-bold rounded ${
+                            vic.status === 'Assisted' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-80 * 2 font-bold'
+                          }`}>
+                            {vic.status}
+                          </span>
+                        </div>
+
+                        <div className="mt-2 text-xs">
+                          <p className="text-slate-800">
+                            <strong>Damages:</strong> <span className="text-rose-600 font-semibold">{vic.loss}</span>
+                          </p>
+                          <p className="text-slate-500 text-[11px] italic mt-0.5">
+                            <strong>Request:</strong> {vic.request}
+                          </p>
+                        </div>
+
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
               </div>
-
             </div>
-          </div>
-
+          )}
         </div>
+
+      </div>
 
         {/* RIGHT COLUMN: RELIEF GOODS DISTRIBUTION TIMELINE & CHARTS */}
         <div className="space-y-6">
@@ -432,7 +415,7 @@ export default function ResponseRecoveryView({
 
             {/* Safety Review notes */}
             <div className="mt-4 p-3 rounded-lg bg-slate-50 border border-slate-200 text-[11px] text-slate-700 leading-relaxed font-medium">
-              <strong>Latest Response Report:</strong> After rigorous structural assessment at the Purok 3 residential area, local officers declared the establishment of a Purok Volunteer Fire Brigade to proactively mitigate rapid fire propagation while BFP firetrucks are in transit.
+              <strong>Latest Response Report:</strong> After rigorous structural assessment at the Purok 3 residential area, local officers declared the establishment of a Purok Fire-Safety Watch Committee to proactively mitigate rapid fire hazards while BFP firetrucks are in transit.
             </div>
           </div>
 
@@ -474,12 +457,7 @@ export default function ResponseRecoveryView({
                     <select
                       value={distCenterId}
                       onChange={(e) => setDistCenterId(e.target.value)}
-                      className="w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-white text-slate-900 cursor-pointer"
-                      style={{
-                        width: `calc(${
-                          (evacuationCenters.find(ec => ec.id === distCenterId)?.name || '').length
-                        }ch + 3rem)`
-                      }}
+                      className="w-full text-xs py-2 px-3 h-auto whitespace-normal break-words rounded-lg border border-slate-300 bg-white text-slate-955 cursor-pointer hover:bg-slate-50"
                     >
                       {evacuationCenters.map(e => (
                         <option key={e.id} value={e.id}>{e.name}</option>
