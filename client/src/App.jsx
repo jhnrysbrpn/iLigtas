@@ -44,7 +44,6 @@ import AlertsView from './components/AlertsView';
 import InterDepartmentView from './components/InterDepartmentView';
 import AuthModal from './components/AuthModal';
 import GoBagPlannerView from './components/GoBagPlannerView';
-import { translations, Language } from './data/translations';
 
 export default function App() {
   
