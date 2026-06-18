@@ -8,7 +8,7 @@
 
 */
 -- AlterTable
-ALTER TABLE `user` DROP COLUMN `age`,
+ALTER TABLE `User` DROP COLUMN `age`,
     ADD COLUMN `approved` BOOLEAN NOT NULL DEFAULT false,
     ADD COLUMN `department` VARCHAR(191) NULL,
     ADD COLUMN `departmentId` VARCHAR(191) NULL,
@@ -19,3 +19,4 @@ ALTER TABLE `user` DROP COLUMN `age`,
 
 -- CreateIndex
 CREATE UNIQUE INDEX `User_username_key` ON `User`(`username`);
+
