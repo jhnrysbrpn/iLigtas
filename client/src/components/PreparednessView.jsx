@@ -27,12 +27,7 @@ export default function PreparednessView({
   setCurrentTab
 }) {
   
-  const isDeptAdmin = currentUser?.department && 
-    (currentUser.department.toLowerCase() === 'bfp' || 
-     currentUser.department.toLowerCase() === 'pnp' || 
-     currentUser.department.toLowerCase() === 'medics');
-     
-  const hasPreparednessAdminPrivilege = userRole === 'Admin' && !isDeptAdmin;
+  const hasPreparednessAdminPrivilege = userRole === 'Admin' || userRole === 'SuperAdmin';
 
   // Go-Bag interactive state
   const [checkedItems, setCheckedItems] = useState(['gb-1', 'gb-2']);
@@ -126,7 +121,41 @@ export default function PreparednessView({
 
   const handleDeleteActivity = (programId) => {
     if (!onUpdatePrograms) return;
+    const targetProg = programs.find(p => p.id === programId);
     if (window.confirm('Are you sure you want to delete this activity?')) {
+      if (targetProg) {
+        try {
+          const saved = localStorage.getItem('bdrrmc_archives_v1');
+          let archivesObj = { users: [], reports: [], alerts: [], programs: [] };
+          if (saved) {
+            try {
+              archivesObj = JSON.parse(saved);
+            } catch (e) {
+              console.error(e);
+            }
+          }
+          const newArchive = {
+            id: targetProg.id || `prog-${Date.now()}`,
+            type: 'PROGRAM',
+            name: targetProg.title || 'Deleted Activity',
+            details: targetProg,
+            history: [
+              {
+                action: 'Program Deleted & Archived',
+                timestamp: new Date().toISOString(),
+                details: `Program activity [ID: ${targetProg.id}] deleted and placed in secure archive storage list.`
+              }
+            ],
+            archivedAt: new Date().toISOString(),
+            deletedBy: 'Administrator'
+          };
+          archivesObj.programs = [newArchive, ...(archivesObj.programs || [])];
+          localStorage.setItem('bdrrmc_archives_v1', JSON.stringify(archivesObj));
+          window.dispatchEvent(new CustomEvent('bdrrmc-archives-updated'));
+        } catch (err) {
+          console.error('Archiving program failed:', err);
+        }
+      }
       const updated = programs.filter(p => p.id !== programId);
       onUpdatePrograms(updated);
     }
@@ -195,26 +224,28 @@ export default function PreparednessView({
         <div className="lg:col-span-2 space-y-6">
           
           {/* A. GO-BAG CHECKLIST INTERACTIVE SYSTEM */}
-          <div className="bg-[#EEF2FC]/70 p-6 rounded-3xl border border-indigo-100 flex flex-col sm:flex-row items-center justify-between gap-5 shadow-xs">
-            <div className="space-y-1 text-left">
-              <span className="text-[10px] font-black uppercase font-mono text-[#4f46e5] tracking-widest block">Survival Resource Portal</span>
-              <h3 className="font-extrabold text-slate-950 text-base sm:text-lg tracking-tight uppercase flex items-center gap-2">
-                <Flame className="w-5 h-5 text-red-500 animate-pulse shrink-0" />
-                Family Emergency Go Bag Planner
-              </h3>
-              <p className="text-xs text-slate-700 font-medium max-w-md leading-relaxed">
-                We have separated the Go-Bag tracking into a dedicated, multi-category checklist manager. Track items for Documents, Food, Medical, Clothing, Tools, and Communications!
-              </p>
-            </div>
+          {userRole === 'Resident' && (
+            <div className="bg-[#EEF2FC]/70 p-6 rounded-3xl border border-indigo-100 flex flex-col sm:flex-row items-center justify-between gap-5 shadow-xs animate-fade-in mb-6">
+              <div className="space-y-1 text-left">
+                <span className="text-[10px] font-black uppercase font-mono text-[#4f46e5] tracking-widest block">Survival Resource Portal</span>
+                <h3 className="font-extrabold text-slate-950 text-base sm:text-lg tracking-tight uppercase flex items-center gap-2">
+                  <Flame className="w-5 h-5 text-red-500 animate-pulse shrink-0" />
+                  Family Emergency Go Bag Planner
+                </h3>
+                <p className="text-xs text-slate-700 font-medium max-w-md leading-relaxed">
+                  We have separated the Go-Bag tracking into a dedicated, multi-category checklist manager. Track items for Documents, Food, Medical, Clothing, Tools, and Communications!
+                </p>
+              </div>
 
-            <button
-              type="button"
-              onClick={() => setCurrentTab('gobag')}
-              className="py-2.5 px-5 bg-indigo-600 hover:bg-slate-900 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md cursor-pointer select-none active:scale-95 transition-all flex items-center gap-2"
-            >
-              Launch Go Bag Planner
-            </button>
-          </div>
+              <button
+                type="button"
+                onClick={() => setCurrentTab('gobag')}
+                className="py-2.5 px-5 bg-indigo-600 hover:bg-slate-900 text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-md cursor-pointer select-none active:scale-95 transition-all flex items-center gap-2"
+              >
+                Launch Go Bag Planner
+              </button>
+            </div>
+          )}
 
           {/* B. DISASTER PROGRAMS & SKILLS DRILLS RESERVATION */}
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs">
@@ -231,7 +262,7 @@ export default function PreparednessView({
                 <button
                   type="button"
                   onClick={handleOpenAddActivity}
-                  className="py-1.5 px-3 bg-indigo-650 hover:bg-slate-900 text-white text-xs font-black rounded-lg shadow-sm transition-all flex items-center gap-1 active:scale-95 cursor-pointer"
+                  className="py-1.5 px-3 bg-indigo-600 hover:bg-slate-900 text-white text-xs font-black rounded-lg shadow-sm transition-all flex items-center gap-1 active:scale-95 cursor-pointer"
                 >
                   <PlusCircle className="w-4 h-4" /> Add Activity
                 </button>
@@ -272,7 +303,7 @@ export default function PreparednessView({
 
                   {/* Options Option */}
                   <div className="flex flex-col justify-end items-start md:items-end shrink-0 gap-2">
-                    <span className="text-[11px] font-black text-slate-650 font-mono">
+                    <span className="text-[11px] font-black text-slate-600 font-mono">
                       {prog.registrantsCount} Residents Registered
                     </span>
 
@@ -283,7 +314,7 @@ export default function PreparednessView({
                           onClick={() => handleOpenEditActivity(prog)}
                           className="py-1 px-3 bg-amber-500 hover:bg-amber-600 text-slate-950 text-[11px] font-black rounded-md shadow-xs active:scale-95 transition-all cursor-pointer"
                         >
-                          Change
+                          Modify
                         </button>
                         <button
                           type="button"
@@ -297,7 +328,7 @@ export default function PreparednessView({
                       prog.status === 'Upcoming' && (
                         <button
                           onClick={() => setSelectedProgramId(prog.id)}
-                          className="py-1.5 px-3.5 bg-indigo-650 hover:bg-slate-900 text-white text-[11px] font-black rounded-lg shadow-sm transition-all active:scale-95 text-center cursor-pointer"
+                          className="py-1.5 px-3.5 bg-indigo-600 hover:bg-slate-900 text-white text-[11px] font-black rounded-lg shadow-sm transition-all active:scale-95 text-center cursor-pointer"
                         >
                           I-register Aking Pangalan
                         </button>
@@ -523,19 +554,7 @@ export default function PreparednessView({
                   <select
                     value={formType}
                     onChange={(e) => setFormType(e.target.value)}
-                    className="mt-1 w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900 font-bold cursor-pointer"
-                    style={{
-                      width: `calc(${
-                        (formType === 'Drill' || formType === 'DRILL'
-                          ? '🚨 Emergency Drill'
-                          : formType === 'Fire Safety' || formType === 'FIRE_SAFETY'
-                            ? '🔥 Fire Safety Seminar'
-                            : formType === 'Seminar' || formType === 'SEMINAR'
-                              ? '📖 Preparedness Seminar'
-                              : '🩹 First Aid Training'
-                        ).length
-                      }ch + 3rem)`
-                    }}
+                    className="mt-1 w-full text-xs py-2 px-3 h-auto whitespace-normal break-words rounded-lg border border-slate-300 bg-slate-50 text-slate-955 font-bold cursor-pointer hover:bg-slate-100/50"
                   >
                     <option value={ProgramType.DRILL}>🚨 Emergency Drill</option>
                     <option value={ProgramType.FIRE_SAFETY}>🔥 Fire Safety Seminar</option>
@@ -551,8 +570,7 @@ export default function PreparednessView({
                   <select
                     value={formStatus}
                     onChange={(e) => setFormStatus(e.target.value)}
-                    className="mt-1 w-fit max-w-full text-xs py-2 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded-lg border border-slate-300 bg-slate-50 text-slate-900 font-bold cursor-pointer"
-                    style={{ width: `calc(${(formStatus || '').length}ch + 3.5rem)` }}
+                    className="mt-1 w-full text-xs py-2 px-3 h-auto whitespace-normal break-words rounded-lg border border-slate-300 bg-slate-50 text-slate-955 font-bold cursor-pointer hover:bg-slate-100/50"
                   >
                     <option value="Upcoming">Upcoming</option>
                     <option value="Ongoing">Ongoing</option>
@@ -643,7 +661,7 @@ export default function PreparednessView({
                 </button>
                 <button
                   type="submit"
-                  className="w-1/2 py-2 text-xs font-black rounded-lg bg-indigo-650 hover:bg-slate-900 text-white cursor-pointer"
+                  className="w-1/2 py-2 text-xs font-black rounded-lg bg-indigo-600 hover:bg-slate-900 text-white cursor-pointer"
                 >
                   {editingProgramId ? 'Save Changes' : 'Create Activity'}
                 </button>

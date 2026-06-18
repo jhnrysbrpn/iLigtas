@@ -53,8 +53,6 @@ export default function Sidebar({
     if (!dept) return '';
     switch (dept.toLowerCase()) {
       case 'bfp': return 'Bureau of Fire Protection';
-      case 'pnp': return 'PNP Maypajo';
-      case 'volunteers': return 'Barangay Volunteer';
       case 'medics': return 'Health & Medics';
       case 'rescue': 
         if (currentUser && (currentUser.departmentId === 'BDRRMC-35' || currentUser.username === 'official')) {
@@ -124,7 +122,7 @@ export default function Sidebar({
       });
     }
   } else {
-    // Responders, volunteers (Official), and Admin side: Remove "Report Fire Hazard" completely!
+    // Responders and Admin side: Remove "Report Fire Hazard" and "Go Bag Planner" completely!
     menuItems.push(
       { id: 'dashboard', name: 'Dashboard Hub', icon: LayoutDashboard },
       { id: 'maps', name: 'Hazard Map', icon: Map, badge: null },
@@ -137,7 +135,6 @@ export default function Sidebar({
         badgeColor: 'bg-yellow-100 text-yellow-800 border border-yellow-300 animate-pulse'
       },
       { id: 'preparedness', name: 'Preparedness Hub', icon: Shield },
-      { id: 'gobag', name: 'Go Bag Planner', icon: Briefcase },
       { id: 'response', name: 'Evac & Recovery', icon: BriefcaseMedical }
     );
   }
@@ -272,7 +269,7 @@ export default function Sidebar({
      {/* Barangay helpline footer */}
         <div className="p-3 mx-4 mb-4 mt-auto rounded-2xl bg-white border border-slate-200 text-left flex flex-col min-h-0 shrink-0">
           <div className="flex items-center gap-1.5 mb-2 select-none border-b pb-1.5 border-slate-100">
-            <span className="p-0.5 bg-red-650 text-white font-mono rounded text-[8px] font-black tracking-wide shrink-0 animate-pulse">
+            <span className="p-0.5 bg-red-600 text-white font-mono rounded text-[8px] font-black tracking-wide shrink-0 animate-pulse">
               HOTLINE
             </span>
             <p className="text-[10px] font-black text-slate-900 uppercase tracking-tight font-sans">
@@ -296,7 +293,7 @@ export default function Sidebar({
                 className="text-xs font-mono font-black text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-2 py-1 rounded border border-emerald-200/50 inline-flex items-center gap-1 cursor-pointer transition-colors"
                 title="Tap to call"
               >
-                <Phone className="w-3 h-3 text-emerald-650" />
+                <Phone className="w-3 h-3 text-emerald-600" />
                 <span>(02) 8260-8842</span>
               </a>
 

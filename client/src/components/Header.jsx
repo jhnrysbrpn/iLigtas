@@ -22,12 +22,60 @@ export default function Header({
   sidebarOpen,
   setSidebarOpen,
   onTriggerSOS,
-  activeExtremeAlertsExist
+  alerts = []
 }) {
   const [showSosModal, setShowSosModal] = useState(false);
   const [sosLocation, setSosLocation] = useState('');
   const [sosNotes, setSosNotes] = useState('');
   const [sosSuccess, setSosSuccess] = useState(false);
+
+  // Additional crisis parameters
+  const [waterLevel, setWaterLevel] = useState('Adequate');
+  const [taskUrgency, setTaskUrgency] = useState('Critical (All agencies)');
+  const [fireAlarmLevel, setFireAlarmLevel] = useState('First Alarm');
+
+  // GPS tracking & Automatic calling simulation states
+  const [gpsLoading, setGpsLoading] = useState(false);
+  const [gpsError, setGpsError] = useState(null);
+  const [gpsCoords, setGpsCoords] = useState(null);
+  const [isCalling, setIsCalling] = useState(false);
+  const [callTimer, setCallTimer] = useState(0);
+
+  // Helper function to synthesize a cellular ringtone
+  const playPhoneRingSound = () => {
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtx) return;
+      const ctx = new AudioCtx();
+      
+      const osc1 = ctx.createOscillator();
+      const osc2 = ctx.createOscillator();
+      const gainNode = ctx.createGain();
+
+      osc1.type = 'sine';
+      osc2.type = 'sine';
+      osc1.frequency.value = 440;
+      osc2.frequency.value = 480;
+
+      osc1.connect(gainNode);
+      osc2.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      // Ring sound: rise/decay pattern
+      gainNode.gain.setValueAtTime(0, ctx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.04, ctx.currentTime + 0.1);
+      gainNode.gain.setValueAtTime(0.04, ctx.currentTime + 1.8);
+      gainNode.gain.linearRampToValueAtTime(0, ctx.currentTime + 2.0);
+
+      osc1.start();
+      osc2.start();
+
+      osc1.stop(ctx.currentTime + 2.1);
+      osc2.stop(ctx.currentTime + 2.1);
+    } catch (e) {
+      console.warn("Web Audio API not supported or awaiting focus layout:", e);
+    }
+  };
 
   // Custom Hotlines overlay and client-side code packaging
   const [showHotlinesModal, setShowHotlinesModal] = useState(false);
@@ -46,20 +94,92 @@ export default function Header({
     return () => clearInterval(interval);
   }, []);
 
+  // Sync GPS coordinates tracking on modal toggled
+  React.useEffect(() => {
+    if (showSosModal) {
+      setGpsLoading(true);
+      setGpsError(null);
+      setGpsCoords(null);
+      setSosLocation('');
+      setIsCalling(false);
+      setCallTimer(0);
+
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            setGpsCoords({ lat, lng });
+            setGpsLoading(false);
+            
+            // Reverse geocode/estimate the best Purok 1-5 region
+            const puroks = ['Purok 1', 'Purok 2', 'Purok 3', 'Purok 4 (Sawata)', 'Purok 5'];
+            const idx = Math.abs(Math.floor((lat + lng) * 10000)) % puroks.length;
+            const estimatedPurok = puroks[idx] || 'Purok 4';
+            setSosLocation(`${estimatedPurok} (GPS Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)})`);
+          },
+          (error) => {
+            console.error(error);
+            setGpsError(error.message || "GPS Permission Blocked");
+            setGpsLoading(false);
+            // Default fallbacks for Barangay 35 Central
+            setGpsCoords({ lat: 14.6425, lng: 120.9734 });
+            setSosLocation("Purok 4, Sawata Yard (Barangay 35 Central)");
+          },
+          { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
+        );
+      } else {
+        setGpsError("Browser does not support geolocation APIs");
+        setGpsLoading(false);
+        setGpsCoords({ lat: 14.6425, lng: 120.9734 });
+        setSosLocation("Purok 4, Sawata Yard (Barangay 35 Central)");
+      }
+    }
+  }, [showSosModal]);
+
+  // Handle automatic simulated voice-dispatch call progression
+  React.useEffect(() => {
+    let timerID;
+    if (isCalling) {
+      // Sound active ring tone immediately
+      playPhoneRingSound();
+      
+      timerID = setInterval(() => {
+        setCallTimer(prev => {
+          const next = prev + 1;
+          // Repeat ringing sound cadence
+          if (next === 3 || next === 6) {
+            playPhoneRingSound();
+          }
+          if (next >= 8) {
+            clearInterval(timerID);
+            const finalNotes = sosNotes.trim() === '' ? 'cause: Under Investigation' : sosNotes;
+            onTriggerSOS(
+              IncidentCategory.FIRE, 
+              sosLocation || 'Barangay 35 Live GPS Hub', 
+              finalNotes,
+              waterLevel,
+              taskUrgency,
+              fireAlarmLevel
+            );
+            setSosSuccess(true);
+            setIsCalling(false);
+            setTimeout(() => {
+              setSosSuccess(false);
+              setShowSosModal(false);
+            }, 3000);
+          }
+          return next;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timerID);
+  }, [isCalling, sosLocation, sosNotes, waterLevel, taskUrgency, fireAlarmLevel]);
+
   const handleSosSubmit = (e) => {
     e.preventDefault();
     if (!sosLocation.trim()) return;
-    
-    // We strictly trigger fire incident category
-    onTriggerSOS(IncidentCategory.FIRE, sosLocation, sosNotes || 'IMMEDIATE SOS FIRE FIGHTING TRUCK DISPATCH REQUEST - CITIZEN ALARM BUTTON');
-    setSosSuccess(true);
-    setTimeout(() => {
-      setSosSuccess(false);
-      setShowSosModal(false);
-      // Reset forms
-      setSosLocation('');
-      setSosNotes('');
-    }, 2800);
+    setIsCalling(true);
   };
 
   return (
@@ -100,21 +220,92 @@ export default function Header({
 
         {/* Center: Overall Brgy Alert Level Bar */}
         <div className="hidden sm:flex items-center gap-2">
-          {activeExtremeAlertsExist ? (
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-300 text-red-700 font-extrabold shadow-2xs">
-              <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-              <span className="text-[10px] uppercase tracking-widest font-mono">
-                High Risk Alert
-              </span>
-            </div>
-          ) : (
-            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-700 font-extrabold shadow-2xs">
-              <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[10px] uppercase tracking-widest font-mono">
-                All Clear (Ligtas)
-              </span>
-            </div>
-          )}
+          {(() => {
+            const activeAlerts = alerts?.filter(a => a.isActive) || [];
+            
+            // Check if there is an active extreme alert
+            const hasExtreme = activeAlerts.some(a => 
+              a.severity === 'Extreme Danger' || 
+              a.severity?.toUpperCase() === 'EXTREME'
+            );
+            
+            // Check if there is an active warning alert
+            const hasWarning = activeAlerts.some(a => 
+              a.severity === 'Warning' || 
+              a.severity?.toUpperCase() === 'WARNING'
+            );
+            
+            // Check if there is an active advisory alert
+            const hasAdvisory = activeAlerts.some(a => 
+              a.severity === 'Advisory' || 
+              a.severity?.toUpperCase() === 'ADVISORY'
+            );
+
+            if (hasExtreme) {
+              const activeExtreme = activeAlerts.find(a => 
+                a.severity === 'Extreme Danger' || 
+                a.severity?.toUpperCase() === 'EXTREME'
+              );
+              const address = activeExtreme?.affectedArea || 'Barangay 35';
+              return (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-red-100 border border-red-400 text-red-800 font-extrabold shadow-sm">
+                  <span className="h-2 w-2 rounded-full bg-red-600 animate-pulse animate-duration-1000" />
+                  <span className="text-[10px] uppercase tracking-widest font-mono">
+                    HORROR ALERT
+                  </span>
+                  <span className="text-red-400 text-[10px] font-normal">|</span>
+                  <span className="text-[10px] text-red-700 font-sans tracking-tight font-bold truncate max-w-[150px] sm:max-w-[250px]">
+                    📍 {address}
+                  </span>
+                </div>
+              );
+            } else if (hasWarning) {
+              const activeWarning = activeAlerts.find(a => 
+                a.severity === 'Warning' || 
+                a.severity?.toUpperCase() === 'WARNING'
+              );
+              const address = activeWarning?.affectedArea || 'Barangay 35';
+              return (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-300 text-amber-800 font-extrabold shadow-2xs">
+                  <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="text-[10px] uppercase tracking-widest font-mono">
+                    WARNING ADVISORY
+                  </span>
+                  <span className="text-amber-300 text-[10px] font-normal">|</span>
+                  <span className="text-[10px] text-amber-700 font-sans tracking-tight font-bold truncate max-w-[150px] sm:max-w-[250px]">
+                    📍 {address}
+                  </span>
+                </div>
+              );
+            } else if (hasAdvisory) {
+              const activeAdvisory = activeAlerts.find(a => 
+                a.severity === 'Advisory' || 
+                a.severity?.toUpperCase() === 'ADVISORY'
+              );
+              const address = activeAdvisory?.affectedArea || 'Barangay 35';
+              return (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-sky-50 border border-sky-300 text-sky-700 font-extrabold shadow-2xs">
+                  <span className="h-2 w-2 rounded-full bg-sky-500 animate-pulse" />
+                  <span className="text-[10px] uppercase tracking-widest font-mono">
+                    ADVISORY FEED
+                  </span>
+                  <span className="text-sky-305 text-[10px] font-normal">|</span>
+                  <span className="text-[10px] text-sky-600 font-sans tracking-tight font-bold truncate max-w-[150px] sm:max-w-[250px]">
+                    📍 {address}
+                  </span>
+                </div>
+              );
+            } else {
+              return (
+                <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-700 font-extrabold shadow-2xs">
+                  <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <span className="text-[10px] uppercase tracking-widest font-mono">
+                    ALL CLEAR (LIGTAS)
+                  </span>
+                </div>
+              );
+            }
+          })()}
         </div>
 
         {/* Right Side: Emergency Hotlines Button */}
@@ -124,7 +315,7 @@ export default function Header({
           <button
             id="emergency-hotlines-btn"
             onClick={() => setShowHotlinesModal(true)}
-            className="bg-[#0ADBD2] hover:bg-[#09c2ba] text-slate-950 hover:text-black font-extrabold uppercase text-xs border border-indigo-200/80 px-3.5 sm:px-4 py-2 rounded-lg shadow-2xs cursor-pointer transition-all active:scale-95"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold uppercase text-xs border border-indigo-700 px-3.5 sm:px-4 py-2 rounded-lg shadow-sm cursor-pointer transition-all active:scale-95 hover:scale-[1.02]"
             title="Barangay 35 Emergency Fire Rescue Numbers"
           >
             Emergency Hotlines
@@ -148,68 +339,165 @@ export default function Header({
         <div id="sos-trigger-modal-backdrop" className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
           <div 
             id="sos-trigger-modal-box"
-            className="bg-white border-2 border-slate-950 max-w-sm w-full rounded-3xl p-6 text-slate-900 space-y-4 shadow-2xl relative animate-fade-in"
+            className="bg-white border-3 border-slate-950 max-w-lg w-full rounded-3xl p-6 md:p-8 text-slate-900 space-y-4 shadow-2xl relative animate-fade-in"
           >
-            <div className="flex items-center gap-2 text-red-600">
-              <Flame className="w-6 h-6 text-red-600 animate-pulse fill-red-600" />
-              <h3 className="text-md font-black font-sans uppercase tracking-tight">
-                CRITICAL FIRE DISPATCH REQUEST
-              </h3>
-            </div>
-
+            {/* Success screen once dispatch completes */}
             {sosSuccess ? (
               <div 
-                id="sos-trigger-success"
-                className="p-4 rounded-xl bg-emerald-100 text-emerald-800 border-2 border-emerald-500/20 text-xs font-mono font-bold text-center space-y-2 animate-pulse"
+                id="sos-trigger-success-animate"
+                className="p-6 rounded-2xl bg-emerald-50 border-2 border-emerald-500 text-center space-y-3 text-slate-900"
               >
-                <div className="text-xl">🚒 TRANSMITTED!</div>
-                <p>SOS alert has been coordinates-broadcasted to the Caloocan BFP Station. Local firefighters are en route to your street.</p>
+                <div className="text-3xl animate-bounce">🚒 CONNECTED!</div>
+                <h4 className="font-extrabold text-xs text-emerald-800 uppercase font-mono">Barangay Maypajo Response Activated</h4>
+                <p className="text-xs text-emerald-950 font-medium leading-relaxed">
+                  Your live GPS coordinates and specifications have been transmitted inside the central control dashboard. All fire engines, medics, and BDRRMC responders have been sounded via sirens!
+                </p>
+              </div>
+            ) : isCalling ? (
+              /* Simulated phone dialer performing the automatic call to the barangay */
+              <div id="sos-calling-screen" className="text-center space-y-5 animate-fade-in bg-slate-950 text-white p-6 rounded-2xl border-2 border-red-700">
+                <div className="relative mx-auto w-16 h-16 flex items-center justify-center bg-red-600 rounded-full animate-bounce">
+                  <Phone className="w-8 h-8 text-white fill-white animate-pulse" />
+                  <span className="absolute -inset-2 bg-red-500/25 rounded-full animate-ping" />
+                </div>
+                
+                <div className="space-y-1">
+                  <p className="text-[10px] font-mono tracking-widest uppercase font-black text-red-500">Live Satellite Dialing</p>
+                  <h4 className="text-base font-extrabold text-white">Calling Barangay 35 Office (BDRRMC Desk)</h4>
+                  <p className="text-xs font-mono text-slate-400">🚨 (02) 8281-9111 • Active GPS Link</p>
+                </div>
+
+                {/* Call status steps */}
+                <div className="bg-white/5 border border-white/10 p-3 rounded-xl text-left font-mono text-[10px] space-y-1.5">
+                  <div className="flex items-center gap-1.5 text-slate-300">
+                    <span className="text-emerald-500">✔</span>
+                    <span>GPS lock established ({gpsCoords?.lat?.toFixed(5)}, {gpsCoords?.lng?.toFixed(5)})</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-slate-300">
+                    <span className="text-emerald-500">✔</span>
+                    <span>Specifying constraints: [Water: ${waterLevel}] [Urgency: ${taskUrgency}] [Alarm: ${fireAlarmLevel}]</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-1.5 text-red-400 font-extrabold">
+                    <span className="animate-pulse">●</span>
+                    <span>
+                      {callTimer < 3 ? "Initiating Call Trunk..." : 
+                       callTimer < 6 ? "Ringing Dispatch Desks..." : 
+                       "Connecting Voice Synth Voice-Feed..."}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="text-xs font-bold text-slate-300 bg-red-950/40 p-2 rounded border border-red-900 border-dashed">
+                  📞 Automatically reporting fire threat area...
+                </div>
+
+                <button 
+                  type="button"
+                  onClick={() => {
+                    setIsCalling(false);
+                    setCallTimer(0);
+                  }}
+                  className="w-full py-2 bg-red-800 hover:bg-red-900 text-white font-mono font-black text-[11px] rounded-lg border border-red-600/50 uppercase transition-all"
+                >
+                  Hang Up / Cancel Dispatch
+                </button>
               </div>
             ) : (
-              <form onSubmit={handleSosSubmit} className="space-y-4">
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  Submit this distress alarm. It will immediately activate sirens and send automatic dispatch logs to responders.
+              /* Step 1: Tracking location and showing Big Confirm Buttons with maximized two-grid parameters */
+              <div id="sos-confirm-form" className="space-y-4 text-slate-900">
+                <div className="flex items-center gap-2 text-red-600 border-b pb-2">
+                  <Flame className="w-6 h-6 text-red-600 animate-pulse fill-red-600" />
+                  <h3 className="text-sm font-black font-sans uppercase tracking-tight">
+                    INTEGRATED CRITICAL SOS BROADCASTER
+                  </h3>
+                </div>
+
+                <p className="text-xs text-slate-600 leading-relaxed font-semibold">
+                  This system tracks precise satellite GPS coordinates, updates the live database, and automatically issues hotlines notifications to Barangay 35.
                 </p>
 
-                <div className="space-y-1 text-left">
-                  <label className="text-[10px] font-mono font-black text-slate-600 uppercase">Emergency Location (Purok / No.)</label>
-                  <input
-                    type="text"
-                    required
-                    value={sosLocation}
-                    onChange={(e) => setSosLocation(e.target.value)}
-                    placeholder="e.g. Purok 4, Sawata Alleyway 2"
-                    className="w-full bg-slate-50 border border-slate-300 rounded p-2 text-xs focus:border-red-500 focus:outline-none"
-                  />
-                </div>
+                {/* GPS Status and Coordinate Box */}
+                {gpsLoading ? (
+                  <div className="p-3 bg-[#EEF2FC]/60 border border-indigo-100 rounded-xl flex items-center justify-center gap-2 text-xs text-slate-800 font-bold animate-pulse">
+                    <span className="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                    🛰️ Querying live GPS coordinates...
+                  </div>
+                ) : gpsError ? (
+                  <div className="bg-amber-50 border border-amber-300 rounded-xl p-3 space-y-1.5 text-left">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono font-black text-amber-800 uppercase tracking-wide">📍 Default Station coordinates</span>
+                      <span className="px-1.5 py-0.5 text-[8px] bg-amber-100 text-amber-800 rounded font-bold uppercase">FALLBACK LOCKED</span>
+                    </div>
+                    <p className="text-[10px] text-amber-700 font-medium font-sans">
+                      Could not secure live GPS track ({gpsError}). Using preset Barangay Maypajo Central workspace coordinates.
+                    </p>
+                    <p className="text-xs font-mono text-slate-800">
+                      Lat: <span className="text-indigo-700 font-bold">14.642500</span>, Lng: <span className="text-indigo-700 font-bold">120.973400</span>
+                    </p>
+                  </div>
+                ) : (
+                  <div className="bg-emerald-50 border border-emerald-300 rounded-xl p-3 space-y-1.5 text-left">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[10px] font-mono font-black text-emerald-800 uppercase tracking-wide">📍 Live GPS Coordinates Secured</span>
+                      <span className="px-1.5 py-0.5 text-[8px] bg-emerald-100 text-emerald-800 rounded font-bold uppercase font-mono">ACTIVE SATELLITE FEED</span>
+                    </div>
+                    <p className="text-xs font-mono text-slate-800">
+                      Latitude: <span className="text-emerald-700 font-bold">{gpsCoords?.lat?.toFixed(6)}</span> <br />
+                      Longitude: <span className="text-emerald-700 font-bold">{gpsCoords?.lng?.toFixed(6)}</span>
+                    </p>
+                  </div>
+                )}
 
-                <div className="space-y-1 text-left">
-                  <label className="text-[10px] font-mono font-black text-slate-600 uppercase">Hazard Details (Optional)</label>
-                  <input
-                    type="text"
-                    value={sosNotes}
-                    onChange={(e) => setSosNotes(e.target.value)}
-                    placeholder="e.g. electrical transformer smoking or grass burning"
-                    className="w-full bg-slate-50 border border-slate-300 rounded p-2 text-xs focus:border-red-500 focus:outline-none"
-                  />
-                </div>
+                {/* Confirm Dispatch Details form elements */}
+                <form onSubmit={handleSosSubmit} className="space-y-4 text-left">
+                  <div className="space-y-4">
+                    {/* Location input */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-mono font-black text-slate-700 uppercase tracking-wide">📍 EMERGENCY LOCATION (PUROK / STREET)</label>
+                      <input
+                        type="text"
+                        required
+                        value={sosLocation}
+                        onChange={(e) => setSosLocation(e.target.value)}
+                        placeholder="e.g. Purok 1, Maypajo"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs font-bold focus:border-red-500 focus:outline-none text-slate-900"
+                      />
+                    </div>
 
-                <div className="flex items-center justify-end gap-2.5 pt-2 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setShowSosModal(false)}
-                    className="p-2 border rounded font-mono font-bold hover:bg-slate-100 text-slate-600"
-                  >
-                    Cancel Alarm
-                  </button>
-                  <button
-                    type="submit"
-                    className="p-2 px-5 bg-red-600 hover:bg-red-700 text-white font-mono font-black rounded-lg border-2 border-red-700"
-                  >
-                    DISPATCH TRUCKS
-                  </button>
-                </div>
-              </form>
+                    {/* Emergency Details input (renamed from Hazard Details) */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-mono font-black text-slate-700 uppercase tracking-wide">📝 EMERGENCY DETAILS (LEAVE BLANK FOR UNDER INVESTIGATION)</label>
+                      <textarea
+                        rows={4}
+                        value={sosNotes}
+                        onChange={(e) => setSosNotes(e.target.value)}
+                        placeholder="Provide details. If left blank, this logs as 'cause: Under Investigation'."
+                        className="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 text-xs text-slate-900 focus:border-red-500 focus:outline-none resize-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* HIGH-CONTRAST BIG SCREEN CRITICAL CALL TRIGGER */}
+                  <div className="space-y-2.5 pt-1.5 border-t border-slate-200">
+                    <button
+                      type="submit"
+                      className="w-full py-4 bg-red-600 hover:bg-slate-950 text-white font-mono font-black text-xs uppercase tracking-widest rounded-xl border-3 border-slate-950 hover:scale-[1.01] active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg animate-pulse"
+                    >
+                      <Phone className="w-4 h-4 text-white fill-white animate-bounce" />
+                      CONFIRM SOS & AUTOMATIC CALL
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowSosModal(false)}
+                      className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-mono font-bold text-[11px] rounded-lg border border-slate-300/40 uppercase transition-all text-center"
+                    >
+                      Cancel / Close Alarm
+                    </button>
+                  </div>
+                </form>
+              </div>
             )}
           </div>
         </div>

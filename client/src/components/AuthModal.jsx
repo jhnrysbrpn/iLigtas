@@ -36,9 +36,6 @@ export default function AuthModal({
     setRegError('');
     if (value === 'Resident') {
       setRegRole('Resident');
-    } else if (value === 'Volunteer') {
-      setRegRole('Responder');
-      setRegDepartment('volunteers');
     } else if (value === 'Rescue') {
       setRegRole('Responder');
       setRegDepartment('rescue');
@@ -235,10 +232,20 @@ export default function AuthModal({
           phone: trimmedPhone,
           username: trimmedUsername,
           password: trimmedPassword,
-          role: roleToSet === 'Admin' ? 'Admin' : roleToSet === 'SuperAdmin' ? 'SuperAdmin' : 'Resident',
+          role: 'Resident', // Start as Resident until SuperAdmin approves
+          requestedRole: roleToSet,
           department: isElevated ? regDepartment : undefined,
           departmentId: isElevated ? regDepartmentId.trim() : undefined,
-          approved: true
+          approved: !isElevated, // Needs SuperAdmin approval if requesting elevated role
+          history: [
+            {
+              action: "Account Self-Registration",
+              timestamp: new Date().toISOString(),
+              details: isElevated 
+                ? `Account registered. Requested elevated '${roleToSet}' privilege level for the ${regDepartment ? regDepartment.toUpperCase() : 'General'} agency department. Undergoing credentials validation.`
+                : "Standard Resident role account successfully created and verified."
+            }
+          ]
         };
 
         const updatedUsersList = [...usersList, newUser];
@@ -391,8 +398,8 @@ export default function AuthModal({
                     </div>
                   </div>
 
-                  <div className="bg-blue-50/95 p-3 rounded-xl border border-blue-200">
-                    <p className="text-[10px] leading-relaxed text-blue-900">
+                  <div className="bg-indigo-50/95 p-3 rounded-xl border border-indigo-200">
+                    <p className="text-[10px] leading-relaxed text-indigo-900">
                       💡 <strong>Quick simulation demo access:</strong><br />
                       • Barangay Admin (admin): <code className="text-indigo-850 font-black">admin</code> | Pass: <code className="text-indigo-800 font-black">admin</code><br />
                       • BFP Admin (admin): <code className="text-indigo-850 font-black">bfpadmin</code> | Pass: <code className="text-indigo-800 font-black">bfpadmin</code> (Bureau of Fire Protection)<br />
@@ -528,24 +535,12 @@ export default function AuthModal({
                         onChange={(e) => {
                           handleAccessTypeChange(e.target.value);
                         }}
-                        className="w-fit max-w-full text-xs py-2.5 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded border border-slate-300 bg-white text-slate-900 focus:outline-none focus:border-red-500 font-mono font-bold cursor-pointer"
-                        style={{
-                          width: `calc(${
-                            ({
-                              "Resident": "Resident",
-                              "Volunteer": "Barangay Volunteer",
-                              "Rescue": "Barangay Rescue Squad",
-                              "Official": "Barangay Admin & Officials",
-                              "External": "External Public Agency (BFP/PNP)"
-                            }[selectedAccessType] || selectedAccessType || '').length
-                          }ch + 3.5rem)`
-                        }}
+                        className="w-full text-xs py-2.5 px-3 h-auto whitespace-normal break-words rounded border border-slate-300 bg-white text-slate-950 focus:outline-none focus:border-red-550 font-mono font-bold cursor-pointer hover:bg-slate-50"
                       >
                         <option value="Resident">Resident</option>
-                        <option value="Volunteer">Barangay Volunteer</option>
                         <option value="Rescue">Barangay Rescue Squad</option>
                         <option value="Official">Barangay Admin & Officials</option>
-                        <option value="External">External Public Agency (BFP/PNP)</option>
+                        <option value="External">External Public Agency (BFP/Red Cross)</option>
                       </select>
                     </div>
 
@@ -558,15 +553,7 @@ export default function AuthModal({
                         <select
                           value={regRole}
                           onChange={(e) => setRegRole(e.target.value)}
-                          className="w-fit max-w-full text-[#0f172a] text-xs py-2.5 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded border border-slate-300 bg-white focus:outline-none focus:border-red-500 font-mono font-bold cursor-pointer mb-2"
-                          style={{
-                            width: `calc(${
-                              ({
-                                "Admin": "Admin / Officer (Handles operations and status updates)",
-                                "Responder": "Responder / Field Personnel"
-                              }[regRole] || regRole || '').length
-                            }ch + 3.5rem)`
-                          }}
+                          className="w-full text-[#0f172a] text-xs py-2.5 px-3 h-auto whitespace-normal break-words rounded border border-slate-300 bg-white focus:outline-none focus:border-red-555 font-mono font-bold cursor-pointer mb-2 hover:bg-slate-50"
                         >
                           <option value="Admin">Admin / Officer (Handles operations and status updates)</option>
                           <option value="Responder">Responder / Field Personnel</option>
@@ -586,22 +573,9 @@ export default function AuthModal({
                             <select
                               value={regDepartment}
                               onChange={(e) => setRegDepartment(e.target.value)}
-                              className="w-fit max-w-full text-xs py-2.5 px-3 pr-10 h-auto whitespace-normal wrap-break-word rounded border border-orange-200 bg-white text-slate-950 focus:outline-none focus:border-emerald-500 font-bold cursor-pointer"
-                              style={{
-                                width: `calc(${
-                                  ({
-                                    "bfp": "Bureau of Fire Protection (BFP) Maypajo",
-                                    "pnp": "Philippine National Police (PNP) Maypajo",
-                                    "volunteers": "Barangay 35 Fire Volunteer Brigade",
-                                    "medics": "Maypajo Health & Red Cross Medic Unit",
-                                    "rescue": "Barangay Rescue & Evacuation Squad"
-                                  }[regDepartment] || regDepartment || '').length
-                                }ch + 3.5rem)`
-                              }}
+                              className="w-full text-xs py-2.5 px-3 h-auto whitespace-normal break-words rounded border border-orange-200 bg-white text-slate-955 focus:outline-none focus:border-emerald-500 font-bold cursor-pointer hover:bg-slate-50"
                             >
                               <option value="bfp">Bureau of Fire Protection (BFP) Maypajo</option>
-                              <option value="pnp">Philippine National Police (PNP) Maypajo</option>
-                              <option value="volunteers">Barangay 35 Fire Volunteer Brigade</option>
                               <option value="medics">Maypajo Health & Red Cross Medic Unit</option>
                               <option value="rescue">Barangay Rescue & Evacuation Squad</option>
                             </select>
@@ -620,8 +594,6 @@ export default function AuthModal({
                             placeholder={
                               selectedAccessType === 'Official' 
                                 ? 'e.g. BDRRMC-35, OFFICIAL-01' 
-                                : selectedAccessType === 'Volunteer' 
-                                ? 'e.g. VOL-35-001' 
                                 : selectedAccessType === 'Rescue' 
                                 ? 'e.g. RES-35-001' 
                                 : 'e.g. BFP-4015, RES-201'

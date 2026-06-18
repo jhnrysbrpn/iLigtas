@@ -51,7 +51,7 @@ export const INITIAL_HAZARD_REPORTS = [
     id: 'rep-fire-1',
     category: IncidentCategory.FIRE,
     title: 'Active Kitchen Fire - Solis Alleyway',
-    description: 'A grease/oil cooking fire occurred in a residential kitchen. Smoke is heavy and residents are starting to evacuate the immediate structures. Dry chemical extinguishers are being deployed by volunteers.',
+    description: 'A grease/oil cooking fire occurred in a residential kitchen. Smoke is heavy and residents are starting to evacuate the immediate structures. Dry chemical extinguishers are being deployed by the barangay emergency response team.',
     reporterName: 'Carlos Mendiola',
     reporterPhone: '0917-882-3344',
     locationName: 'Purok 3, Solis Street (Near Maypajo Public Market)',
@@ -95,7 +95,7 @@ export const INITIAL_HAZARD_REPORTS = [
         timestamp: '2026-06-12T11:55:00-07:00'
       }
     ],
-    assignedResponder: 'Meralco Utility Dispatch & Fire Patrol volunteers'
+    assignedResponder: 'Meralco Utility Dispatch & Barangay Rescue'
   },
   {
     id: 'rep-fire-3',
@@ -116,7 +116,7 @@ export const INITIAL_HAZARD_REPORTS = [
     id: 'rep-fire-4',
     category: IncidentCategory.FIRE,
     title: 'Rubbish Fire Near School Perimeter Wall',
-    description: 'Garbage and plastic waste illegally burned near concrete perimeter wall. Smoke resolved by barangay volunteers with buckets of sand. Closed out.',
+    description: 'Garbage and plastic waste illegally burned near concrete perimeter wall. Smoke resolved by barangay response team with buckets of sand. Closed out.',
     reporterName: 'Nita Reyes',
     reporterPhone: '0922-334-5566',
     locationName: 'Purok 2, Behind Barangay 35 Daycare Centre',
@@ -215,7 +215,7 @@ export const INITIAL_PROGRAMS = [
     time: '1:00 PM - 3:30 PM',
     location: 'Barangay Function Hall',
     description: 'Interactive session detailing how to identify hot plugs, low submeter capacity limitations, and affordable home smoke alarm units install tips for residents.',
-    host: 'Volunteers for Safe Caloocan',
+    host: 'BFP Caloocan District',
     status: 'Upcoming',
     registrantsCount: 22,
     registeredUsers: []
@@ -228,7 +228,7 @@ export const INITIAL_PROGRAMS = [
     time: '9:00 AM',
     location: 'Main Hydrant Station, J.P. Rizal St',
     description: 'A complete walkthrough on how to operate fire hydrants, hose pressure relief systems, and how to coordinate with initial BFP responder trucks during emergencies.',
-    host: 'Caloocan Fire Volunteers Club',
+    host: 'BDRRMC Maypajo Safety Office',
     status: 'Completed',
     registrantsCount: 41,
     registeredUsers: []
@@ -265,7 +265,7 @@ export const INITIAL_STOCKPILE = [
   },
   {
     id: 'st-4',
-    name: 'Barangay Volunteer Brass Hydrant Nozzles (2.5 inch)',
+    name: 'Barangay Auxiliary Brass Hydrant Nozzles (2.5 inch)',
     category: 'Fire fighting tools',
     quantity: 18,
     unit: 'pcs',
