@@ -1,0 +1,138 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  username      String   @unique
+  phone         String
+  password      String
+  name          String
+  role          String   @default("Resident")
+  requestedRole String?
+  department    String?
+  departmentId  String?
+  approved      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Alert {
+  id           Int      @id @default(autoincrement())
+  title        String
+  severity     String
+  message      String   @db.Text
+  affectedArea String
+  timestamp    DateTime @default(now())
+  isActive     Boolean  @default(true)
+  createdBy    String
+  broadcastSMS Boolean  @default(false)
+}
+
+model HazardReport {
+  id                    Int       @id @default(autoincrement())
+  category              String
+  title                 String
+  description           String    @db.Text
+  reporterName          String
+  reporterPhone         String
+  locationName          String
+  latitude              Float
+  longitude             Float
+  status                String    @default("Pending")
+  priority              String    @default("Medium")
+  timestamp             DateTime  @default(now())
+  assignedResponder     String?
+  affectedFamiliesCount Int       @default(0)
+  damageCostEstimated   Float     @default(0)
+  comments              Comment[]
+}
+
+model Comment {
+  id             Int          @id @default(autoincrement())
+  author         String
+  role           String
+  text           String       @db.Text
+  timestamp      DateTime     @default(now())
+  hazardReport   HazardReport @relation(fields: [hazardReportId], references: [id], onDelete: Cascade)
+  hazardReportId Int
+}
+
+model EvacuationCenter {
+  id               Int     @id @default(autoincrement())
+  name             String
+  locationName     String
+  currentOccupants Int     @default(0)
+  maxCapacity      Int
+  status           String  @default("Inactive")
+  contactPerson    String
+  phone            String
+  hasMedicalSupply Boolean @default(false)
+  hasRestrooms     Boolean @default(false)
+  hasKitchen       Boolean @default(false)
+  latitude         Float
+  longitude        Float
+}
+
+model Program {
+  id               Int    @id @default(autoincrement())
+  title            String
+  type             String
+  date             String
+  time             String
+  location         String
+  description      String @db.Text
+  host             String
+  status           String
+  registrantsCount Int    @default(0)
+  registeredUsers  String @default("")
+}
+
+model StockpileItem {
+  id           Int    @id @default(autoincrement())
+  name         String
+  category     String
+  quantity     Int
+  unit         String
+  minimumLevel Int
+  lastUpdated  String
+}
+
+model VulnerabilityRecord {
+  id                Int     @id @default(autoincrement())
+  familyName        String
+  headOfHousehold   String
+  membersCount      Int
+  address           String
+  vulnerableMembers String
+  hazardExposure    String
+  notified          Boolean @default(false)
+  registeredDate    String
+}
+
+model Hydrant {
+  id           Int    @id @default(autoincrement())
+  name         String
+  locationName String
+  status       String
+  latitude     Float
+  longitude    Float
+}
+
+model ReliefDistribution {
+  id               Int    @id @default(autoincrement())
+  centerId         Int
+  batchName        String
+  itemsDistributed String @db.Text
+  familiesServed   Int
+  date             String
+  status           String
+}
