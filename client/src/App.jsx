@@ -69,13 +69,8 @@ export default function App() {
   const [usersList, setUsersList] = useState(() => {
     const defaultUsers = [
       { name: 'Kagawad Jaime Ortiz', username: 'admin', email: 'jaime.ortiz@maypajo.gov.ph', phone: '0917-828-9111', password: 'admin', role: 'SuperAdmin', department: 'rescue', departmentId: 'RES-101', approved: true },
-      { name: 'SFO1 Michael Abad', username: 'fire', email: 'michael.abad@bfp.gov.ph', phone: '0917-237-5463', password: 'fire', role: 'Responder', department: 'bfp', departmentId: 'BFP-911', approved: true },
       { name: 'SFO4 Juan Dela Cruz', username: 'bfpadmin', email: 'juan.delacruz@bfp.gov.ph', phone: '0917-001-9111', password: 'bfpadmin', role: 'SuperAdmin', department: 'bfp', departmentId: 'BFP-911', approved: true },
-      { name: 'PCol Ricardo Cardo', username: 'pnpadmin', email: 'ricardo.cardo@pnp.gov.ph', phone: '0917-002-9111', password: 'pnpadmin', role: 'SuperAdmin', department: 'pnp', departmentId: 'PNP-911', approved: true },
-      { name: 'Dr. Jane Doe V', username: 'healthadmin', email: 'jane.doe@redcross.org.ph', phone: '0917-003-9111', password: 'healthadmin', role: 'SuperAdmin', department: 'medics', departmentId: 'MDC-911', approved: true },
-      { name: 'Noel Aguilar (Volunteer Leader)', username: 'volunteer', email: 'noel.aguilar@maypajo.gov.ph', phone: '0917-888-0001', password: 'volunteer', role: 'SuperAdmin', department: 'volunteers', departmentId: 'VOL-35-001', approved: true },
-      { name: 'Sgt. James Dee (Rescue Specialist)', username: 'rescue', email: 'james.rescue@maypajo.gov.ph', phone: '0917-888-0002', password: 'rescue', role: 'Admin', department: 'rescue', departmentId: 'RES-35-001', approved: true },
-      { name: 'Hon. Barangay Officer Santos', username: 'official', email: 'santos.officials@maypajo.gov.ph', phone: '0917-888-0003', password: 'official', role: 'Admin', department: 'rescue', departmentId: 'BDRRMC-35', approved: true }
+      { name: 'Dr. Jane Doe V', username: 'healthadmin', email: 'jane.doe@redcross.org.ph', phone: '0917-003-9111', password: 'healthadmin', role: 'SuperAdmin', department: 'medics', departmentId: 'MDC-911', approved: true }
     ];
     const saved = localStorage.getItem('_users_list');
     if (saved) {

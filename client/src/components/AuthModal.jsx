@@ -394,14 +394,9 @@ export default function AuthModal({
                   <div className="bg-blue-50/95 p-3 rounded-xl border border-blue-200">
                     <p className="text-[10px] leading-relaxed text-blue-900">
                       💡 <strong>Quick simulation demo access:</strong><br />
-                      • Central Admin: <code className="text-indigo-850 font-black">admin</code> | Pass: <code className="text-indigo-800 font-black">admin</code><br />
+                      • Barangay Admin: <code className="text-indigo-850 font-black">admin</code> | Pass: <code className="text-indigo-800 font-black">admin</code><br />
                       • BFP Admin: <code className="text-indigo-850 font-black">bfpadmin</code> | Pass: <code className="text-indigo-800 font-black">bfpadmin</code> (Bureau of Fire Protection)<br />
-                      • PNP Admin: <code className="text-indigo-850 font-black">pnpadmin</code> | Pass: <code className="text-indigo-800 font-black">pnpadmin</code> (National Police / PNP)<br />
-                      • Health Admin: <code className="text-indigo-850 font-black">healthadmin</code> | Pass: <code className="text-indigo-800 font-black">healthadmin</code> (Medics / Red Cross)<br />
-                      • Volunteer Leader: <code className="text-indigo-850 font-black">volunteer</code> | Pass: <code className="text-indigo-800 font-black">volunteer</code> (Volunteer Brigade)<br />
-                      • Rescue Specialist: <code className="text-indigo-850 font-black">rescue</code> | Pass: <code className="text-indigo-800 font-black">rescue</code> (Rescue Squad Admin)<br />
-                      • Brgy Official: <code className="text-indigo-850 font-black">official</code> | Pass: <code className="text-indigo-800 font-black">official</code> (Barangay Officers)<br />
-                      • Field Responder: <code className="text-indigo-850 font-black">fire</code> | Pass: <code className="text-indigo-800 font-black">fire</code> (BFP field responder)
+                      • Health Admin: <code className="text-indigo-850 font-black">healthadmin</code> | Pass: <code className="text-indigo-800 font-black">healthadmin</code> (Medics / Red Cross)
                     </p>
                   </div>
 

@@ -43,18 +43,6 @@ export default function InterDepartmentView({ userRole, currentUser, t, usersLis
         ]
       },
       {
-        id: 'pnp',
-        name: 'Philippine National Police (PNP) Maypajo',
-        leader: 'PCol Ricardo Cardo',
-        personnelActive: 10,
-        status: 'Perimeter Cordon & Crowd Control',
-        color: 'border-blue-600 bg-blue-50/50 hover:bg-blue-50',
-        deployments: [
-          { id: 'dep-9', teamName: 'PNP Security Crew 1', location: 'Solis Perimeter Line', task: 'Crowd containment & securing thoroughfares', timeSent: '12:15 PM' },
-          { id: 'dep-10', teamName: 'PNP Mobile 503', location: 'Rizal Ave Traffic Cut-off', task: 'Clearing traffic routes for emergency engines', timeSent: '12:22 PM' }
-        ]
-      },
-      {
         id: 'volunteers',
         name: 'Barangay 35 Fire Volunteer Brigade',
         leader: 'Captain Noel Aguilar',
@@ -382,7 +370,7 @@ export default function InterDepartmentView({ userRole, currentUser, t, usersLis
     if (!dept) return 'Citizen Division';
     switch (dept.toLowerCase()) {
       case 'bfp': return 'Bureau of Fire Protection Maypajo';
-      case 'pnp': return 'PNP Maypajo Police Precinct';
+
       case 'volunteers': return 'Barangay 35 Fire Volunteer Brigade';
       case 'medics': return 'Maypajo Health & Red Cross Medic Unit';
       case 'rescue': return 'Barangay Rescue & Evacuation Squad';
@@ -855,14 +843,9 @@ export default function InterDepartmentView({ userRole, currentUser, t, usersLis
               <div className="p-3 bg-white rounded-xl border border-slate-200 text-left">
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest font-mono">Demo Mock Accounts</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-1.5 text-xs mt-1.5 font-mono">
-                  <p>👤 <strong>Central Admin:</strong> `admin` | `admin`</p>
-                  <p>🚒 <strong>Field Responder:</strong> `fire` | `fire`</p>
+                  <p>👤 <strong>Barangay Admin:</strong> `admin` | `admin`</p>
                   <p>🔥 <strong>BFP Admin:</strong> `bfpadmin` | `bfpadmin`</p>
-                  <p>👮 <strong>PNP Admin:</strong> `pnpadmin` | `pnpadmin`</p>
                   <p>🏥 <strong>Health Admin:</strong> `healthadmin` | `healthadmin`</p>
-                  <p>🤝 <strong>Volunteer Leader:</strong> `volunteer` | `volunteer`</p>
-                  <p>⚡ <strong>Rescue Specialist:</strong> `rescue` | `rescue`</p>
-                  <p>🏛️ <strong>Brgy Official:</strong> `official` | `official`</p>
                 </div>
               </div>
             </div>
@@ -967,7 +950,6 @@ export default function InterDepartmentView({ userRole, currentUser, t, usersLis
                           width: `calc(${
                             ({
                               "bfp": "BFP Station",
-                              "pnp": "PNP Maypajo",
                               "volunteers": "Barangay Volunteers",
                               "medics": "Medic Team",
                               "rescue": "Rescue Evacuation"
@@ -976,7 +958,6 @@ export default function InterDepartmentView({ userRole, currentUser, t, usersLis
                         }}
                       >
                         {isSelectableDept("bfp") && <option value="bfp">BFP Station</option>}
-                        {isSelectableDept("pnp") && <option value="pnp">PNP Maypajo</option>}
                         {isSelectableDept("volunteers") && <option value="volunteers">Barangay Volunteers</option>}
                         {isSelectableDept("medics") && <option value="medics">Medic Team</option>}
                         {isSelectableDept("rescue") && <option value="rescue">Rescue Evacuation</option>}
@@ -1062,7 +1043,6 @@ export default function InterDepartmentView({ userRole, currentUser, t, usersLis
                           width: `calc(${
                             ({
                               "bfp": "BFP Station",
-                              "pnp": "PNP Maypajo",
                               "volunteers": "Barangay Volunteers",
                               "medics": "Medic Team",
                               "rescue": "Rescue Evacuation"
@@ -1071,7 +1051,6 @@ export default function InterDepartmentView({ userRole, currentUser, t, usersLis
                         }}
                       >
                         {isSelectableDept("bfp") && <option value="bfp">BFP Station</option>}
-                        {isSelectableDept("pnp") && <option value="pnp">PNP Maypajo</option>}
                         {isSelectableDept("volunteers") && <option value="volunteers">Barangay Volunteers</option>}
                         {isSelectableDept("medics") && <option value="medics">Medic Team</option>}
                         {isSelectableDept("rescue") && <option value="rescue">Rescue Evacuation</option>}
@@ -1154,7 +1133,6 @@ export default function InterDepartmentView({ userRole, currentUser, t, usersLis
                         width: `calc(${
                           ({
                             "bfp": "BFP Maypajo Substation",
-                            "pnp": "PNP Maypajo Police Precinct",
                             "volunteers": "Barangay Fire Volunteers",
                             "medics": "Red Cross Medical Hub",
                             "rescue": "Evac & Rescue Dispatch"
@@ -1163,7 +1141,6 @@ export default function InterDepartmentView({ userRole, currentUser, t, usersLis
                       }}
                     >
                       {isSelectableDept("bfp") && <option value="bfp">BFP Maypajo Substation</option>}
-                      {isSelectableDept("pnp") && <option value="pnp">PNP Maypajo Police Precinct</option>}
                       {isSelectableDept("volunteers") && <option value="volunteers">Barangay Fire Volunteers</option>}
                       {isSelectableDept("medics") && <option value="medics">Red Cross Medical Hub</option>}
                       {isSelectableDept("rescue") && <option value="rescue">Evac & Rescue Dispatch</option>}
