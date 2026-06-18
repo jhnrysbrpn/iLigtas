@@ -24,7 +24,6 @@ export default function PreparednessView({
   onRegisterForProgram,
   onModifyStockpile,
   onUpdatePrograms,
-  t,
   setCurrentTab
 }) {
   

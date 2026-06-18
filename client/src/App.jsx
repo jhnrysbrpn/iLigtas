@@ -112,11 +112,6 @@ export default function App() {
 
   const [showAuthModal, setShowAuthModal] = useState(false);
 
-  // Translation function helper (English only)
-  const t = (key) => {
-    return translations['en'][key] || String(key);
-  };
-
   // Sync role to user selection on reload/state update to make role management updates live
   useEffect(() => {
     if (isLoggedIn && currentUser) {
@@ -198,13 +193,14 @@ export default function App() {
   useEffect(() => {
     const fetchBackendData = async () => {
       try {
-        const alertsRes = await fetch('http://localhost:5000/api/alerts');
+        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const alertsRes = await fetch(`${apiBase}/api/alerts`);
         const alertsData = await alertsRes.json();
         if (alertsData.status === 'success') {
           setAlerts(alertsData.data);
         }
 
-        const reportsRes = await fetch('http://localhost:5000/api/reports');
+        const reportsRes = await fetch(`${apiBase}/api/reports`);
         const reportsData = await reportsRes.json();
         if (reportsData.status === 'success') {
           setReports(reportsData.data);
@@ -613,7 +609,6 @@ export default function App() {
         currentUser={currentUser}
         setCurrentUser={setCurrentUser}
         setShowAuthModal={setShowAuthModal}
-        t={t}
         broadcastPublicMode={broadcastPublicMode}
       />
 
@@ -627,7 +622,6 @@ export default function App() {
           setSidebarOpen={setSidebarOpen}
           onTriggerSOS={handleTriggerSOS}
           activeExtremeAlertsExist={activeExtremeAlertsExist}
-          t={t}
         />
 
         {/* COMPONENT TAB DETECTOR RENDER VIEWS */}
@@ -645,7 +639,6 @@ export default function App() {
               onAddComment={handleAddComment}
               onUpdateReportStatus={handleUpdateReportStatus}
               onQuickBroadcast={handleQuickBroadcast}
-              t={t}
               onDeleteReport={handleDeleteReport}
             />
           )}
@@ -657,7 +650,6 @@ export default function App() {
               reports={reports}
               vulnerabilityRegistry={vulnerabilityRegistry}
               onAddHouseholdVulnerability={handleAddHouseholdVulnerability}
-              t={t}
               userRole={userRole}
               currentUser={currentUser}
               onUpdateReportStatus={handleUpdateReportStatus}
@@ -670,7 +662,6 @@ export default function App() {
               reports={reports}
               onSubmitReport={handleSubmitReport}
               onAddComment={handleAddComment}
-              t={t}
               isLoggedIn={isLoggedIn}
               currentUser={currentUser}
               setShowAuthModal={setShowAuthModal}
@@ -685,7 +676,6 @@ export default function App() {
               onAddAlert={handleAddAlert}
               onDeleteAlert={handleDeleteAlert}
               onUpdateAlerts={setAlerts}
-              t={t}
               broadcastPublicMode={broadcastPublicMode}
               onToggleBroadcastPublicMode={handleToggleBroadcastPublicMode}
             />
@@ -695,7 +685,6 @@ export default function App() {
             <InterDepartmentView 
               userRole={userRole}
               currentUser={currentUser}
-              t={t}
               usersList={usersList}
               setUsersList={setUsersList}
             />
@@ -710,7 +699,6 @@ export default function App() {
               onRegisterForProgram={handleRegisterForProgram}
               onModifyStockpile={handleModifyStockpile}
               onUpdatePrograms={setPrograms}
-              t={t}
               setCurrentTab={setCurrentTab}
             />
           )}
@@ -731,7 +719,6 @@ export default function App() {
               reports={reports}
               onAddVictimIntake={handleAddVictimIntake}
               onAddReliefDistribution={handleAddReliefDistribution}
-              t={t}
             />
           )}
         </main>
@@ -740,8 +727,8 @@ export default function App() {
         <footer className="py-4 text-center text-[10px] text-slate-600 font-mono border-t border-slate-300 bg-[#EFF2FE] mt-auto select-none">
           <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
             <div className="flex gap-4">
-              <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></div> {t('systemOnline')}</span>
-              <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div> {t('govUplink')}</span>
+              <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></div> System Online</span>
+              <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-slate-400"></div> Gov't Uplink Active</span>
             </div>
             <div>Barangay 35 Maypajo Caloocan Fire Preparedness & Emergency Portal © 2026 | Preparedness is Safety!</div>
           </div>
@@ -756,7 +743,6 @@ export default function App() {
         onAuthSuccess={handleAuthSuccess}
         usersList={usersList}
         setUsersList={setUsersList}
-        t={t}
       />
 
     </div>

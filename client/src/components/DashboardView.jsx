@@ -34,7 +34,6 @@ export default function DashboardView({
   onAddComment,
   onUpdateReportStatus,
   onQuickBroadcast,
-  t,
   onDeleteReport
 }) {
   

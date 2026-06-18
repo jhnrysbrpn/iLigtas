@@ -21,7 +21,6 @@ export default function ReportingView({
   reports,
   onSubmitReport,
   onAddComment,
-  t,
   isLoggedIn = false,
   currentUser = null,
   setShowAuthModal

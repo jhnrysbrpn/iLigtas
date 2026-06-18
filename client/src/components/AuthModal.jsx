@@ -7,24 +7,7 @@ export default function AuthModal({
   onClose,
   onAuthSuccess,
   usersList,
-  setUsersList,
-  t = (key) => {
-    const localTranslations = {
-      authModalTitle: 'Barangay 35 Securing Portal',
-      registerSuccessLabel: 'Registration Successful',
-      loginTab: 'Sign In',
-      registerTab: 'Register Resident',
-      usernameInput: 'Username',
-      passwordInput: 'Password',
-      residentToggleBtn: 'Sign in as Barangay Resident / Public',
-      signInAction: 'Secure Log In',
-      fullnameInput: 'Full Name (Middle, Last)',
-      selectRole: 'Official Clearance / Role',
-      cancelBtn: 'Cancel',
-      signUpAction: 'Submit Registration'
-    };
-    return localTranslations[key] || '';
-  }
+  setUsersList
 }) {
   const [activeTab, setActiveTab] = useState('login');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
@@ -303,7 +286,7 @@ export default function AuthModal({
             </div>
             <div>
               <h3 className="font-extrabold text-sm text-slate-950 uppercase tracking-wide font-mono">
-                {t('authModalTitle')}
+                Barangay 35 Securing Portal
               </h3>
               <p className="text-[10px] text-slate-600 mt-1 uppercase font-bold font-mono tracking-wider">
                 Brgy 35 Maypajo, Caloocan City
@@ -318,7 +301,7 @@ export default function AuthModal({
           {regSuccess ? (
             <div className="p-8 text-center flex flex-col items-center justify-center min-h-75">
               <CheckCircle className="w-16 h-16 text-emerald-600 animate-bounce mb-4" />
-              <h4 className="text-lg font-black text-emerald-800 uppercase font-mono">{t('registerSuccessLabel')}!</h4>
+              <h4 className="text-lg font-black text-emerald-800 uppercase font-mono">Registration Successful!</h4>
               <p className="text-xs text-slate-700 mt-2 max-w-xs">
                 Account constructed. Preparing system session credentials...
               </p>
@@ -341,7 +324,7 @@ export default function AuthModal({
                   }`}
                 >
                   <Lock className="w-3.5 h-3.5" />
-                  <span>{t('loginTab')}</span>
+                  <span>Sign In</span>
                 </button>
                 <button
                   type="button"
@@ -356,7 +339,7 @@ export default function AuthModal({
                   }`}
                 >
                   <UserPlus className="w-3.5 h-3.5" />
-                  <span>{t('registerTab')}</span>
+                  <span>Register Resident</span>
                 </button>
               </div>
 
@@ -372,7 +355,7 @@ export default function AuthModal({
 
                   <div>
                     <label className="block text-[10px] font-bold text-slate-700 tracking-wider uppercase mb-1.5 font-mono">
-                      {t('usernameInput')} *
+                      Username *
                     </label>
                     <input
                       type="text"
@@ -386,7 +369,7 @@ export default function AuthModal({
 
                   <div>
                     <label className="block text-[10px] font-bold text-slate-700 tracking-wider uppercase mb-1.5 font-mono">
-                      {t('passwordInput')} *
+                      Password *
                     </label>
                     <div className="relative">
                       <input
@@ -428,13 +411,13 @@ export default function AuthModal({
                       onClick={onClose}
                       className="w-1/2 py-2.5 text-xs font-semibold rounded bg-slate-300 hover:bg-slate-200 text-slate-800 transition-colors"
                     >
-                      {t('residentToggleBtn')}
+                      Sign in as Barangay Resident / Public
                     </button>
                     <button
                       type="submit"
                       className="w-1/2 py-2.5 text-xs font-black rounded bg-red-600 hover:bg-red-700 text-white shadow-md active:scale-97 transition-all uppercase tracking-wider font-mono cursor-pointer"
                     >
-                      {t('signInAction')}
+                      Secure Log In
                     </button>
                   </div>
 
@@ -456,7 +439,7 @@ export default function AuthModal({
                     
                     <div>
                       <label className="block text-[10px] font-bold text-slate-700 tracking-wider uppercase mb-1 font-mono">
-                        {t('fullnameInput')} *
+                        Full Name (Middle, Last) *
                       </label>
                       <input
                         type="text"
@@ -503,7 +486,7 @@ export default function AuthModal({
 
                     <div>
                       <label className="block text-[10px] font-bold text-slate-700 tracking-wider uppercase mb-1 font-mono">
-                        {t('usernameInput')} *
+                        Username *
                       </label>
                       <input
                         type="text"
@@ -517,7 +500,7 @@ export default function AuthModal({
 
                     <div>
                       <label className="block text-[10px] font-bold text-slate-700 tracking-wider uppercase mb-1 font-mono">
-                        {t('passwordInput')} *
+                        Password *
                       </label>
                       <div className="relative">
                         <input
@@ -542,7 +525,7 @@ export default function AuthModal({
                     {/* Role selection dropdown */}
                     <div>
                       <label className="block text-[10px] font-bold text-slate-700 tracking-wider uppercase mb-1 font-mono">
-                        {t('selectRole')} *
+                        Official Clearance / Role *
                       </label>
                       <select
                         value={selectedAccessType}
@@ -661,13 +644,13 @@ export default function AuthModal({
                       onClick={onClose}
                       className="w-1/2 py-2.5 text-xs font-semibold rounded bg-slate-300 hover:bg-slate-200 text-slate-800 transition-colors cursor-pointer"
                     >
-                      {t('cancelBtn')}
+                      Cancel
                     </button>
                     <button
                       type="submit"
                       className="w-1/2 py-2.5 text-xs font-black rounded bg-emerald-600 hover:bg-emerald-700 text-white shadow-md active:scale-97 transition-all uppercase tracking-wider font-mono cursor-pointer"
                     >
-                      {t('signUpAction')}
+                      Submit Registration
                     </button>
                   </div>
 

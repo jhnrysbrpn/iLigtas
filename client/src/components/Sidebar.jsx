@@ -34,20 +34,6 @@ export default function Sidebar({
   currentUser,
   setCurrentUser,
   setShowAuthModal,
-  t = (key) => {
-    const localTranslations = {
-      sidebarDashboard: 'Dashboard Hub',
-      sidebarMap: 'Hazard Map',
-      sidebarPreparedness: 'Preparedness Hub',
-      sidebarResponse: 'Evac & Recovery',
-      sidebarReport: 'Report Fire Hazard',
-      sidebarAlerts: 'Broadcaster Portal',
-      logoutBtn: 'Sign Out',
-      roleSwitcherLockInfo: 'To switch roles or update hazard levels, please log in with your authorized Barangay credentials.',
-      loginBtn: 'Acknowledge & Sign In'
-    };
-    return localTranslations[key] || '';
-  },
   broadcastPublicMode = false
 }) {
   const [copiedNumber, setCopiedNumber] = useState(null);
@@ -107,8 +93,8 @@ export default function Sidebar({
   if (userRole === 'Resident') {
     // Resident side: They only have access to Dashboard, Hazard Map, Preparedness, Evac & Recovery
     menuItems.push(
-      { id: 'dashboard', name: t('sidebarDashboard') || 'Dashboard Hub', icon: LayoutDashboard },
-      { id: 'maps', name: t('sidebarMap') || 'Hazard Map', icon: Map, badge: null }
+      { id: 'dashboard', name: 'Dashboard Hub', icon: LayoutDashboard },
+      { id: 'maps', name: 'Hazard Map', icon: Map, badge: null }
     );
 
     if (broadcastPublicMode) {
@@ -122,16 +108,16 @@ export default function Sidebar({
     }
 
     menuItems.push(
-      { id: 'preparedness', name: t('sidebarPreparedness') || 'Preparedness Hub', icon: Shield },
+      { id: 'preparedness', name: 'Preparedness Hub', icon: Shield },
       { id: 'gobag', name: 'Go Bag Planner', icon: Briefcase },
-      { id: 'response', name: t('sidebarResponse') || 'Evac & Recovery', icon: BriefcaseMedical }
+      { id: 'response', name: 'Evac & Recovery', icon: BriefcaseMedical }
     );
 
     // Include Report Fire Hazard ONLY if currently redirected to it, so active highlight works
     if (currentTab === 'report') {
       menuItems.push({
         id: 'report',
-        name: t('sidebarReport') || 'Report Fire Hazard',
+        name: 'Report Fire Hazard',
         icon: AlertTriangle,
         badge: pendingReportsCount > 0 ? pendingReportsCount : null,
         badgeColor: 'bg-red-100 text-red-700 border border-red-300'
@@ -140,19 +126,19 @@ export default function Sidebar({
   } else {
     // Responders, volunteers (Official), and Admin side: Remove "Report Fire Hazard" completely!
     menuItems.push(
-      { id: 'dashboard', name: t('sidebarDashboard') || 'Dashboard Hub', icon: LayoutDashboard },
-      { id: 'maps', name: t('sidebarMap') || 'Hazard Map', icon: Map, badge: null },
+      { id: 'dashboard', name: 'Dashboard Hub', icon: LayoutDashboard },
+      { id: 'maps', name: 'Hazard Map', icon: Map, badge: null },
       { id: 'interdepartment', name: 'Inter-Department Portal', icon: Users },
       { 
         id: 'alerts', 
-        name: broadcastPublicMode ? 'Broadcast' : (t('sidebarAlerts') || 'Broadcaster Portal'), 
+        name: broadcastPublicMode ? 'Broadcast' : 'Broadcaster Portal', 
         icon: Bell, 
         badge: activeAlertsCount > 0 ? activeAlertsCount : null,
         badgeColor: 'bg-yellow-100 text-yellow-800 border border-yellow-300 animate-pulse'
       },
-      { id: 'preparedness', name: t('sidebarPreparedness') || 'Preparedness Hub', icon: Shield },
+      { id: 'preparedness', name: 'Preparedness Hub', icon: Shield },
       { id: 'gobag', name: 'Go Bag Planner', icon: Briefcase },
-      { id: 'response', name: t('sidebarResponse') || 'Evac & Recovery', icon: BriefcaseMedical }
+      { id: 'response', name: 'Evac & Recovery', icon: BriefcaseMedical }
     );
   }
 
@@ -230,20 +216,20 @@ export default function Sidebar({
                 onClick={handleLogout}
                 className="w-full py-1.5 rounded-lg border border-slate-300 hover:border-red-500 hover:bg-red-50 hover:text-red-700 text-[10px] uppercase font-black tracking-wide font-mono transition-all text-slate-600 cursor-pointer"
               >
-                {t('logoutBtn')}
+                Sign Out
               </button>
             </div>
           ) : (
             <div className="space-y-2 text-left">
               <p className="text-[10px] text-slate-500 leading-snug font-medium">
-                {t('roleSwitcherLockInfo')}
+                To switch roles or update hazard levels, please log in with your authorized Barangay credentials.
               </p>
               <button
                 id="sidebar-login-btn"
                 onClick={() => setShowAuthModal(true)}
                 className="w-full py-2 bg-slate-900 hover:bg-slate-950 text-white font-black text-[10px] uppercase rounded-lg shadow-sm font-mono tracking-wider transition-colors cursor-pointer"
               >
-                {t('loginBtn')}
+                Acknowledge & Sign In
               </button>
             </div>
           )}

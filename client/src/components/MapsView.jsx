@@ -19,7 +19,6 @@ export default function MapsView({
   reports,
   vulnerabilityRegistry,
   onAddHouseholdVulnerability,
-  t,
   userRole,
   onUpdateReportStatus
 }) {

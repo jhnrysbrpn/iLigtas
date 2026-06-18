@@ -22,8 +22,7 @@ export default function ResponseRecoveryView({
   distributions,
   reports,
   onAddVictimIntake,
-  onAddReliefDistribution,
-  t
+  onAddReliefDistribution
 }) {
   
   // Victim registration States

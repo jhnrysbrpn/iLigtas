@@ -22,8 +22,7 @@ export default function Header({
   sidebarOpen,
   setSidebarOpen,
   onTriggerSOS,
-  activeExtremeAlertsExist,
-  t
+  activeExtremeAlertsExist
 }) {
   const [showSosModal, setShowSosModal] = useState(false);
   const [sosLocation, setSosLocation] = useState('');
@@ -91,10 +90,10 @@ export default function Header({
           
           <div className="hidden md:block text-left">
             <span className="text-[10px] font-black text-rose-600 uppercase tracking-widest block font-mono">
-              {t('republicLabel')}
+              Republic of the Philippines
             </span>
             <span className="text-sm font-black text-slate-900 block -mt-1 tracking-tight">
-              {t('headerBrgyLabel')}
+              Barangay 35 – Maypajo, Caloocan
             </span>
           </div>
         </div>
@@ -105,14 +104,14 @@ export default function Header({
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 border border-red-300 text-red-700 font-extrabold shadow-2xs">
               <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
               <span className="text-[10px] uppercase tracking-widest font-mono">
-                {t('statusHighRisk')}
+                High Risk Alert
               </span>
             </div>
           ) : (
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-300 text-emerald-700 font-extrabold shadow-2xs">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-[10px] uppercase tracking-widest font-mono">
-                {t('statusLigtasNormal')}
+                All Clear (Ligtas)
               </span>
             </div>
           )}
@@ -128,7 +127,7 @@ export default function Header({
             className="bg-[#0ADBD2] hover:bg-[#09c2ba] text-slate-950 hover:text-black font-extrabold uppercase text-xs border border-indigo-200/80 px-3.5 sm:px-4 py-2 rounded-lg shadow-2xs cursor-pointer transition-all active:scale-95"
             title="Barangay 35 Emergency Fire Rescue Numbers"
           >
-            {t('emergencyHotline')}
+            Emergency Hotlines
           </button>
 
           {/* SOS Panic Button */}

@@ -19,7 +19,6 @@ export default function AlertsView({
   onAddAlert,
   onDeleteAlert,
   onUpdateAlerts,
-  t,
   broadcastPublicMode = false,
   onToggleBroadcastPublicMode
 }) {
