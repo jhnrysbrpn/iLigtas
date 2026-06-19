@@ -329,6 +329,16 @@ export default function InterDepartmentView({ userRole, currentUser, t, usersLis
   const [adminActiveTab, setAdminActiveTab] = useState('registry'); // 'registry' or 'archives'
   const [selectedArchiveCategory, setSelectedArchiveCategory] = useState('users');
   const [selectedUserHistory, setSelectedUserHistory] = useState(null);
+  const [newAdminForm, setNewAdminForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    username: '',
+    password: '',
+    department: 'rescue',
+    departmentId: ''
+  });
+  const [newAdminError, setNewAdminError] = useState('');
 
   const [archivesList, setArchivesList] = useState(() => {
     const saved = localStorage.getItem('bdrrmc_archives_v1');
@@ -382,6 +392,85 @@ export default function InterDepartmentView({ userRole, currentUser, t, usersLis
     });
     setUsersList(updated);
     localStorage.setItem('_users_list', JSON.stringify(updated));
+  };
+
+  const handleCreateAdminAccount = (e) => {
+    e.preventDefault();
+    if (!usersList || !setUsersList) return;
+
+    const trimmed = {
+      name: newAdminForm.name.trim(),
+      email: newAdminForm.email.trim(),
+      phone: newAdminForm.phone.trim(),
+      username: newAdminForm.username.trim(),
+      password: newAdminForm.password,
+      department: newAdminForm.department,
+      departmentId: newAdminForm.departmentId.trim()
+    };
+
+    setNewAdminError('');
+
+    if (!trimmed.name || !trimmed.email || !trimmed.phone || !trimmed.username || !trimmed.password || !trimmed.department || !trimmed.departmentId) {
+      setNewAdminError('All fields are required to create an admin account.');
+      return;
+    }
+
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(trimmed.email)) {
+      setNewAdminError('Please enter a valid email address.');
+      return;
+    }
+
+    if (!/^09\d{9}$/.test(trimmed.phone)) {
+      setNewAdminError('Phone number must start with 09 and contain 11 digits.');
+      return;
+    }
+
+    const duplicateUser = usersList.find(u =>
+      u && (
+        u.username?.toLowerCase() === trimmed.username.toLowerCase() ||
+        u.email?.toLowerCase() === trimmed.email.toLowerCase()
+      )
+    );
+
+    if (duplicateUser) {
+      setNewAdminError('A user with the same username or email already exists.');
+      return;
+    }
+
+    const createdUser = {
+      name: trimmed.name,
+      email: trimmed.email,
+      phone: trimmed.phone,
+      username: trimmed.username,
+      password: trimmed.password,
+      role: 'Admin',
+      department: trimmed.department,
+      departmentId: trimmed.departmentId,
+      approved: true,
+      history: [
+        {
+          action: 'Admin Account Created',
+          timestamp: new Date().toISOString(),
+          details: `Admin account created by SuperAdmin ${currentUser?.name || 'SuperAdmin'}.`
+        }
+      ]
+    };
+
+    const updated = [...usersList, createdUser];
+    setUsersList(updated);
+    localStorage.setItem('_users_list', JSON.stringify(updated));
+    setNewAdminForm({
+      name: '',
+      email: '',
+      phone: '',
+      username: '',
+      password: '',
+      department: trimmed.department,
+      departmentId: ''
+    });
+    setNewAdminError('');
+    alert(`✅ Admin account created for ${createdUser.name}`);
   };
 
   const handleUpdateMemberRole = (username, nextRole) => {
@@ -663,8 +752,97 @@ export default function InterDepartmentView({ userRole, currentUser, t, usersLis
 
             {adminActiveTab === 'registry' && (
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                {/* Left Column: Pending Approvals */}
+                {/* Left Column: Create Admin & Pending Approvals */}
                 <div className="lg:col-span-5 space-y-4">
+                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h5 className="text-[10px] font-black tracking-wider uppercase text-slate-500 font-mono">
+                          Create Admin Account
+                        </h5>
+                        <p className="text-[9px] text-slate-500 font-medium mt-1">
+                          Add a verified administrator for any department.
+                        </p>
+                      </div>
+                      <span className="text-[9px] bg-emerald-100 text-emerald-900 border border-emerald-300 px-1.5 py-0.5 rounded font-bold uppercase font-mono">
+                        Superadmin Tool
+                      </span>
+                    </div>
+
+                    <form onSubmit={handleCreateAdminAccount} className="space-y-2.5">
+                      <div className="grid grid-cols-1 gap-2">
+                        <input
+                          type="text"
+                          placeholder="Full Name"
+                          value={newAdminForm.name}
+                          onChange={(e) => setNewAdminForm(prev => ({ ...prev, name: e.target.value }))}
+                          className="w-full text-[10px] py-1.5 px-2.5 rounded border border-slate-300 bg-white text-slate-950 font-mono focus:outline-none focus:border-indigo-500"
+                        />
+                        <input
+                          type="email"
+                          placeholder="Email"
+                          value={newAdminForm.email}
+                          onChange={(e) => setNewAdminForm(prev => ({ ...prev, email: e.target.value }))}
+                          className="w-full text-[10px] py-1.5 px-2.5 rounded border border-slate-300 bg-white text-slate-950 font-mono focus:outline-none focus:border-indigo-500"
+                        />
+                        <input
+                          type="tel"
+                          placeholder="Phone (09XXXXXXXXX)"
+                          value={newAdminForm.phone}
+                          onChange={(e) => setNewAdminForm(prev => ({ ...prev, phone: e.target.value }))}
+                          className="w-full text-[10px] py-1.5 px-2.5 rounded border border-slate-300 bg-white text-slate-950 font-mono focus:outline-none focus:border-indigo-500"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Username"
+                          value={newAdminForm.username}
+                          onChange={(e) => setNewAdminForm(prev => ({ ...prev, username: e.target.value }))}
+                          className="w-full text-[10px] py-1.5 px-2.5 rounded border border-slate-300 bg-white text-slate-950 font-mono focus:outline-none focus:border-indigo-500"
+                        />
+                        <input
+                          type="password"
+                          placeholder="Temporary Password"
+                          value={newAdminForm.password}
+                          onChange={(e) => setNewAdminForm(prev => ({ ...prev, password: e.target.value }))}
+                          className="w-full text-[10px] py-1.5 px-2.5 rounded border border-slate-300 bg-white text-slate-950 font-mono focus:outline-none focus:border-indigo-500"
+                        />
+                        <div className="grid grid-cols-2 gap-2">
+                          <select
+                            value={newAdminForm.department}
+                            onChange={(e) => setNewAdminForm(prev => ({ ...prev, department: e.target.value }))}
+                            className="w-full text-[10px] py-1.5 px-2.5 rounded border border-slate-300 bg-white text-slate-950 font-mono focus:outline-none focus:border-indigo-500"
+                          >
+                            <option value="bfp">🔥 BFP</option>
+                            <option value="rescue">🚒 RESCUE</option>
+                            <option value="medics">🩹 MEDICS</option>
+                            <option value="system">👮 SYSTEM</option>
+                          </select>
+                          <input
+                            type="text"
+                            placeholder="Department ID"
+                            value={newAdminForm.departmentId}
+                            onChange={(e) => setNewAdminForm(prev => ({ ...prev, departmentId: e.target.value }))}
+                            className="w-full text-[10px] py-1.5 px-2.5 rounded border border-slate-300 bg-white text-slate-950 font-mono focus:outline-none focus:border-indigo-500"
+                          />
+                        </div>
+                      </div>
+
+                      {newAdminError && (
+                        <p className="text-[9px] text-red-700 bg-red-50 border border-red-200 rounded px-2 py-1 font-mono">
+                          {newAdminError}
+                        </p>
+                      )}
+
+                      <button
+                        type="submit"
+                        className="w-full bg-[#4f46e5] hover:bg-[#4338ca] text-white text-[10px] font-black uppercase py-2 rounded border border-[#4338ca] shadow-xs cursor-pointer tracking-wider transition-colors inline-flex items-center justify-center gap-1.5"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        Create Admin Account
+                      </button>
+                    </form>
+                  </div>
+
                   <div className="flex items-center justify-between border-b border-slate-100 pb-1.5">
                     <h5 className="text-[10px] font-black tracking-wider uppercase text-slate-500 font-mono">
                       Pending Credentials Verification ({deptPending.length})
