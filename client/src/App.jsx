@@ -468,12 +468,12 @@ export default function App() {
 
   // MUTATION WORKFLOW 4: Modify Incident Status Code (Official enforcers only)
   const handleUpdateReportStatus = (reportId, status) => {
-    if (userRole !== 'Admin' && userRole !== 'SuperAdmin') return;
+    if (userRole !== 'Admin') return;
 
     const updatedReports = reports.map(r => {
       if (r.id === reportId) {
         const commentAuthor = currentUser?.name || 'BDRRMC Center Dispatcher';
-        const statusNotes = `Status updated to [${status}] by ${userRole === 'SuperAdmin' ? 'Barangay SuperAdmin' : 'BDRRMC officials'}.`;
+        const statusNotes = `Status updated to [${status}] by BDRRMC officials.`;
         
         return {
           ...r,

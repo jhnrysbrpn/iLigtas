@@ -41,7 +41,7 @@ export default function AlertsView({
 
   const isResident = userRole === 'Resident';
   const isPublicViewer = isResident;
-  const isAdmin = userRole === 'Admin' || userRole === 'SuperAdmin';
+  const isAdmin = userRole === 'Admin';
 
   const canConfigurePublicBroadcast = isAdmin;
 

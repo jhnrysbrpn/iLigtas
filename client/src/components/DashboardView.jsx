@@ -375,7 +375,7 @@ export default function DashboardView({
                   <th className="py-2.5 w-1/2 font-mono">{"REPORT TICKET"}</th>
                   <th className="py-2.5 font-mono">{"LOCATION"}</th>
                   <th className="py-2.5 text-right font-mono">{"STATUS"}</th>
-                  {(userRole === 'Admin' || userRole === 'SuperAdmin') && <th className="py-2.5 text-right font-mono w-20">ACTIONS</th>}
+                  {userRole === 'Admin' && <th className="py-2.5 text-right font-mono w-20">ACTIONS</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-900/10">
@@ -387,7 +387,7 @@ export default function DashboardView({
                   if (rep.status === IncidentStatus.DISPATCHED) statusBg = 'bg-red-100 text-red-800 border border-red-400/20 animate-pulse';
                   if (rep.status === IncidentStatus.RESOLVED) statusBg = 'bg-emerald-100 text-emerald-800 border border-emerald-400/20';
 
-                  const isStaff = userRole === 'Admin' || userRole === 'SuperAdmin';
+                  const isStaff = userRole === 'Admin';
                   return (
                     <tr 
                       key={rep.id} 
@@ -413,7 +413,7 @@ export default function DashboardView({
                           {rep.status}
                         </span>
                       </td>
-                      {(userRole === 'Admin' || userRole === 'SuperAdmin') && (
+                      {userRole === 'Admin' && (
                         <td className="py-3 text-right" onClick={(e) => e.stopPropagation()}>
                           <button
                             onClick={() => onDeleteReport && onDeleteReport(rep.id)}
@@ -429,7 +429,7 @@ export default function DashboardView({
 
                 {filteredReports.length === 0 && (
                   <tr>
-                    <td colSpan={(userRole === 'Admin' || userRole === 'SuperAdmin') ? 4 : 3} className="text-center py-8 text-slate-700 font-bold italic font-sans">
+                    <td colSpan={userRole === 'Admin' ? 4 : 3} className="text-center py-8 text-slate-700 font-bold italic font-sans">
                       {"No fire hazard reports match your filters."}
                     </td>
                   </tr>

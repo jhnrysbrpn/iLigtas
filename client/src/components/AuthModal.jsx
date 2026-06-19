@@ -24,29 +24,8 @@ export default function AuthModal({
   const [regPhone, setRegPhone] = useState('');
   const [regUsername, setRegUsername] = useState('');
   const [regPassword, setRegPassword] = useState('');
-  const [regRole, setRegRole] = useState('Resident');
-  const [selectedAccessType, setSelectedAccessType] = useState('Resident');
   const [regError, setRegError] = useState('');
   const [regSuccess, setRegSuccess] = useState(false);
-  const [regDepartment, setRegDepartment] = useState('bfp');
-  const [regDepartmentId, setRegDepartmentId] = useState('');
-
-  const handleAccessTypeChange = (value) => {
-    setSelectedAccessType(value);
-    setRegError('');
-    if (value === 'Resident') {
-      setRegRole('Resident');
-    } else if (value === 'Rescue') {
-      setRegRole('Responder');
-      setRegDepartment('rescue');
-    } else if (value === 'Official') {
-      setRegRole('Admin');
-      setRegDepartment('rescue');
-    } else {
-      setRegRole('Responder');
-      setRegDepartment('bfp');
-    }
-  };
 
   if (!isOpen) return null;
 
@@ -160,15 +139,6 @@ export default function AuthModal({
       return;
     }
 
-    const isElevated = selectedAccessType !== 'Resident';
-
-    if (isElevated) {
-      if (!regDepartmentId.trim()) {
-        setRegError('Department Verification ID is required for elevated accounts.');
-        return;
-      }
-    }
-
     try {
       const response = await fetch('http://localhost:5000/api/auth/signup', {
         method: 'POST',
@@ -181,9 +151,6 @@ export default function AuthModal({
           phone: trimmedPhone,
           username: trimmedUsername,
           password: trimmedPassword,
-          requestedRole: isElevated ? regRole : undefined,
-          department: isElevated ? regDepartment : undefined,
-          departmentId: isElevated ? regDepartmentId.trim() : undefined,
         }),
       });
 
@@ -213,8 +180,6 @@ export default function AuthModal({
         setRegPhone('');
         setRegUsername('');
         setRegPassword('');
-        setRegDepartment('bfp');
-        setRegDepartmentId('');
         onClose();
       }, 1800);
     } catch (err) {
@@ -225,25 +190,19 @@ export default function AuthModal({
           return;
         }
 
-        const roleToSet = isElevated ? regRole : 'Resident';
         const newUser = {
           name: trimmedName,
           email: trimmedEmail,
           phone: trimmedPhone,
           username: trimmedUsername,
           password: trimmedPassword,
-          role: 'Resident', // Start as Resident until SuperAdmin approves
-          requestedRole: roleToSet,
-          department: isElevated ? regDepartment : undefined,
-          departmentId: isElevated ? regDepartmentId.trim() : undefined,
-          approved: !isElevated, // Needs SuperAdmin approval if requesting elevated role
+          role: 'Resident',
+          approved: true,
           history: [
             {
               action: "Account Self-Registration",
               timestamp: new Date().toISOString(),
-              details: isElevated 
-                ? `Account registered. Requested elevated '${roleToSet}' privilege level for the ${regDepartment ? regDepartment.toUpperCase() : 'General'} agency department. Undergoing credentials validation.`
-                : "Standard Resident role account successfully created and verified."
+              details: "Standard Resident role account successfully created and verified."
             }
           ]
         };
@@ -263,8 +222,6 @@ export default function AuthModal({
           setRegPhone('');
           setRegUsername('');
           setRegPassword('');
-          setRegDepartment('bfp');
-          setRegDepartmentId('');
           onClose();
         }, 1800);
       } else {
@@ -427,7 +384,7 @@ export default function AuthModal({
                 </form>
               )}
 
-              {/* TAB B: REGISTER ADMIN ACCOUNT */}
+              {/* TAB B: REGISTER RESIDENT ACCOUNT */}
               {activeTab === 'register' && (
                 <form onSubmit={handleRegisterSubmit} className="space-y-4">
                   
@@ -524,85 +481,6 @@ export default function AuthModal({
                         </button>
                       </div>
                     </div>
-
-                    {/* Role selection dropdown */}
-                    <div>
-                      <label className="block text-[10px] font-bold text-slate-700 tracking-wider uppercase mb-1 font-mono">
-                        Official Clearance / Role *
-                      </label>
-                      <select
-                        value={selectedAccessType}
-                        onChange={(e) => {
-                          handleAccessTypeChange(e.target.value);
-                        }}
-                        className="w-full text-xs py-2.5 px-3 h-auto whitespace-normal break-words rounded border border-slate-300 bg-white text-slate-950 focus:outline-none focus:border-red-550 font-mono font-bold cursor-pointer hover:bg-slate-50"
-                      >
-                        <option value="Resident">Resident</option>
-                        <option value="Rescue">Barangay Rescue Squad</option>
-                        <option value="Official">Barangay Admin & Officials</option>
-                        <option value="External">External Public Agency (BFP/Red Cross)</option>
-                      </select>
-                    </div>
-
-                    {/* Requested Account Role: Only shown for External per requirements */}
-                    {selectedAccessType === 'External' && (
-                      <div className="md:col-span-2">
-                        <label className="block text-[10px] font-bold text-slate-700 tracking-wider uppercase mb-1.5 font-mono">
-                          Requested Account Role *
-                        </label>
-                        <select
-                          value={regRole}
-                          onChange={(e) => setRegRole(e.target.value)}
-                          className="w-full text-[#0f172a] text-xs py-2.5 px-3 h-auto whitespace-normal break-words rounded border border-slate-300 bg-white focus:outline-none focus:border-red-555 font-mono font-bold cursor-pointer mb-2 hover:bg-slate-50"
-                        >
-                          <option value="Admin">Admin / Officer (Handles operations and status updates)</option>
-                          <option value="Responder">Responder / Field Personnel</option>
-                        </select>
-                      </div>
-                    )}
-
-                    {/* Department Context block: displayed for and tailored to elevated categories */}
-                    {selectedAccessType !== 'Resident' && (
-                      <div className="space-y-3.5 p-3.5 rounded-xl bg-orange-50/70 border border-orange-300 shadow-xs md:col-span-2">
-                        {/* Identify Department Dropdown: ONLY visible for External Agency */}
-                        {selectedAccessType === 'External' && (
-                          <div>
-                            <label className="block text-[10px] font-bold text-orange-800 tracking-wider uppercase mb-1 font-mono">
-                              Identify Department *
-                            </label>
-                            <select
-                              value={regDepartment}
-                              onChange={(e) => setRegDepartment(e.target.value)}
-                              className="w-full text-xs py-2.5 px-3 h-auto whitespace-normal break-words rounded border border-orange-200 bg-white text-slate-955 focus:outline-none focus:border-emerald-500 font-bold cursor-pointer hover:bg-slate-50"
-                            >
-                              <option value="bfp">Bureau of Fire Protection (BFP) Maypajo</option>
-                              <option value="medics">Maypajo Health & Red Cross Medic Unit</option>
-                              <option value="rescue">Barangay Rescue & Evacuation Squad</option>
-                            </select>
-                          </div>
-                        )}
-
-                        <div>
-                          <label className="block text-[10px] font-bold text-orange-850 tracking-wider uppercase mb-1 font-mono">
-                            Department ID / Card Code *
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            value={regDepartmentId}
-                            onChange={(e) => setRegDepartmentId(e.target.value)}
-                            placeholder={
-                              selectedAccessType === 'Official' 
-                                ? 'e.g. BDRRMC-35, OFFICIAL-01' 
-                                : selectedAccessType === 'Rescue' 
-                                ? 'e.g. RES-35-001' 
-                                : 'e.g. BFP-4015, RES-201'
-                            }
-                            className="w-full text-xs p-2.5 rounded border border-orange-200 bg-white text-slate-950 placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-mono"
-                          />
-                        </div>
-                      </div>
-                    )}
 
                   </div>
 
