@@ -1,9 +1,8 @@
 const { PrismaClient } = require('@prisma/client');
 const { PrismaMariaDb } = require('@prisma/adapter-mariadb');
-const mysql = require('mysql2');
 const path = require('path');
 
-// Load env files safely
+// Load environment variables cleanly
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const connectionString = process.env.DATABASE_URL;
@@ -12,30 +11,29 @@ if (!connectionString) {
   throw new Error("DATABASE_URL is missing from environment variables.");
 }
 
-// Parse string cleanly
-const dbUrl = new URL(connectionString);
+// Clean the string (remove trailing spaces if any)
+const cleanUrl = connectionString.trim();
+
+// Parse connection URL details out to ensure a clean config object
+const dbUrl = new URL(cleanUrl);
 const dbName = dbUrl.pathname.replace(/^\//, '').split('?')[0];
 
-const poolConfig = {
+console.log(`🚀 INITIALIZING PRISMA 7 MARIADB ADAPTER FOR: ${dbUrl.hostname}:${dbUrl.port || 3306}`);
+
+// Pass the raw connection configuration parameters directly to PrismaMariaDb
+const adapter = new PrismaMariaDb({
   host: dbUrl.hostname,
   port: parseInt(dbUrl.port) || 3306,
   user: dbUrl.username,
   password: decodeURIComponent(dbUrl.password),
   database: dbName,
-  waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0,
   ssl: {
     rejectUnauthorized: false
   }
-};
+});
 
-console.log(`🚀 CONNECTING VIA ADAPTER TO: ${poolConfig.host}:${poolConfig.port} | Database: ${poolConfig.database}`);
-
-const pool = mysql.createPool(poolConfig);
-const adapter = new PrismaMariaDb(pool);
-
-// Instantiate with just the driver adapter
+// Pass the configured adapter instance to Prisma Client
 const prisma = new PrismaClient({ adapter });
 
 module.exports = prisma;
