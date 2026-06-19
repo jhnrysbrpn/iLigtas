@@ -8,12 +8,10 @@ if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is not defined in your environment variables.");
 }
 
-// Instantiate PrismaClient using Prisma's highly optimized native engine
+// Instantiate PrismaClient using the correct singular configuration property
 const prisma = new PrismaClient({
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL,
-    },
+  datasource: {
+    url: process.env.DATABASE_URL,
   },
 });
 
