@@ -8,11 +8,7 @@ if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL is not defined in your environment variables.");
 }
 
-// Instantiate PrismaClient using the correct singular configuration property
-const prisma = new PrismaClient({
-  datasource: {
-    url: process.env.DATABASE_URL,
-  },
-});
+// Prisma automatically connects to process.env.DATABASE_URL out of the box!
+const prisma = new PrismaClient();
 
 module.exports = prisma;
