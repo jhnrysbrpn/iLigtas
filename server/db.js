@@ -6,22 +6,21 @@ const path = require('path');
 // Explicitly load .env file relative to this folder
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
-if (!process.env.DATABASE_URL) {
+// Fallback to check Render's global environment variables if process.env.DATABASE_URL is missing
+const connectionString = process.env.DATABASE_URL;
+
+if (!connectionString) {
+  console.error("❌ CRITICAL: DATABASE_URL environment variable is totally missing!");
   throw new Error("DATABASE_URL is not defined in your environment variables.");
 }
 
-// 1. Create a native mysql2 connection pool
-const pool = mysql.createPool({
-  uri: process.env.DATABASE_URL,
-  waitForConnections: true,
-  connectionLimit: 10, // Gives Render plenty of connection room
-  queueLimit: 0
-});
+console.log("🔗 Connecting to database host:", connectionString.split('@')[1] || "Localhost/Unknown");
 
-// 2. Wrap it with the Prisma 7 driver adapter
+// Create a native pool using the explicit connection string
+const pool = mysql.createPool(connectionString);
+
+// Wrap it with the driver adapter
 const adapter = new PrismaMariaDb(pool);
-
-// 3. Pass the adapter to the constructor (Required in Prisma 7)
 const prisma = new PrismaClient({ adapter });
 
 module.exports = prisma;
