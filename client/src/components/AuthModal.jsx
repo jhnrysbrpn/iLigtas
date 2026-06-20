@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
 import { X, Shield, Lock, UserPlus, KeyRound, CheckCircle, Eye, EyeOff } from 'lucide-react';
-import { supabase } from '../supabaseClient';
+import { authAPI } from '../api/client';
 
 export default function AuthModal({
   isOpen,
   onClose,
   onAuthSuccess,
   usersList,
-  setUsersList,
-  language,
-  t
+  setUsersList
 }) {
   const [activeTab, setActiveTab] = useState('login');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
@@ -62,49 +60,61 @@ export default function AuthModal({
     }
 
     try {
-      let emailToSignIn = loginUsername.trim();
-
-      // If the login identifier is not an email, resolve it by username from profiles
-      if (!emailToSignIn.includes('@')) {
-        const { data: profile, error: lookupError } = await supabase
-          .from('profiles')
-          .select('email')
-          .eq('username', loginUsername.trim().toLowerCase())
-          .maybeSingle();
-
-        if (lookupError || !profile) {
-          throw new Error('User not found or username invalid.');
+      // 1. Try local simulated authentication check first for near-instant demo access
+      const localUser = (usersList || []).find(
+        u => u && u.username && u.username.toLowerCase() === loginUsername.trim().toLowerCase()
+      );
+      if (localUser) {
+        if (localUser.password === loginPassword) {
+          localStorage.setItem('bdrrmc_token', 'local-simulated-token');
+          onAuthSuccess(localUser.username, localUser.name, localUser.role, localUser.email, localUser.phone);
+          onClose();
+          return;
+        } else {
+          throw new Error('Password incorrect (local database check).');
         }
-        emailToSignIn = profile.email;
       }
 
-      // Sign in with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-        email: emailToSignIn,
-        password: loginPassword,
+      // 2. Fall back to fetch API if not a simulated account or local check failed
+      const response = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: loginUsername,
+          password: loginPassword,
+        }),
       });
 
-      if (authError) {
-        throw new Error(authError.message);
+      const data = await response.json();
+
+      if (!response.ok || data.status === 'error') {
+        throw new Error(data.message || 'Login failed');
       }
 
-      // Fetch full profile details
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', authData.user.id)
-        .single();
-
-      if (profileError) {
-        throw new Error(profileError.message);
-      }
-
+      const { token, user } = data.data;
+      localStorage.setItem('bdrrmc_token', token);
+      
       // Call parent success handler
-      const activeRole = (profile.approved || profile.role === 'Resident') ? profile.role : 'Resident';
-      onAuthSuccess(profile.username, profile.name, activeRole, profile.email, profile.phone);
+      onAuthSuccess(user.username, user.name, user.role, user.email, user.phone);
       onClose();
     } catch (err) {
-      setLoginError(`Invalid credentials: ${err.message}`);
+      // If it failed to fetch, and we already tried local simulation inside, show explicit error or try one last dynamic check
+      if (err.message && err.message.includes('Failed to fetch')) {
+        const localUser = (usersList || []).find(
+          u => u && u.username && u.username.toLowerCase() === loginUsername.trim().toLowerCase()
+        );
+        if (localUser && localUser.password === loginPassword) {
+          localStorage.setItem('bdrrmc_token', 'local-simulated-token');
+          onAuthSuccess(localUser.username, localUser.name, localUser.role, localUser.email, localUser.phone);
+          onClose();
+        } else {
+          setLoginError(`Authentication failed: Account not matching local simulation list.`);
+        }
+      } else {
+        setLoginError(`Invalid credentials: ${err.message}`);
+      }
     }
   };
 
@@ -123,14 +133,14 @@ export default function AuthModal({
       return;
     }
 
-    // Email validation
+    // Email validation: must contain "@" and "." and follow a valid format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!trimmedEmail.includes('@') || !trimmedEmail.includes('.') || !emailRegex.test(trimmedEmail)) {
-      setRegError('Please enter a complete and valid email address.');
+      setRegError('Please enter a complete and valid email address (must contain "@", "." and follow standard name@email.com format).');
       return;
     }
 
-    // Cellphone number validation
+    // Cellphone number validation: must be exactly 11 digits, must start with "09", contain only digits (positive and no "-")
     const isExactlyElevenDigits = trimmedPhone.length === 11 && /^\d+$/.test(trimmedPhone);
     const startsWith09 = trimmedPhone.startsWith('09');
     if (!isExactlyElevenDigits || !startsWith09) {
@@ -138,7 +148,7 @@ export default function AuthModal({
       return;
     }
 
-    // Password validation
+    // Strong Password validation: at least 6 characters long, contains letters (with both upper & letters/numbers) and special characters
     const isAtLeast6 = trimmedPassword.length >= 6;
     const hasLetters = /[a-zA-Z]/.test(trimmedPassword);
     const hasNumbers = /[0-9]/.test(trimmedPassword);
@@ -160,45 +170,42 @@ export default function AuthModal({
     }
 
     try {
-      // 1. Sign up user inside Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: trimmedEmail,
-        password: trimmedPassword,
+      const response = await fetch('http://localhost:5000/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: trimmedName,
+          email: trimmedEmail,
+          phone: trimmedPhone,
+          username: trimmedUsername,
+          password: trimmedPassword,
+          requestedRole: isElevated ? regRole : undefined,
+          department: isElevated ? regDepartment : undefined,
+          departmentId: isElevated ? regDepartmentId.trim() : undefined,
+        }),
       });
 
-      if (authError) {
-        throw new Error(authError.message);
+      const data = await response.json();
+
+      if (!response.ok || data.status === 'error') {
+        if (data.errors && Array.isArray(data.errors)) {
+          // If Zod validation errors exist, format and display them
+          const errorMsgs = data.errors.map(err => err.message).join(', ');
+          throw new Error(errorMsgs);
+        }
+        throw new Error(data.message || 'Registration failed');
       }
 
-      if (!authData?.user) {
-        throw new Error('Sign up failed to return user data.');
-      }
-
-      // 2. Insert corresponding profile details inside profiles table
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([{
-          id: authData.user.id,
-          username: trimmedUsername.toLowerCase(),
-          email: trimmedEmail.toLowerCase(),
-          phone: trimmedPhone,
-          name: trimmedName,
-          role: 'Resident',
-          requested_role: isElevated ? regRole : null,
-          department: isElevated ? regDepartment : null,
-          department_id: isElevated ? regDepartmentId.trim() : null,
-          approved: !isElevated,
-        }]);
-
-      if (profileError) {
-        throw new Error(profileError.message);
-      }
+      const { token, user } = data.data;
+      localStorage.setItem('bdrrmc_token', token);
 
       setRegSuccess(true);
       
       // Automatically login user after registration delay
       setTimeout(() => {
-        onAuthSuccess(trimmedUsername.toLowerCase(), trimmedName, 'Resident', trimmedEmail, trimmedPhone);
+        onAuthSuccess(user.username, user.name, user.role, user.email, user.phone);
         setRegSuccess(false);
         // Reset inputs
         setRegFullName('');
@@ -211,10 +218,60 @@ export default function AuthModal({
         onClose();
       }, 1800);
     } catch (err) {
-      setRegError(err.message);
+      // Offline / Local Simulation signup fallback
+      if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
+        if (usersList.some(u => u && u.username && u.username.toLowerCase() === trimmedUsername.toLowerCase())) {
+          setRegError('Username already taken in local database.');
+          return;
+        }
+
+        const roleToSet = isElevated ? regRole : 'Resident';
+        const newUser = {
+          name: trimmedName,
+          email: trimmedEmail,
+          phone: trimmedPhone,
+          username: trimmedUsername,
+          password: trimmedPassword,
+          role: 'Resident', // Start as Resident until SuperAdmin approves
+          requestedRole: roleToSet,
+          department: isElevated ? regDepartment : undefined,
+          departmentId: isElevated ? regDepartmentId.trim() : undefined,
+          approved: !isElevated, // Needs SuperAdmin approval if requesting elevated role
+          history: [
+            {
+              action: "Account Self-Registration",
+              timestamp: new Date().toISOString(),
+              details: isElevated 
+                ? `Account registered. Requested elevated '${roleToSet}' privilege level for the ${regDepartment ? regDepartment.toUpperCase() : 'General'} agency department. Undergoing credentials validation.`
+                : "Standard Resident role account successfully created and verified."
+            }
+          ]
+        };
+
+        const updatedUsersList = [...usersList, newUser];
+        setUsersList(updatedUsersList);
+        localStorage.setItem('_users_list', JSON.stringify(updatedUsersList));
+        localStorage.setItem('bdrrmc_token', 'local-simulated-token');
+
+        setRegSuccess(true);
+        setTimeout(() => {
+          onAuthSuccess(newUser.username, newUser.name, newUser.role, newUser.email, newUser.phone);
+          setRegSuccess(false);
+          // Reset inputs
+          setRegFullName('');
+          setRegEmail('');
+          setRegPhone('');
+          setRegUsername('');
+          setRegPassword('');
+          setRegDepartment('bfp');
+          setRegDepartmentId('');
+          onClose();
+        }, 1800);
+      } else {
+        setRegError(err.message);
+      }
     }
   };
-
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 z-55 animate-fade-in select-none">

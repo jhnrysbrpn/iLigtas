@@ -44,7 +44,6 @@ import AlertsView from './components/AlertsView';
 import InterDepartmentView from './components/InterDepartmentView';
 import AuthModal from './components/AuthModal';
 import GoBagPlannerView from './components/GoBagPlannerView';
-import { supabase } from './supabaseClient';
 
 export default function App() {
   
@@ -190,69 +189,20 @@ export default function App() {
   useEffect(() => {
     const fetchBackendData = async () => {
       try {
-        // 1. Fetch Alerts from Supabase
-        const { data: alertsData, error: alertsError } = await supabase
-          .from('alerts')
-          .select('*')
-          .order('timestamp', { ascending: false });
-
-        if (alertsError) throw alertsError;
-
-        if (alertsData) {
-          const mappedAlerts = alertsData.map(a => ({
-            id: String(a.id),
-            title: a.title,
-            severity: a.severity,
-            message: a.message,
-            affectedArea: a.affected_area,
-            timestamp: a.timestamp,
-            isActive: a.is_active,
-            createdBy: a.created_by,
-            broadcastSMS: a.broadcast_sms
-          }));
-          setAlerts(mappedAlerts);
+        const apiBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+        const alertsRes = await fetch(`${apiBase}/api/alerts`);
+        const alertsData = await alertsRes.json();
+        if (alertsData.status === 'success') {
+          setAlerts(alertsData.data);
         }
 
-        // 2. Fetch Hazard Reports (with nested Comments) from Supabase
-        const { data: reportsData, error: reportsError } = await supabase
-          .from('hazard_reports')
-          .select(`
-            *,
-            comments (*)
-          `)
-          .order('timestamp', { ascending: false });
-
-        if (reportsError) throw reportsError;
-
-        if (reportsData) {
-          const mappedReports = reportsData.map(r => ({
-            id: String(r.id),
-            category: r.category,
-            title: r.title,
-            description: r.description,
-            reporterName: r.reporter_name,
-            reporterPhone: r.reporter_phone,
-            locationName: r.location_name,
-            latitude: r.latitude,
-            longitude: r.longitude,
-            status: r.status,
-            priority: r.priority,
-            assignedResponder: r.assigned_responder,
-            affectedFamiliesCount: r.affected_families_count,
-            damageCostEstimated: r.damage_cost_estimated,
-            timestamp: r.timestamp,
-            comments: (r.comments || []).map(c => ({
-              id: String(c.id),
-              author: c.author,
-              role: c.role,
-              text: c.text,
-              timestamp: c.timestamp
-            }))
-          }));
-          setReports(mappedReports);
+        const reportsRes = await fetch(`${apiBase}/api/reports`);
+        const reportsData = await reportsRes.json();
+        if (reportsData.status === 'success') {
+          setReports(reportsData.data);
         }
       } catch (err) {
-        console.warn("Supabase fetch failed, falling back to local storage:", err);
+        console.warn("Backend server offline, falling back to local storage:", err);
         const savedAlerts = localStorage.getItem('bdrrmc_alerts');
         setAlerts(savedAlerts ? JSON.parse(savedAlerts) : INITIAL_ALERTS);
         const savedReports = localStorage.getItem('bdrrmc_reports');
