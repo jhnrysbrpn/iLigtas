@@ -61,7 +61,41 @@ export default function AuthModal({
       return;
     }
 
+    const isSupabaseConfigured = !!import.meta.env.VITE_SUPABASE_URL && 
+                                 !!import.meta.env.VITE_SUPABASE_ANON_KEY && 
+                                 import.meta.env.VITE_SUPABASE_URL !== 'YOUR_SUPABASE_URL' && 
+                                 import.meta.env.VITE_SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY';
+
     try {
+      if (!isSupabaseConfigured) {
+        // Graceful Local database authentication fallback
+        const matchedLocalUser = usersList.find(
+          (u) =>
+            u &&
+            (u.username?.toLowerCase() === loginUsername.trim().toLowerCase() ||
+              u.email?.toLowerCase() === loginUsername.trim().toLowerCase())
+        );
+
+        if (!matchedLocalUser) {
+          throw new Error('User not registered locally. Try a default account: admin, bfpadmin, healthadmin, or supadmin (same password as username).');
+        }
+
+        if (matchedLocalUser.password !== loginPassword) {
+          throw new Error('Incorrect password.');
+        }
+
+        const activeRole = (matchedLocalUser.approved || matchedLocalUser.role === 'Resident') ? matchedLocalUser.role : 'Resident';
+        onAuthSuccess(
+          matchedLocalUser.username.toLowerCase(),
+          matchedLocalUser.name,
+          activeRole,
+          matchedLocalUser.email,
+          matchedLocalUser.phone
+        );
+        onClose();
+        return;
+      }
+
       let emailToSignIn = loginUsername.trim();
 
       // If the login identifier is not an email, resolve it by username from profiles
@@ -159,7 +193,69 @@ export default function AuthModal({
       }
     }
 
+    const isSupabaseConfigured = !!import.meta.env.VITE_SUPABASE_URL && 
+                                 !!import.meta.env.VITE_SUPABASE_ANON_KEY && 
+                                 import.meta.env.VITE_SUPABASE_URL !== 'YOUR_SUPABASE_URL' && 
+                                 import.meta.env.VITE_SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY';
+
     try {
+      if (!isSupabaseConfigured) {
+        // Fallback local registration
+        const usernameExists = usersList.some(u => u && u.username && u.username.toLowerCase() === trimmedUsername.toLowerCase());
+        const emailExists = usersList.some(u => u && u.email && u.email.toLowerCase() === trimmedEmail.toLowerCase());
+
+        if (usernameExists) {
+          throw new Error('Username already exists in local registry.');
+        }
+        if (emailExists) {
+          throw new Error('Email already exists in local registry.');
+        }
+
+        const roleToSet = isElevated ? regRole : 'Resident';
+        const newLocalUser = {
+          name: trimmedName,
+          email: trimmedEmail.toLowerCase(),
+          phone: trimmedPhone,
+          username: trimmedUsername.toLowerCase(),
+          password: trimmedPassword,
+          role: 'Resident', // Start as Resident until SuperAdmin approves if requesting elevated role
+          requestedRole: roleToSet,
+          department: isElevated ? regDepartment : undefined,
+          departmentId: isElevated ? regDepartmentId.trim() : undefined,
+          approved: !isElevated, // Needs SuperAdmin approval if requesting elevated role
+          history: [
+            {
+              action: "Account Self-Registration",
+              timestamp: new Date().toISOString(),
+              details: isElevated 
+                ? `Account registered. Requested elevated '${roleToSet}' privilege level for the ${regDepartment ? regDepartment.toUpperCase() : 'General'} agency department. Undergoing credentials validation.`
+                : "Standard Resident role account successfully created and verified."
+            }
+          ]
+        };
+
+        const updatedList = [...usersList, newLocalUser];
+        setUsersList(updatedList);
+        localStorage.setItem('_users_list', JSON.stringify(updatedList));
+
+        setRegSuccess(true);
+        
+        setTimeout(() => {
+          onAuthSuccess(trimmedUsername.toLowerCase(), trimmedName, 'Resident', trimmedEmail.toLowerCase(), trimmedPhone);
+          setRegSuccess(false);
+          // Reset fields
+          setRegFullName('');
+          setRegEmail('');
+          setRegPhone('');
+          setRegUsername('');
+          setRegPassword('');
+          setRegDepartment('bfp');
+          setRegDepartmentId('');
+          onClose();
+        }, 1800);
+        return;
+      }
+
       // 1. Sign up user inside Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: trimmedEmail,
