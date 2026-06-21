@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "scripts": {
-    "build": "cd client && npm install && npm run build && rm -rf ../dist && cp -r dist ../dist",
+    "build": "cd client && npm install && npx --yes vite build && rm -rf ../dist && cp -r dist ../dist",
     "dev": "cd client && npm install && npm run dev",
     "lint": "cd client && npm run lint"
   }
