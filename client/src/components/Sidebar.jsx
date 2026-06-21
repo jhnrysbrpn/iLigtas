@@ -121,6 +121,10 @@ export default function Sidebar({
         badgeColor: 'bg-red-100 text-red-700 border border-red-300'
       });
     }
+  } else if (userRole === 'SuperAdmin') {
+    menuItems.push(
+      { id: 'interdepartment', name: 'Inter-Department Portal', icon: Users }
+    );
   } else {
     // Responders and Admin side: Remove "Report Fire Hazard" and "Go Bag Planner" completely!
     menuItems.push(
@@ -226,7 +230,7 @@ export default function Sidebar({
                 onClick={() => setShowAuthModal(true)}
                 className="w-full py-2 bg-slate-900 hover:bg-slate-950 text-white font-black text-[10px] uppercase rounded-lg shadow-sm font-mono tracking-wider transition-colors cursor-pointer"
               >
-                Acknowledge & Sign In
+                Sign In / Sign Up
               </button>
             </div>
           )}

@@ -538,7 +538,7 @@ export default function InterDepartmentView({ userRole, currentUser, t, usersLis
     }
   };
 
-  const isAdminOrResponderOrOfficial = userRole === 'Admin' || userRole === 'Responder' || userRole === 'SuperAdmin';
+  const isAdminOrResponderOrOfficial = userRole === 'Admin' || userRole === 'Responder';
 
   return (
     <div id="inter-department-portal" className="space-y-8">

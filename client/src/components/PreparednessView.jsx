@@ -330,7 +330,7 @@ export default function PreparednessView({
                           onClick={() => setSelectedProgramId(prog.id)}
                           className="py-1.5 px-3.5 bg-indigo-600 hover:bg-slate-900 text-white text-[11px] font-black rounded-lg shadow-sm transition-all active:scale-95 text-center cursor-pointer"
                         >
-                          I-register Aking Pangalan
+                          Register my Name
                         </button>
                       )
                     )}
