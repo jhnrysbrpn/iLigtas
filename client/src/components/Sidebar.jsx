@@ -126,7 +126,7 @@ export default function Sidebar({
       { id: 'interdepartment', name: 'Inter-Department Portal', icon: Users }
     );
   } else {
-    // Admin and Responder side: Keep operational modules for official personnel
+    // Responders and Admin side: Remove "Report Fire Hazard" and "Go Bag Planner" completely!
     menuItems.push(
       { id: 'dashboard', name: 'Dashboard Hub', icon: LayoutDashboard },
       { id: 'maps', name: 'Hazard Map', icon: Map, badge: null },

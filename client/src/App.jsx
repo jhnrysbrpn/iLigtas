@@ -293,7 +293,7 @@ export default function App() {
   }, [distributions]);
 
   // MUTATION WORKFLOW 1: Direct SOS Panic Trigger Action
-  const handleTriggerSOS = async (category, locationName, notes, waterLevel = 'Adequate', taskUrgency = 'High', fireAlarmLevel = 'First Alarm') => {
+  const handleTriggerSOS = (category, locationName, notes, waterLevel = 'Adequate', taskUrgency = 'High', fireAlarmLevel = 'First Alarm') => {
     const finalDescription = notes && notes.trim() !== '' ? notes : 'cause: Under Investigation';
 
     const newReport = {
@@ -838,32 +838,11 @@ export default function App() {
     }
   };
 
-  const handleDeleteReport = async (id) => {
-    const reportToArchive = reports.find(r => r.id === id);
-    if (reportToArchive) {
-      archiveDeletedItem('reports', reportToArchive);
-    }
+  const handleDeleteReport = (id) => {
     setReports(prev => prev.filter(r => r.id !== id));
-
-    if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
-      try {
-        const parsedId = isNaN(id) ? id : parseInt(id, 10);
-        // Cascade delete comments
-        await supabase.from('comments').delete().eq('hazard_report_id', parsedId);
-        // Delete report
-        const { error } = await supabase.from('hazard_reports').delete().eq('id', parsedId);
-        if (error) console.error("Error deleting report from Supabase:", error);
-      } catch (err) {
-        console.error("Supabase delete failure for report:", err);
-      }
-    }
   };
 
-  const handleDeleteAlert = async (id) => {
-    const alertToArchive = alerts.find(a => a.id === id);
-    if (alertToArchive) {
-      archiveDeletedItem('alerts', alertToArchive);
-    }
+  const handleDeleteAlert = (id) => {
     setAlerts(prev => prev.filter(a => a.id !== id));
 
     if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {

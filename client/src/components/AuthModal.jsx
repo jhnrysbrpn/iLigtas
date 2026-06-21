@@ -133,18 +133,28 @@ export default function AuthModal({
         return;
       }
 
-      // Create new local user
-      const newLocalUser = {
-        name: trimmedName,
-        username: trimmedUsername.toLowerCase(),
-        role: isElevated ? regRole : 'Resident',
-        email: trimmedEmail.toLowerCase(),
-        phone: trimmedPhone,
-        password: trimmedPassword,
-        department: isElevated ? regDepartment : null,
-        departmentId: isElevated ? regDepartmentId.trim() : null,
-        approved: !isElevated
-      };
+        const roleToSet = isElevated ? regRole : 'Resident';
+        const newUser = {
+          name: trimmedName,
+          email: trimmedEmail,
+          phone: trimmedPhone,
+          username: trimmedUsername,
+          password: trimmedPassword,
+          role: 'Resident', // Start as Resident until SuperAdmin approves
+          requestedRole: roleToSet,
+          department: isElevated ? regDepartment : undefined,
+          departmentId: isElevated ? regDepartmentId.trim() : undefined,
+          approved: !isElevated, // Needs SuperAdmin approval if requesting elevated role
+          history: [
+            {
+              action: "Account Self-Registration",
+              timestamp: new Date().toISOString(),
+              details: isElevated 
+                ? `Account registered. Requested elevated '${roleToSet}' privilege level for the ${regDepartment ? regDepartment.toUpperCase() : 'General'} agency department. Undergoing credentials validation.`
+                : "Standard Resident role account successfully created and verified."
+            }
+          ]
+        };
 
       const updatedList = [...usersList, newLocalUser];
       setUsersList(updatedList);

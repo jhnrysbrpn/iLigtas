@@ -27,7 +27,7 @@ export default function PreparednessView({
   setCurrentTab
 }) {
   
-  const hasPreparednessAdminPrivilege = userRole === 'Admin';
+  const hasPreparednessAdminPrivilege = userRole === 'Admin' || userRole === 'SuperAdmin';
 
   // Go-Bag interactive state
   const [checkedItems, setCheckedItems] = useState(['gb-1', 'gb-2']);
