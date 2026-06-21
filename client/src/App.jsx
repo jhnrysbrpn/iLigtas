@@ -293,7 +293,7 @@ export default function App() {
   }, [distributions]);
 
   // MUTATION WORKFLOW 1: Direct SOS Panic Trigger Action
-  const handleTriggerSOS = (category, locationName, notes, waterLevel = 'Adequate', taskUrgency = 'High', fireAlarmLevel = 'First Alarm') => {
+  const handleTriggerSOS = async (category, locationName, notes, waterLevel = 'Adequate', taskUrgency = 'High', fireAlarmLevel = 'First Alarm') => {
     const finalDescription = notes && notes.trim() !== '' ? notes : 'cause: Under Investigation';
 
     const newReport = {
@@ -324,7 +324,52 @@ export default function App() {
       assignedResponder: 'Barangay Rescue Alpha & Paramedic Unit'
     };
 
-    setReports([newReport, ...reports]);
+    setReports(prevReports => [newReport, ...prevReports]);
+
+    // Send the SOS details and location to Supabase if configured
+    if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      try {
+        const { data: insertedReport, error: reportError } = await supabase
+          .from('hazard_reports')
+          .insert([{
+            category,
+            title: newReport.title,
+            description: finalDescription,
+            reporter_name: 'Resident SOS Emergency Trigger',
+            reporter_phone: '0911-SOS-911',
+            location_name: locationName,
+            latitude: newReport.latitude,
+            longitude: newReport.longitude,
+            status: IncidentStatus.DISPATCHED,
+            priority: PriorityLevel.HIGH,
+            assigned_responder: 'Barangay Rescue Alpha & Paramedic Unit',
+            affected_families_count: 0,
+            damage_cost_estimated: 0,
+            timestamp: newReport.timestamp
+          }])
+          .select()
+          .single();
+
+        if (reportError) {
+          console.error("Error inserting SOS report to Supabase:", reportError);
+        } else if (insertedReport) {
+          const { error: commentError } = await supabase
+            .from('comments')
+            .insert([{
+              hazard_report_id: insertedReport.id,
+              author: 'BDRRMC Autonomous Command',
+              role: 'Admin',
+              text: `⚡ EMERGENCY SOS DETECTED! Water Level Supply: ${waterLevel}. Urgency: ${taskUrgency}. Alarm Level: ${fireAlarmLevel}. Responders and paramedic sirens dispatched. Detail cause: ${finalDescription}`,
+              timestamp: newReport.timestamp
+            }]);
+          if (commentError) {
+            console.error("Error inserting SOS comment to Supabase:", commentError);
+          }
+        }
+      } catch (err) {
+        console.error("Supabase write failure for SOS trigger:", err);
+      }
+    }
 
     // Send the SOS details and location in real-time to the inter-department system
     try {
@@ -480,20 +525,50 @@ export default function App() {
   };
 
   // MUTATION WORKFLOW 2: Hazard/Incident Report Submission
-  const handleSubmitReport = (newReportData) => {
+  const handleSubmitReport = async (newReportData) => {
+    const tempId = `rep-usr-${Date.now()}`;
     const newReport = {
       ...newReportData,
-      id: `rep-usr-${Date.now()}`,
+      id: tempId,
       timestamp: new Date().toISOString(),
       status: IncidentStatus.PENDING,
       comments: []
     };
 
-    setReports([newReport, ...reports]);
+    setReports(prevReports => [newReport, ...prevReports]);
+
+    if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      try {
+        const { error } = await supabase
+          .from('hazard_reports')
+          .insert([{
+            category: newReport.category,
+            title: newReport.title,
+            description: newReport.description,
+            reporter_name: newReport.reporterName,
+            reporter_phone: newReport.reporterPhone,
+            location_name: newReport.locationName,
+            latitude: Number(newReport.latitude) || 14.6225 + (Math.random() - 0.5) * 0.005,
+            longitude: Number(newReport.longitude) || 121.0963 + (Math.random() - 0.5) * 0.005,
+            status: newReport.status,
+            priority: newReport.priority,
+            assigned_responder: newReport.assignedResponder || null,
+            affected_families_count: Number(newReport.affectedFamiliesCount) || 0,
+            damage_cost_estimated: Number(newReport.damageCostEstimated) || 0,
+            timestamp: newReport.timestamp
+          }]);
+        if (error) console.error("Error inserting report to Supabase:", error);
+      } catch (err) {
+        console.error("Supabase write failure for manual report:", err);
+      }
+    }
   };
 
   // MUTATION WORKFLOW 3: Add Comment thread Update (Dispatched enroute logs)
-  const handleAddComment = (reportId, text) => {
+  const handleAddComment = async (reportId, text) => {
+    const author = userRole === 'Admin' ? 'Punong Brgy Santos' : userRole === 'Responder' ? 'SFO1 Michael Abad' : 'Reporter Residente';
+    const timestamp = new Date().toISOString();
+
     const updatedReports = reports.map(r => {
       if (r.id === reportId) {
         return {
@@ -502,10 +577,10 @@ export default function App() {
             ...r.comments,
             {
               id: `comm-${Date.now()}`,
-              author: userRole === 'Admin' ? 'Punong Brgy Santos' : userRole === 'Responder' ? 'SFO1 Michael Abad' : 'Reporter Residente',
+              author,
               role: userRole,
               text,
-              timestamp: new Date().toISOString()
+              timestamp
             }
           ]
         };
@@ -514,17 +589,36 @@ export default function App() {
     });
 
     setReports(updatedReports);
+
+    if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      try {
+        const parsedReportId = isNaN(reportId) ? reportId : parseInt(reportId, 10);
+        const { error } = await supabase
+          .from('comments')
+          .insert([{
+            hazard_report_id: parsedReportId,
+            author,
+            role: userRole,
+            text,
+            timestamp
+          }]);
+        if (error) console.error("Error inserting comment to Supabase:", error);
+      } catch (err) {
+        console.error("Supabase write failure for manual comment:", err);
+      }
+    }
   };
 
   // MUTATION WORKFLOW 4: Modify Incident Status Code (Official enforcers only)
-  const handleUpdateReportStatus = (reportId, status) => {
+  const handleUpdateReportStatus = async (reportId, status) => {
     if (userRole !== 'Admin' && userRole !== 'SuperAdmin') return;
+
+    const commentAuthor = currentUser?.name || 'BDRRMC Center Dispatcher';
+    const statusNotes = `Status updated to [${status}] by ${userRole === 'SuperAdmin' ? 'Barangay SuperAdmin' : 'BDRRMC officials'}.`;
+    const timestamp = new Date().toISOString();
 
     const updatedReports = reports.map(r => {
       if (r.id === reportId) {
-        const commentAuthor = currentUser?.name || 'BDRRMC Center Dispatcher';
-        const statusNotes = `Status updated to [${status}] by ${userRole === 'SuperAdmin' ? 'Barangay SuperAdmin' : 'BDRRMC officials'}.`;
-        
         return {
           ...r,
           status,
@@ -535,7 +629,7 @@ export default function App() {
               author: commentAuthor,
               role: userRole,
               text: statusNotes,
-              timestamp: new Date().toISOString()
+              timestamp
             }
           ]
         };
@@ -544,12 +638,40 @@ export default function App() {
     });
 
     setReports(updatedReports);
+
+    if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      try {
+        const parsedReportId = isNaN(reportId) ? reportId : parseInt(reportId, 10);
+        
+        // Update report status
+        const { error: statusError } = await supabase
+          .from('hazard_reports')
+          .update({ status })
+          .eq('id', parsedReportId);
+        if (statusError) console.error("Error updating status in Supabase:", statusError);
+
+        // Append log comment
+        const { error: commentError } = await supabase
+          .from('comments')
+          .insert([{
+            hazard_report_id: parsedReportId,
+            author: commentAuthor,
+            role: userRole,
+            text: statusNotes,
+            timestamp
+          }]);
+        if (commentError) console.error("Error inserting status comment to Supabase:", commentError);
+      } catch (err) {
+        console.error("Supabase write failure for status update:", err);
+      }
+    }
   };
 
   // MUTATION WORKFLOW 5: Quick Warning Broadcast (Front side trigger)
-  const handleQuickBroadcast = (title, message, severity) => {
+  const handleQuickBroadcast = async (title, message, severity) => {
+    const tempId = `alt-q-${Date.now()}`;
     const newAlert = {
-      id: `alt-q-${Date.now()}`,
+      id: tempId,
       title,
       severity,
       message,
@@ -560,18 +682,59 @@ export default function App() {
       broadcastSMS: true
     };
 
-    setAlerts([newAlert, ...alerts]);
+    setAlerts(prevAlerts => [newAlert, ...prevAlerts]);
+
+    if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      try {
+        const { error } = await supabase
+          .from('alerts')
+          .insert([{
+            title: newAlert.title,
+            severity: newAlert.severity,
+            message: newAlert.message,
+            affected_area: newAlert.affectedArea,
+            timestamp: newAlert.timestamp,
+            is_active: newAlert.isActive,
+            created_by: newAlert.createdBy,
+            broadcast_sms: newAlert.broadcastSMS
+          }]);
+        if (error) console.error("Error inserting quick alert to Supabase:", error);
+      } catch (err) {
+        console.error("Supabase write failure for quick alert:", err);
+      }
+    }
   };
 
   // MUTATION WORKFLOW 6: Full Broadcast warning form
-  const handleAddAlert = (alertData) => {
+  const handleAddAlert = async (alertData) => {
+    const tempId = `alt-full-${Date.now()}`;
     const newAlert = {
       ...alertData,
-      id: `alt-full-${Date.now()}`,
+      id: tempId,
       timestamp: new Date().toISOString()
     };
 
-    setAlerts([newAlert, ...alerts]);
+    setAlerts(prevAlerts => [newAlert, ...prevAlerts]);
+
+    if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      try {
+        const { error } = await supabase
+          .from('alerts')
+          .insert([{
+            title: newAlert.title,
+            severity: newAlert.severity,
+            message: newAlert.message,
+            affected_area: newAlert.affectedArea || 'Main Barangay Purok zones',
+            timestamp: newAlert.timestamp,
+            is_active: newAlert.isActive,
+            created_by: newAlert.createdBy || 'BDRRMC Command',
+            broadcast_sms: newAlert.broadcastSMS
+          }]);
+        if (error) console.error("Error inserting alert to Supabase:", error);
+      } catch (err) {
+        console.error("Supabase write failure for alert:", err);
+      }
+    }
   };
 
   // MUTATION WORKFLOW 7: Register Name to Seminars
@@ -675,20 +838,43 @@ export default function App() {
     }
   };
 
-  const handleDeleteReport = (id) => {
+  const handleDeleteReport = async (id) => {
     const reportToArchive = reports.find(r => r.id === id);
     if (reportToArchive) {
       archiveDeletedItem('reports', reportToArchive);
     }
     setReports(prev => prev.filter(r => r.id !== id));
+
+    if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      try {
+        const parsedId = isNaN(id) ? id : parseInt(id, 10);
+        // Cascade delete comments
+        await supabase.from('comments').delete().eq('hazard_report_id', parsedId);
+        // Delete report
+        const { error } = await supabase.from('hazard_reports').delete().eq('id', parsedId);
+        if (error) console.error("Error deleting report from Supabase:", error);
+      } catch (err) {
+        console.error("Supabase delete failure for report:", err);
+      }
+    }
   };
 
-  const handleDeleteAlert = (id) => {
+  const handleDeleteAlert = async (id) => {
     const alertToArchive = alerts.find(a => a.id === id);
     if (alertToArchive) {
       archiveDeletedItem('alerts', alertToArchive);
     }
     setAlerts(prev => prev.filter(a => a.id !== id));
+
+    if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
+      try {
+        const parsedId = isNaN(id) ? id : parseInt(id, 10);
+        const { error } = await supabase.from('alerts').delete().eq('id', parsedId);
+        if (error) console.error("Error deleting alert from Supabase:", error);
+      } catch (err) {
+        console.error("Supabase delete failure for alert:", err);
+      }
+    }
   };
 
   // Counts for counts badge in Sidebar

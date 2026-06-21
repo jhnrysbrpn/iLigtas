@@ -1,5 +1,5 @@
 {
-  "name": "iLigtas",
+  "name": "!Ligtas",
   "description": "A responsive, modern web application for Barangay fire disaster preparedness, early warning alerts, hazard reporting, evacuation centers, and relief tracking.",
   "requestFramePermissions": [
     "geolocation"
