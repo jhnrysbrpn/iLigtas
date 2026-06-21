@@ -62,11 +62,104 @@ export default function AuthModal({
     }
 
     try {
-      const isSupabaseConfigured = !!import.meta.env.VITE_SUPABASE_URL && !!import.meta.env.VITE_SUPABASE_ANON_KEY;
-      if (!isSupabaseConfigured) {
-        throw new Error('Supabase is not configured.');
+      let emailToSignIn = loginUsername.trim();
+
+      // If the login identifier is not an email, resolve it by username from profiles
+      if (!emailToSignIn.includes('@')) {
+        const { data: profile, error: lookupError } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('username', loginUsername.trim().toLowerCase())
+          .maybeSingle();
+
+        if (lookupError || !profile) {
+          throw new Error('User not found or username invalid.');
+        }
+        emailToSignIn = profile.email;
       }
 
+      // Sign in with Supabase Auth
+      const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+        email: emailToSignIn,
+        password: loginPassword,
+      });
+
+      if (authError) {
+        throw new Error(authError.message);
+      }
+
+      // Fetch full profile details
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', authData.user.id)
+        .single();
+
+      if (profileError) {
+        throw new Error(profileError.message);
+      }
+
+      // Call parent success handler
+      const activeRole = (profile.approved || profile.role === 'Resident') ? profile.role : 'Resident';
+      onAuthSuccess(profile.username, profile.name, activeRole, profile.email, profile.phone);
+      onClose();
+    } catch (err) {
+      setLoginError(`Invalid credentials: ${err.message}`);
+    }
+  };
+
+  const handleRegisterSubmit = async (e) => {
+    e.preventDefault();
+    setRegError('');
+
+    const trimmedName = regFullName.trim();
+    const trimmedEmail = regEmail.trim();
+    const trimmedPhone = regPhone.trim();
+    const trimmedUsername = regUsername.trim();
+    const trimmedPassword = regPassword;
+
+    if (!trimmedName || !trimmedEmail || !trimmedPhone || !trimmedUsername || !trimmedPassword) {
+      setRegError('All fields are mandatory.');
+      return;
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!trimmedEmail.includes('@') || !trimmedEmail.includes('.') || !emailRegex.test(trimmedEmail)) {
+      setRegError('Please enter a complete and valid email address.');
+      return;
+    }
+
+    // Cellphone number validation
+    const isExactlyElevenDigits = trimmedPhone.length === 11 && /^\d+$/.test(trimmedPhone);
+    const startsWith09 = trimmedPhone.startsWith('09');
+    if (!isExactlyElevenDigits || !startsWith09) {
+      setRegError('Cellphone number must be exactly 11 digits starting with "09" and positive (no "-" sign or other symbols).');
+      return;
+    }
+
+    // Password validation
+    const isAtLeast6 = trimmedPassword.length >= 6;
+    const hasLetters = /[a-zA-Z]/.test(trimmedPassword);
+    const hasNumbers = /[0-9]/.test(trimmedPassword);
+    const hasUppercase = /[A-Z]/.test(trimmedPassword);
+    const hasSpecialChar = /[^A-Za-z0-9]/.test(trimmedPassword);
+
+    if (!isAtLeast6 || !hasLetters || !hasNumbers || !hasUppercase || !hasSpecialChar) {
+      setRegError('Password must be at least 6 characters long and contain letters, numbers, at least one uppercase letter (A-Z), and at least one special character.');
+      return;
+    }
+
+    const isElevated = selectedAccessType !== 'Resident';
+
+    if (isElevated) {
+      if (!regDepartmentId.trim()) {
+        setRegError('Department Verification ID is required for elevated accounts.');
+        return;
+      }
+    }
+
+    try {
       // 1. Sign up user inside Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: trimmedEmail,
@@ -118,65 +211,10 @@ export default function AuthModal({
         onClose();
       }, 1800);
     } catch (err) {
-      console.warn("Supabase registration failed, trying local backup registration:", err.message);
-      
-      // Check if username/email already exists locally
-      const usernameExists = usersList.some(u => u && u.username && u.username.toLowerCase() === trimmedUsername.toLowerCase());
-      const emailExists = usersList.some(u => u && u.email && u.email.toLowerCase() === trimmedEmail.toLowerCase());
-
-      if (usernameExists) {
-        setRegError('Username already exists in local registry.');
-        return;
-      }
-      if (emailExists) {
-        setRegError('Email already exists in local registry.');
-        return;
-      }
-
-        const roleToSet = isElevated ? regRole : 'Resident';
-        const newUser = {
-          name: trimmedName,
-          email: trimmedEmail,
-          phone: trimmedPhone,
-          username: trimmedUsername,
-          password: trimmedPassword,
-          role: 'Resident', // Start as Resident until SuperAdmin approves
-          requestedRole: roleToSet,
-          department: isElevated ? regDepartment : undefined,
-          departmentId: isElevated ? regDepartmentId.trim() : undefined,
-          approved: !isElevated, // Needs SuperAdmin approval if requesting elevated role
-          history: [
-            {
-              action: "Account Self-Registration",
-              timestamp: new Date().toISOString(),
-              details: isElevated 
-                ? `Account registered. Requested elevated '${roleToSet}' privilege level for the ${regDepartment ? regDepartment.toUpperCase() : 'General'} agency department. Undergoing credentials validation.`
-                : "Standard Resident role account successfully created and verified."
-            }
-          ]
-        };
-
-      const updatedList = [...usersList, newLocalUser];
-      setUsersList(updatedList);
-      localStorage.setItem('_users_list', JSON.stringify(updatedList));
-
-      setRegSuccess(true);
-      
-      setTimeout(() => {
-        onAuthSuccess(trimmedUsername.toLowerCase(), trimmedName, 'Resident', trimmedEmail.toLowerCase(), trimmedPhone);
-        setRegSuccess(false);
-        // Reset inputs
-        setRegFullName('');
-        setRegEmail('');
-        setRegPhone('');
-        setRegUsername('');
-        setRegPassword('');
-        setRegDepartment('bfp');
-        setRegDepartmentId('');
-        onClose();
-      }, 1800);
-    } // ✅ Correctly closed right here!
+      setRegError(err.message);
+    }
   };
+
 
   return (
     <div className="fixed inset-0 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4 z-55 animate-fade-in select-none">
@@ -537,4 +575,4 @@ export default function AuthModal({
       </div>
     </div>
   );
-} 
+}
