@@ -44,7 +44,7 @@ import AlertsView from './components/AlertsView';
 import InterDepartmentView from './components/InterDepartmentView';
 import AuthModal from './components/AuthModal';
 import GoBagPlannerView from './components/GoBagPlannerView';
-import { supabase } from './supabaseClient';
+import { supabase } from '../src/supabaseClient';
 
 export default function App() {
   
