@@ -293,7 +293,7 @@ export default function App() {
   }, [distributions]);
 
   // MUTATION WORKFLOW 1: Direct SOS Panic Trigger Action
-  const handleTriggerSOS = (category, locationName, notes, waterLevel = 'Adequate', taskUrgency = 'High', fireAlarmLevel = 'First Alarm') => {
+  const handleTriggerSOS = async (category, locationName, notes, waterLevel = 'Adequate', taskUrgency = 'High', fireAlarmLevel = 'First Alarm') => {
     const finalDescription = notes && notes.trim() !== '' ? notes : 'cause: Under Investigation';
 
     const newReport = {
@@ -842,7 +842,7 @@ export default function App() {
     setReports(prev => prev.filter(r => r.id !== id));
   };
 
-  const handleDeleteAlert = (id) => {
+  const handleDeleteAlert = async (id) => {
     setAlerts(prev => prev.filter(a => a.id !== id));
 
     if (import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY) {
