@@ -1,6 +1,9 @@
 const express = require('express');
 const prisma = require('../db');
 const authMiddleware = require('../middleware/auth');
+const validate = require('../middleware/validate');
+const { createReportSchema, updateReportSchema, createCommentSchema } = require('../schemas/report');
+const { isNearDuplicate } = require('../utils/validation');
 const router = express.Router();
 
 // Get all hazard reports (with comments)
@@ -22,22 +25,44 @@ router.get('/', async (req, res) => {
 });
 
 // Create a new hazard report (Public or authenticated)
-router.post('/', async (req, res) => {
+router.post('/', validate(createReportSchema), async (req, res) => {
   try {
-    const { 
-      category, 
-      title, 
-      description, 
-      reporterName, 
-      reporterPhone, 
-      locationName, 
-      latitude, 
-      longitude, 
-      priority 
-    } = req.body;
+    const {
+      category,
+      title,
+      description,
+      reporterName,
+      reporterPhone,
+      locationName,
+      latitude,
+      longitude,
+      priority
+    } = req.validatedBody;
 
-    if (!category || !title || !description || !reporterName || !reporterPhone || !locationName || !latitude || !longitude) {
-      return res.status(400).json({ status: 'error', message: 'All fields are required' });
+    const duplicateWindowStart = new Date(Date.now() - 5 * 60 * 1000);
+    const recentReports = await prisma.hazardReport.findMany({
+      where: {
+        reporterPhone,
+        timestamp: { gte: duplicateWindowStart }
+      },
+      select: {
+        title: true,
+        description: true,
+        locationName: true
+      }
+    });
+
+    const hasNearDuplicate = recentReports.some((report) =>
+      isNearDuplicate(report.title, title) &&
+      isNearDuplicate(report.description, description) &&
+      isNearDuplicate(report.locationName, locationName)
+    );
+
+    if (hasNearDuplicate) {
+      return res.status(409).json({
+        status: 'error',
+        message: 'Near-identical report already submitted within the last 5 minutes.'
+      });
     }
 
     const report = await prisma.hazardReport.create({
@@ -48,8 +73,8 @@ router.post('/', async (req, res) => {
         reporterName,
         reporterPhone,
         locationName,
-        latitude: parseFloat(latitude),
-        longitude: parseFloat(longitude),
+        latitude,
+        longitude,
         priority: priority || 'Medium',
         status: 'Pending'
       }
@@ -63,10 +88,10 @@ router.post('/', async (req, res) => {
 });
 
 // Update report status, responder, or estimates (Protected)
-router.put('/:id', authMiddleware, async (req, res) => {
+router.put('/:id', authMiddleware, validate(updateReportSchema), async (req, res) => {
   try {
     const { id } = req.params;
-    const { status, priority, assignedResponder, affectedFamiliesCount, damageCostEstimated } = req.body;
+    const { status, priority, assignedResponder, affectedFamiliesCount, damageCostEstimated } = req.validatedBody;
 
     const report = await prisma.hazardReport.update({
       where: { id: parseInt(id) },
@@ -74,8 +99,8 @@ router.put('/:id', authMiddleware, async (req, res) => {
         status,
         priority,
         assignedResponder,
-        affectedFamiliesCount: affectedFamiliesCount !== undefined ? parseInt(affectedFamiliesCount) : undefined,
-        damageCostEstimated: damageCostEstimated !== undefined ? parseFloat(damageCostEstimated) : undefined
+        affectedFamiliesCount,
+        damageCostEstimated
       }
     });
 
@@ -87,14 +112,10 @@ router.put('/:id', authMiddleware, async (req, res) => {
 });
 
 // Add a comment to a report (Protected)
-router.post('/:id/comments', authMiddleware, async (req, res) => {
+router.post('/:id/comments', authMiddleware, validate(createCommentSchema), async (req, res) => {
   try {
     const { id } = req.params;
-    const { text, role } = req.body;
-
-    if (!text || !role) {
-      return res.status(400).json({ status: 'error', message: 'Comment text and role are required' });
-    }
+    const { text, role } = req.validatedBody;
 
     const comment = await prisma.comment.create({
       data: {

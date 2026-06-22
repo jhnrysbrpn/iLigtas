@@ -15,6 +15,13 @@ import {
   Check
 } from 'lucide-react';
 import { IncidentCategory, IncidentStatus, PriorityLevel } from '../types';
+import {
+  E164_PHONE_REGEX,
+  hasProfanity,
+  isAllowedImage,
+  normalizePhone,
+  validateFullName
+} from '../utils/validation';
 
 export default function ReportingView({
   userRole,
@@ -37,6 +44,8 @@ export default function ReportingView({
   const [customImage, setCustomImage] = useState('');
   const [fileSelectedName, setFileSelectedName] = useState('');
   const [reportSuccess, setReportSuccess] = useState(false);
+  const [reportError, setReportError] = useState('');
+  const [isReportSubmitting, setIsReportSubmitting] = useState(false);
 
   // Auto-fill reporter details if logged in
   useEffect(() => {
@@ -63,20 +72,66 @@ export default function ReportingView({
   const handleMockPhotoUpload = (e) => {
     const file = e.target.files?.[0];
     if (file) {
-      setFileSelectedName(file.name);
-      
-      // Convert to dummy base64 or placeholder representing appropriate hazard
-      if (category === 'Fire') {
-        setCustomImage('https://images.unsplash.com/photo-1508873696983-2df519f0397e?auto=format&fit=crop&q=80&w=400');
-      } else {
-        setCustomImage('https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&q=80&w=400');
+      if (!isAllowedImage(file)) {
+        setReportError('Photo must be jpg, png, or webp and no larger than 5 MB.');
+        e.target.value = '';
+        return;
       }
+      const imageUrl = URL.createObjectURL(file);
+      const image = new Image();
+      image.onload = () => {
+        URL.revokeObjectURL(imageUrl);
+        if (image.width < 100 || image.height < 100) {
+          setReportError('Photo must be at least 100 x 100 pixels.');
+          setFileSelectedName('');
+          setCustomImage('');
+          e.target.value = '';
+          return;
+        }
+        setFileSelectedName(file.name);
+        setCustomImage(
+          category === 'Fire'
+            ? 'https://images.unsplash.com/photo-1508873696983-2df519f0397e?auto=format&fit=crop&q=80&w=400'
+            : 'https://images.unsplash.com/photo-1547683905-f686c993aae5?auto=format&fit=crop&q=80&w=400'
+        );
+        setReportError('');
+      };
+      image.src = imageUrl;
     }
   };
 
   const handleFormSubmit = (e) => {
     e.preventDefault();
-    if (!title || !description || !reporterName || !reporterPhone || !locationName) return;
+    if (isReportSubmitting) return;
+    setReportError('');
+
+    const cleanTitle = title.trim();
+    const cleanDescription = description.trim();
+    const cleanReporterName = reporterName.trim();
+    const cleanPhone = normalizePhone(reporterPhone);
+    const cleanLocation = locationName.trim();
+
+    if (!cleanTitle || !cleanDescription || !cleanReporterName || !cleanPhone || !cleanLocation) {
+      setReportError('All required fields must be completed.');
+      return;
+    }
+    if (cleanTitle.length > 100 || cleanDescription.length > 1000 || cleanLocation.length > 180) {
+      setReportError('One or more fields exceeded the character limit.');
+      return;
+    }
+    if (!validateFullName(cleanReporterName)) {
+      setReportError('Name must include first and last name using letters, hyphens, or apostrophes only.');
+      return;
+    }
+    if (!E164_PHONE_REGEX.test(cleanPhone)) {
+      setReportError('Mobile number must use E.164 format, e.g. +639171234567.');
+      return;
+    }
+    if ([cleanTitle, cleanDescription, cleanReporterName, cleanLocation].some(hasProfanity)) {
+      setReportError('Please remove blocked language before submitting.');
+      return;
+    }
+    setIsReportSubmitting(true);
 
     // Simulate coordinates based on selected location
     let lat = 14.6225;
@@ -88,11 +143,11 @@ export default function ReportingView({
 
     onSubmitReport({
       category,
-      title,
-      description,
-      reporterName,
-      reporterPhone,
-      locationName,
+      title: cleanTitle,
+      description: cleanDescription,
+      reporterName: cleanReporterName,
+      reporterPhone: cleanPhone,
+      locationName: cleanLocation,
       latitude: lat,
       longitude: lng,
       image: customImage || 'https://images.unsplash.com/photo-1508873696983-2df519f0397e?auto=format&fit=crop&q=80&w=400',
@@ -109,6 +164,7 @@ export default function ReportingView({
       setCustomImage('');
       setFileSelectedName('');
       setReportSuccess(false);
+      setIsReportSubmitting(false);
     }, 2500);
   };
 
@@ -123,10 +179,10 @@ export default function ReportingView({
 
   const handleSmsSubmit = (e) => {
     e.preventDefault();
-    if (!smsPhone || !smsName) return;
+    if (!smsPhone || !smsName.trim()) return;
 
-    const normalizedPhone = smsPhone.replace(/\D/g, '');
-    if (!/^09\d{9}$/.test(normalizedPhone)) return;
+    const normalizedPhone = normalizePhone(smsPhone);
+    if (!/^\+639\d{9}$/.test(normalizedPhone) || !validateFullName(smsName.trim())) return;
 
     setSmsRegistered(true);
     setTimeout(() => {
@@ -139,8 +195,9 @@ export default function ReportingView({
   const handleAddComment = (reportId) => {
     const text = commentTextMap[reportId];
     if (!text || !text.trim()) return;
+    if (text.trim().length > 500 || hasProfanity(text)) return;
 
-    onAddComment(reportId, text);
+    onAddComment(reportId, text.trim());
     setCommentTextMap({
       ...commentTextMap,
       [reportId]: ''
@@ -217,6 +274,11 @@ export default function ReportingView({
               </div>
             ) : (
               <form onSubmit={handleFormSubmit} className="space-y-3.5 text-left">
+                {reportError && (
+                  <div className="p-3 text-[11px] leading-relaxed bg-red-50 border border-red-300 text-red-900 rounded-lg font-bold">
+                    {reportError}
+                  </div>
+                )}
                 
                 {/* Category Selection dropdown */}
                 <div>
@@ -244,11 +306,13 @@ export default function ReportingView({
                   <input
                     type="text"
                     required
+                    maxLength={100}
                     value={title}
-                    onChange={(e) => setTitle(e.target.value)}
+                    onChange={(e) => setTitle(e.target.value.slice(0, 100))}
                     placeholder="e.g. Sparking power poles or active LPG leak in residential alley"
                     className="mt-1 w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none"
                   />
+                  <p className="mt-1 text-[10px] text-slate-500 text-right font-mono">{title.length}/100</p>
                 </div>
 
                 {/* Detailed description */}
@@ -259,11 +323,13 @@ export default function ReportingView({
                   <textarea
                     required
                     rows={3}
+                    maxLength={1000}
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    onChange={(e) => setDescription(e.target.value.slice(0, 1000))}
                     placeholder="Describe exactly what you are seeing right now to aid fire crews..."
                     className="mt-1 w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none"
                   />
+                  <p className="mt-1 text-[10px] text-slate-500 text-right font-mono">{description.length}/1000</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -291,8 +357,9 @@ export default function ReportingView({
                       type="tel"
                       required
                       value={reporterPhone}
-                      onChange={(e) => setReporterPhone(e.target.value)}
-                      placeholder="e.g. 0917-XXX-XXXX"
+                      onChange={(e) => setReporterPhone(e.target.value.replace(/[^\d+\s-]/g, '').slice(0, 18))}
+                      onBlur={() => setReporterPhone(normalizePhone(reporterPhone))}
+                      placeholder="e.g. +639171234567"
                       className="mt-1 w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none"
                     />
                   </div>
@@ -307,11 +374,13 @@ export default function ReportingView({
                     <input
                       type="text"
                       required
+                      maxLength={180}
                       value={locationName}
-                      onChange={(e) => setLocationName(e.target.value)}
+                      onChange={(e) => setLocationName(e.target.value.slice(0, 180))}
                       placeholder="e.g. Purok 3 J.P. Rizal St."
                       className="mt-1 w-full text-xs p-2.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-900 placeholder-slate-400 focus:outline-none"
                     />
+                    <p className="mt-1 text-[10px] text-slate-500 text-right font-mono">{locationName.length}/180</p>
                   </div>
 
                   {/* Priority indicator */}
@@ -341,7 +410,7 @@ export default function ReportingView({
                       <Camera className="w-5 h-5 text-slate-500" />
                       <input
                         type="file"
-                        accept="image/*"
+                        accept="image/jpeg,image/png,image/webp"
                         onChange={handleMockPhotoUpload}
                         className="hidden"
                       />
@@ -371,9 +440,10 @@ export default function ReportingView({
 
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs shadow hover:shadow-md transition-all active:scale-95 text-center"
+                  disabled={isReportSubmitting}
+                  className="w-full py-3 rounded-lg bg-red-600 hover:bg-red-700 disabled:bg-slate-400 text-white font-extrabold text-xs shadow hover:shadow-md transition-all active:scale-95 text-center disabled:cursor-not-allowed"
                 >
-                  SEND EMERGENCY FIRE REPORT NOW
+                  {isReportSubmitting ? 'SENDING...' : 'SEND EMERGENCY FIRE REPORT NOW'}
                 </button>
               </form>
             )}
@@ -411,19 +481,14 @@ export default function ReportingView({
                     type="text"
                     inputMode="numeric"
                     required
-                    maxLength={11}
-                    pattern="09[0-9]{9}"
+                    maxLength={18}
+                    pattern="\+[1-9][0-9]{7,14}"
                     value={smsPhone}
                     onChange={(e) => {
-                      const digits = e.target.value.replace(/\D/g, '').slice(0, 11);
-                      const nextValue = digits.startsWith('09') || digits.length === 0
-                        ? digits
-                        : digits.startsWith('9')
-                          ? `0${digits}`
-                          : `09${digits}`;
-                      setSmsPhone(nextValue.slice(0, 11));
+                      setSmsPhone(e.target.value.replace(/[^\d+\s-]/g, '').slice(0, 18));
                     }}
-                    placeholder="09XXXXXXXXX"
+                    onBlur={() => setSmsPhone(normalizePhone(smsPhone))}
+                    placeholder="+639XXXXXXXXX"
                     className="w-full text-xs p-2.5 rounded bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-indigo-400 font-mono"
                   />
                 </div>
@@ -680,10 +745,11 @@ export default function ReportingView({
                           <div className="flex gap-2 pt-1.5Packed">
                             <input
                               type="text"
+                              maxLength={500}
                               value={commentTextMap[report.id] || ''}
                               onChange={(e) => setCommentTextMap({
                                 ...commentTextMap,
-                                [report.id]: e.target.value
+                                [report.id]: e.target.value.slice(0, 500)
                               })}
                               placeholder="Type a reply or request update on current status details..."
                               className="flex-1 text-xs p-2 rounded-lg border border-slate-300 bg-white text-slate-900 focus:outline-none placeholder-slate-400"

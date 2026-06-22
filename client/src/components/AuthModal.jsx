@@ -1,6 +1,17 @@
 import React, { useState } from 'react';
 import { X, Shield, Lock, UserPlus, KeyRound, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { authAPI } from '../api/client';
+import {
+  EMAIL_REGEX,
+  E164_PHONE_REGEX,
+  USERNAME_REGEX,
+  createIdempotencyKey,
+  isStrongPassword,
+  normalizePhone,
+  passwordContainsIdentity,
+  passwordStrength,
+  validateFullName
+} from '../utils/validation';
 
 export default function AuthModal({
   isOpen,
@@ -12,6 +23,7 @@ export default function AuthModal({
   const [activeTab, setActiveTab] = useState('login');
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegPassword, setShowRegPassword] = useState(false);
+  const [isRegisterSubmitting, setIsRegisterSubmitting] = useState(false);
   
   // Login fields
   const [loginUsername, setLoginUsername] = useState('');
@@ -24,12 +36,15 @@ export default function AuthModal({
   const [regPhone, setRegPhone] = useState('');
   const [regUsername, setRegUsername] = useState('');
   const [regPassword, setRegPassword] = useState('');
+  const [regConfirmPassword, setRegConfirmPassword] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [regRole, setRegRole] = useState('Resident');
   const [selectedAccessType, setSelectedAccessType] = useState('Resident');
   const [regError, setRegError] = useState('');
   const [regSuccess, setRegSuccess] = useState(false);
   const [regDepartment, setRegDepartment] = useState('bfp');
   const [regDepartmentId, setRegDepartmentId] = useState('');
+  const strength = passwordStrength(regPassword);
 
   const handleAccessTypeChange = (value) => {
     setSelectedAccessType(value);
@@ -124,8 +139,8 @@ export default function AuthModal({
 
     const trimmedName = regFullName.trim();
     const trimmedEmail = regEmail.trim();
-    const trimmedPhone = regPhone.trim();
-    const trimmedUsername = regUsername.trim();
+    const trimmedPhone = normalizePhone(regPhone.trim());
+    const trimmedUsername = regUsername.trim().toLowerCase();
     const trimmedPassword = regPassword;
 
     if (!trimmedName || !trimmedEmail || !trimmedPhone || !trimmedUsername || !trimmedPassword) {
@@ -133,30 +148,43 @@ export default function AuthModal({
       return;
     }
 
-    // Email validation: must contain "@" and "." and follow a valid format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!trimmedEmail.includes('@') || !trimmedEmail.includes('.') || !emailRegex.test(trimmedEmail)) {
-      setRegError('Please enter a complete and valid email address (must contain "@", "." and follow standard name@email.com format).');
+    if (!validateFullName(trimmedName)) {
+      setRegError('Enter first and last name using letters, hyphens, or apostrophes only; each part must be 2-60 characters.');
       return;
     }
 
-    // Cellphone number validation: must be exactly 11 digits, must start with "09", contain only digits (positive and no "-")
-    const isExactlyElevenDigits = trimmedPhone.length === 11 && /^\d+$/.test(trimmedPhone);
-    const startsWith09 = trimmedPhone.startsWith('09');
-    if (!isExactlyElevenDigits || !startsWith09) {
-      setRegError('Cellphone number must be exactly 11 digits starting with "09" and positive (no "-" sign or other symbols).');
+    if (!EMAIL_REGEX.test(trimmedEmail)) {
+      setRegError('Please enter a complete and valid email address.');
       return;
     }
 
-    // Strong Password validation: at least 6 characters long, contains letters (with both upper & letters/numbers) and special characters
-    const isAtLeast6 = trimmedPassword.length >= 6;
-    const hasLetters = /[a-zA-Z]/.test(trimmedPassword);
-    const hasNumbers = /[0-9]/.test(trimmedPassword);
-    const hasUppercase = /[A-Z]/.test(trimmedPassword);
-    const hasSpecialChar = /[^A-Za-z0-9]/.test(trimmedPassword);
+    if (!E164_PHONE_REGEX.test(trimmedPhone)) {
+      setRegError('Phone must use E.164 format with country code, e.g. +639171234567.');
+      return;
+    }
 
-    if (!isAtLeast6 || !hasLetters || !hasNumbers || !hasUppercase || !hasSpecialChar) {
-      setRegError('Password must be at least 6 characters long and contain letters, numbers, at least one uppercase letter (A-Z), and at least one special character.');
+    if (!USERNAME_REGEX.test(trimmedUsername)) {
+      setRegError('Username must be 3-30 characters and use only letters, numbers, and underscores.');
+      return;
+    }
+
+    if (!isStrongPassword(trimmedPassword)) {
+      setRegError('Password must be at least 8 characters and include uppercase, lowercase, digit, and special character.');
+      return;
+    }
+
+    if (passwordContainsIdentity(trimmedPassword, [trimmedUsername, trimmedEmail, trimmedName, ...trimmedName.split(/\s+/)])) {
+      setRegError('Password cannot contain your username, email address, or name.');
+      return;
+    }
+
+    if (trimmedPassword !== regConfirmPassword) {
+      setRegError('Confirm password must match exactly.');
+      return;
+    }
+
+    if (!termsAccepted) {
+      setRegError('You must accept the terms and privacy consent before registering.');
       return;
     }
 
@@ -169,11 +197,13 @@ export default function AuthModal({
       }
     }
 
+    setIsRegisterSubmitting(true);
     try {
       const response = await fetch('http://localhost:5000/api/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'X-Idempotency-Key': createIdempotencyKey('signup'),
         },
         body: JSON.stringify({
           name: trimmedName,
@@ -181,6 +211,8 @@ export default function AuthModal({
           phone: trimmedPhone,
           username: trimmedUsername,
           password: trimmedPassword,
+          confirmPassword: regConfirmPassword,
+          termsAccepted,
           requestedRole: isElevated ? regRole : undefined,
           department: isElevated ? regDepartment : undefined,
           departmentId: isElevated ? regDepartmentId.trim() : undefined,
@@ -213,6 +245,8 @@ export default function AuthModal({
         setRegPhone('');
         setRegUsername('');
         setRegPassword('');
+        setRegConfirmPassword('');
+        setTermsAccepted(false);
         setRegDepartment('bfp');
         setRegDepartmentId('');
         onClose();
@@ -220,8 +254,12 @@ export default function AuthModal({
     } catch (err) {
       // Offline / Local Simulation signup fallback
       if (err.message && (err.message.includes('Failed to fetch') || err.message.includes('NetworkError'))) {
-        if (usersList.some(u => u && u.username && u.username.toLowerCase() === trimmedUsername.toLowerCase())) {
-          setRegError('Username already taken in local database.');
+        if (usersList.some(u => u && (
+          u.username?.toLowerCase() === trimmedUsername.toLowerCase() ||
+          u.email?.toLowerCase() === trimmedEmail.toLowerCase() ||
+          normalizePhone(u.phone) === trimmedPhone
+        ))) {
+          setRegError('Email, username, or phone already registered. Sign in instead?');
           return;
         }
 
@@ -263,6 +301,8 @@ export default function AuthModal({
           setRegPhone('');
           setRegUsername('');
           setRegPassword('');
+          setRegConfirmPassword('');
+          setTermsAccepted(false);
           setRegDepartment('bfp');
           setRegDepartmentId('');
           onClose();
@@ -270,6 +310,8 @@ export default function AuthModal({
       } else {
         setRegError(err.message);
       }
+    } finally {
+      setIsRegisterSubmitting(false);
     }
   };
 
@@ -442,14 +484,14 @@ export default function AuthModal({
                     
                     <div>
                       <label className="block text-[10px] font-bold text-slate-700 tracking-wider uppercase mb-1 font-mono">
-                        Full Name (Middle, Last) *
+                        Full Name *
                       </label>
                       <input
                         type="text"
                         required
                         value={regFullName}
                         onChange={(e) => setRegFullName(e.target.value)}
-                        placeholder="e.g. Kagawad Maria Santos"
+                        placeholder="e.g. Maria Santos"
                         className="w-full text-xs p-2.5 rounded border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-mono"
                       />
                     </div>
@@ -470,19 +512,18 @@ export default function AuthModal({
 
                     <div>
                       <label className="block text-[10px] font-bold text-slate-700 tracking-wider uppercase mb-1 font-mono">
-                        Cellphone Number *
+                        Mobile Number *
                       </label>
                       <input
                         type="tel"
                         required
                         value={regPhone}
                         onChange={(e) => {
-                          const val = e.target.value.replace(/[^0-9]/g, '');
-                          if (val.length <= 11) {
-                            setRegPhone(val);
-                          }
+                          const nextValue = e.target.value.replace(/[^\d+\s-]/g, '').slice(0, 18);
+                          setRegPhone(nextValue);
                         }}
-                        placeholder="e.g. 09171234567"
+                        onBlur={() => setRegPhone(normalizePhone(regPhone))}
+                        placeholder="e.g. +639171234567"
                         className="w-full text-xs p-2.5 rounded border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-mono"
                       />
                     </div>
@@ -495,7 +536,7 @@ export default function AuthModal({
                         type="text"
                         required
                         value={regUsername}
-                        onChange={(e) => setRegUsername(e.target.value)}
+                        onChange={(e) => setRegUsername(e.target.value.replace(/\s+/g, '').slice(0, 30))}
                         placeholder="e.g. mariasantos"
                         className="w-full text-xs p-2.5 rounded border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-mono"
                       />
@@ -523,6 +564,33 @@ export default function AuthModal({
                           {showRegPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                         </button>
                       </div>
+                      <div className="mt-2 flex items-center gap-2">
+                        <div className="h-1.5 flex-1 rounded-full bg-slate-200 overflow-hidden">
+                          <div className={`h-full ${strength.color}`} style={{ width: `${Math.min(regPassword.length * 8, 100)}%` }} />
+                        </div>
+                        <span className={`text-[10px] font-black uppercase font-mono ${strength.text}`}>
+                          {strength.label}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-700 tracking-wider uppercase mb-1 font-mono">
+                        Confirm Password *
+                      </label>
+                      <input
+                        type={showRegPassword ? "text" : "password"}
+                        required
+                        value={regConfirmPassword}
+                        onChange={(e) => setRegConfirmPassword(e.target.value)}
+                        onBlur={() => {
+                          if (regConfirmPassword && regConfirmPassword !== regPassword) {
+                            setRegError('Confirm password must match exactly.');
+                          }
+                        }}
+                        placeholder="Repeat password"
+                        className="w-full text-xs p-2.5 rounded border border-slate-300 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:border-emerald-500 font-mono"
+                      />
                     </div>
 
                     {/* Role selection dropdown */}
@@ -606,6 +674,18 @@ export default function AuthModal({
 
                   </div>
 
+                  <label className="flex items-start gap-2 text-[11px] text-slate-700 font-semibold">
+                    <input
+                      type="checkbox"
+                      checked={termsAccepted}
+                      onChange={(e) => setTermsAccepted(e.target.checked)}
+                      className="mt-0.5 h-4 w-4"
+                    />
+                    <span>
+                      I accept the terms and privacy policy. Store my consent timestamp and IP when the server activates this account.
+                    </span>
+                  </label>
+
                   <div className="flex gap-2 pt-2 md:col-span-2">
                     <button
                       type="button"
@@ -616,9 +696,10 @@ export default function AuthModal({
                     </button>
                     <button
                       type="submit"
-                      className="w-1/2 py-2.5 text-xs font-black rounded bg-emerald-600 hover:bg-emerald-700 text-white shadow-md active:scale-97 transition-all uppercase tracking-wider font-mono cursor-pointer"
+                      disabled={isRegisterSubmitting}
+                      className="w-1/2 py-2.5 text-xs font-black rounded bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-400 text-white shadow-md active:scale-97 transition-all uppercase tracking-wider font-mono cursor-pointer disabled:cursor-not-allowed"
                     >
-                      Submit Registration
+                      {isRegisterSubmitting ? 'Submitting...' : 'Submit Registration'}
                     </button>
                   </div>
 

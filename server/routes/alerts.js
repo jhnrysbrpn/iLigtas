@@ -1,6 +1,8 @@
 const express = require('express');
 const prisma = require('../db');
 const authMiddleware = require('../middleware/auth');
+const validate = require('../middleware/validate');
+const { createAlertSchema, toggleAlertSchema } = require('../schemas/alert');
 const router = express.Router();
 
 // Get all alerts
@@ -17,13 +19,9 @@ router.get('/', async (req, res) => {
 });
 
 // Create a new alert (Protected)
-router.post('/', authMiddleware, async (req, res) => {
+router.post('/', authMiddleware, validate(createAlertSchema), async (req, res) => {
   try {
-    const { title, severity, message, affectedArea, broadcastSMS } = req.body;
-
-    if (!title || !severity || !message || !affectedArea) {
-      return res.status(400).json({ status: 'error', message: 'All fields are required.' });
-    }
+    const { title, severity, message, affectedArea, broadcastSMS } = req.validatedBody;
 
     const alert = await prisma.alert.create({
       data: {
@@ -44,10 +42,10 @@ router.post('/', authMiddleware, async (req, res) => {
 });
 
 // Toggle alert active status (Protected)
-router.put('/:id/toggle', authMiddleware, async (req, res) => {
+router.put('/:id/toggle', authMiddleware, validate(toggleAlertSchema), async (req, res) => {
   try {
     const { id } = req.params;
-    const { isActive } = req.body;
+    const { isActive } = req.validatedBody;
 
     const alert = await prisma.alert.update({
       where: { id: parseInt(id) },
